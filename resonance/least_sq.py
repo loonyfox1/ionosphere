@@ -31,7 +31,9 @@ def main(data,lims,N):
 	res = []
 	maxw = max(data.X)
 	res = []
-	p = [[5e-4, 8e-3, -0.25, 7.01, 1.],
+	#print lims[i],lims[i+1]
+	p = [#[1e-3, 9e-3, -0.5, 2.1, 0.5],
+		[5e-4, 8e-3, -0.25, 7.01, 1.],
 		[3e-4, 7e-3, -0.15, 14.0, 1.9],
 		[2e-4,  6e-3, -0.2, 20.0, 2.2],
 		[1e-4,  5e-3, -0.2, 25.0, 3.0],
@@ -43,9 +45,10 @@ def main(data,lims,N):
 			if W[x]<0:
 				W[x]=1e-8
 		F = data.f[data.f>lims[i]][data.f<lims[i+1]]
-		# W = color_noise(W,F)
-		popt, pcov = curve_fit(funct, F, W, method='lm',p0=p[i]	)
-		print popt, pcov
+		#W = color_noise(W,F)
+		popt, pcov = curve_fit(funct, F, W, method='lm',p0=p[i])
+		print 'par ',popt
+		#print 'err ',np.sqrt(np.diag(pcov))
 		# plt.plot(F,W)
 		# plt.plot(F,funct(F, *popt))
 		# plt.title('k='+str(i+1))
@@ -54,7 +57,7 @@ def main(data,lims,N):
 	return res
 
 lims = [4.9,11.1,17.9,25.1,29.9,36.1]   # limits between resonances
-N = 5                                   # number of resonances
+N = 5                              # number of resonances
 
 res = main(data,lims,N)
 
@@ -74,7 +77,29 @@ for j in range(len(W)):
 	result.append(suma)
 plt.clf()
 plt.plot(data.f, W, color='blue', label='data')
+plt.plot(data.f, np.array(W)-np.array(result), color='green', label='data')
 plt.plot(data.f,result, color='red', label='fitting')
+plt.grid()
+plt.xlabel('freq')
+plt.ylabel('W / W_max')
+plt.legend()
+#plt.show()
+
+W = np.array(data.X[data.f>5][data.f<35])
+W = [x-8e-3 for x in normalize(W,maxw)]
+for x in range(len(W)):
+	if W[x]<0:
+		W[x]=1e-8
+F = data.f[data.f>5][data.f<35]
+
+res = np.polynomial.chebyshev.chebfit(F,W,deg=15)
+print res
+datay = np.polynomial.chebyshev.chebval(F,res)
+
+
+plt.clf()
+plt.plot(data.f[data.f>5][data.f<35], np.array(W), color='green', label='data')
+plt.plot(F,datay, color='red', label='fitting')
 plt.grid()
 plt.xlabel('freq')
 plt.ylabel('W / W_max')
