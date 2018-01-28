@@ -9,7 +9,7 @@ def color_noise(W,f):
 	y = [np.log(i) for i in W]
 	x = [-np.log(i) for i in f]
 	c = np.polyfit(x,y,1)
-	print c[0], np.exp(c[1])
+	# print c[0], np.exp(c[1])
 	return W - np.exp(c[1])*np.power(f,-c[0])
 
 def funct(x,*p):
@@ -32,7 +32,7 @@ def main(data,lims,N):
 	maxw = max(data.X)
 	res = []
 	#print lims[i],lims[i+1]
-	p = [#[1e-3, 9e-3, -0.5, 2.1, 0.5],
+	p = [[1e-3, 9e-3, -0.5, 2.1, 0.5],
 		[5e-4, 8e-3, -0.25, 7.01, 1.],
 		[3e-4, 7e-3, -0.15, 14.0, 1.9],
 		[2e-4,  6e-3, -0.2, 20.0, 2.2],
@@ -47,7 +47,7 @@ def main(data,lims,N):
 		F = data.f[data.f>lims[i]][data.f<lims[i+1]]
 		#W = color_noise(W,F)
 		popt, pcov = curve_fit(funct, F, W, method='lm',p0=p[i])
-		print 'par ',popt
+		print('par ',popt)
 		#print 'err ',np.sqrt(np.diag(pcov))
 		# plt.plot(F,W)
 		# plt.plot(F,funct(F, *popt))
@@ -56,8 +56,8 @@ def main(data,lims,N):
 		res.append(popt)
 	return res
 
-lims = [4.9,11.1,17.9,25.1,29.9,36.1]   # limits between resonances
-N = 5                              # number of resonances
+lims = [11.1,17.9,25.1,29.9,36.1]   # limits between resonances
+N = 6                             # number of resonances
 
 res = main(data,lims,N)
 
@@ -93,7 +93,7 @@ for x in range(len(W)):
 F = data.f[data.f>5][data.f<35]
 
 res = np.polynomial.chebyshev.chebfit(F,W,deg=15)
-print res
+# print res
 datay = np.polynomial.chebyshev.chebval(F,res)
 
 
