@@ -6,7 +6,8 @@ import pandas as pd
 def funct(x,s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5):
 	# print(*p)
 	# s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5 = p
-	res = s + z/x**m + \
+	res = s + \
+# z/x**m + \
 		  p1*(1+e1*(x-f1))/((x-f1)*(x-f1)+g1*g1/4) + \
 		  p2*(1+e2*(x-f2))/((x-f2)*(x-f2)+g2*g2/4) + \
 		  p3*(1+e3*(x-f3))/((x-f3)*(x-f3)+g3*g3/4) + \
@@ -50,6 +51,6 @@ m = Minuit(minimizeMe, s=p[0], z=p[1], m=p[2],
 					   p5=p[19], e5=p[20], f5=p[21], g5=p[22],
 					   limit_f1=(7,9), limit_f2=(12,16),
 					   limit_f3=(19,23), limit_f4=(24,28),
-					   limit_f4=(29,35))																																							))
+					   limit_f4=(29,35))
 m.print_param()
 m.migrad()
