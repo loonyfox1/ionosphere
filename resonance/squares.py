@@ -2,6 +2,12 @@ from scipy.optimize import leastsq
 import numpy as np
 import pandas as pd
 
+def color_noise(W,f):
+	y = [np.log(i) for i in W]
+	x = [-np.log(i) for i in f]
+	c = np.polyfit(x,y,1)
+	# print c[0], np.exp(c[1])
+	return W - np.exp(c[1])*np.power(f,-c[0])
 
 def Murnaghan(parameters, x):
 	print(parameters)
@@ -34,7 +40,7 @@ p = [8e-4, 1., 0.8,
 data = pd.read_table('/root/Downloads/201109062220.dat', names=['f','X','Y','Z'], sep=' ')
 x = data.f
 y = normalize(data.X)
-
+y = color_noise(y,x)
 plsq = leastsq(objective, p, args=(y, x))
 
 print('Fitted parameters = {0}'.format(plsq[0]))

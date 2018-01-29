@@ -18,17 +18,12 @@ def funct(x,s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4,
 		return 0
 	return res
 
-	# s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5 = p
-	# try:
-	# 	res = s + \
-	# 		  p1*(1+e1*(x-f1))/((x-f1)*(x-f1)+g1*g1/4) + \
-	# 		  p2*(1+e2*(x-f2))/((x-f2)*(x-f2)+g2*g2/4) + \
-	# 		  p3*(1+e3*(x-f3))/((x-f3)*(x-f3)+g3*g3/4) + \
-	# 		  p4*(1+e4*(x-f4))/((x-f4)*(x-f4)+g4*g4/4) + \
-	# 		  p5*(1+e5*(x-f5))/((x-f5)*(x-f5)+g5*g5/4)
-	# except ZeroDivisionError:
-	# 	return 0
-	# return res
+def color_noise(W,f):
+	y = [np.log(i) for i in W]
+	x = [-np.log(i) for i in f]
+	c = np.polyfit(x,y,1)
+	# print c[0], np.exp(c[1])
+	return W - np.exp(c[1])*np.power(f,-c[0])
 
 def normalize(y):
 	maxy = max(y)
@@ -49,7 +44,8 @@ def minimizeMe(s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, 
 data = pd.read_table('/root/Downloads/201109062220.dat', names=['f','X','Y','Z'], sep=' ')
 
 x = data.f
-y = normalize(data.X)
+y = normalize(data.Z)
+y = color_noise(x,y)
 
 p = [8e-4, 1., 0.8,
 	8e-3, -0.25, 7.01, 1.,
