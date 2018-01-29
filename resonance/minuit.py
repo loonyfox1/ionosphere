@@ -6,12 +6,15 @@ import pandas as pd
 def funct(x,s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5):
 	# print(*p)
 	# s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5 = p
-	res = s + z/x**m + \
-		  p1*(1+e1*(x-f1))/((x-f1)*(x-f1)+g1*g1/4) + \
-		  p2*(1+e2*(x-f2))/((x-f2)*(x-f2)+g2*g2/4) + \
-		  p3*(1+e3*(x-f3))/((x-f3)*(x-f3)+g3*g3/4) + \
-		  p4*(1+e4*(x-f4))/((x-f4)*(x-f4)+g4*g4/4) + \
-		  p5*(1+e5*(x-f5))/((x-f5)*(x-f5)+g5*g5/4)
+	try:
+		res = s + \
+			  p1*(1+e1*(x-f1))/((x-f1)*(x-f1)+g1*g1/4) + \
+			  p2*(1+e2*(x-f2))/((x-f2)*(x-f2)+g2*g2/4) + \
+			  p3*(1+e3*(x-f3))/((x-f3)*(x-f3)+g3*g3/4) + \
+			  p4*(1+e4*(x-f4))/((x-f4)*(x-f4)+g4*g4/4) + \
+			  p5*(1+e5*(x-f5))/((x-f5)*(x-f5)+g5*g5/4)
+	except ZeroDivisionError:
+		return 0
 	return res
 
 def normalize(y):
