@@ -1,90 +1,126 @@
 import numpy as np
-import scipy as sc
+from scipy import signal,special
+import pandas as pd
+import matplotlib.pyplot as plt
+import math
+class Charge_Moment_Class(object):
+    # DELTAF - energy bandwidth of the receiver, Hz = 1/sec
+    CONST_DELTAF = 51.8
+    # HI - correction coefficient of lfilter
+    CONST_HI = 1.02
+    # MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
+    CONST_MU0 = 4e-7*np.pi
+    # A - Earth's radius, m
+    CONST_A = 6375e3
+    # C - velocity of light, m/sec
+    CONST_C = 3e8
+    # FS - sampling rate, Hz = 1/sec
+    CONST_FS = 175.96
+    # T - time of data, sec
+    CONST_T = 300
+    # WN - parameter for Cheby filters
+    CONST_WN1, CONST_WN2, CONST_WN3 = 55,55,55
+    #
+    CONST_N = round(CONST_FS*300)
 
-# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
-DELTAF = 51.8
-# HI - correction coefficient of lfilter
-HI = 1.02
-# MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
-MU0 = 4e-7*np.pi
-# A - Earth's radius, m
-A = 6375e3
-# OMEGA - WTF is omega ???
-OMEGA = 0
-# C - velocity of light, m/sec
-C = 3e8
-# TAUr = 1/DELTAF - signal delay in the receiver, sec
-TAUr = 19.3e-3
-# FS - sampling rate, Hz = 1/sec
-FS = 175.96
-# FN = FS/2 - Nyquist frequency, Hz = 1/sec
-FN = 87.98
+    def __init__(self,B,d):
+        # B - B_pulse
+        self.B = B
+        # d - array/tuple of distance like r = ((r_day,day=True),(r_night,day=False))
+        self.d = d
 
-# t - time array
-t = np.linspace(0, 300.0, num=z0.size)
-# f - frequency array
-f = np.fft.rfftfreq(z0.size)
+    def naquist_frequency(self):
+        return self.CONST_FS/2
 
-#fs = z0.size/t[-1] - sampling rate
+    def omega(self,fi):
+        return 2*np.pi*fi
 
-def receiver_transfer_function(f):
-    pass 
+    def frequency_array(self):
+        return np.fft.rfftfreq(self.CONST_N)[1:]
 
-def receiver_filter(z0):
-    b, a = sc.signal.cheby1(N=2, rp=3, Wn=Wn1/FN, analog=False)
-    z1 = sc.signal.lfilter(b, a, z0)
+    def receiver_transfer_function(self):
+        fn = self.naquist_frequency()
+        z0 = [1]+np.zeros(self.CONST_N-1)
 
-    b, a = sc.signal.cheby1(N=3, rp=3, Wn=Wn2/FN, analog=False)
-    z2 = sc.signal.lfilter(b, a, z1)
+        b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/fn, analog=False)
+        z1 = signal.lfilter(b, a, z0)
 
-    b, a = sc.signal.cheby1(N=3, rp=3, Wn=Wn3/FN, analog=False)
-    z3 = sc.signal.lfilter(b, a, z2)
+        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/fn, analog=False)
+        z2 = signal.lfilter(b, a, z1)
 
-    return np.abs(np.fft.rfft(z3))
+        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/fn, analog=False)
+        z3 = signal.lfilter(b, a, z2)
 
-def spectral_density(f):
-    pass
+        return np.fft.rfft(z3)
 
-def ionosphere_transfer_function(r,f):
-    return -j*np.pi*MU0*f/2/magnetic_altitude(f)/phase_velocity(f)*np.sqrt(r/A/np.sin(r/A))*
-            sc.special.hankel2(v=1,z=2*np.pi*r*f/phase_velocity(f))*np.exp(-attenuation_factor(f)*r)
+    def ionosphere_transfer_function(self):
+        res=[]
+        p2=np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))
+        for fi in self.f:
+            p1=-1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
+            p3=special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])
+            p4=np.exp(-self.attenuation_factor(fi)*self.r)
+            res.append(p1*p2*p3*p4)
 
-def magnetic_field_altitude(r,p):
-    return c(r)*p
+        # return [-1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)* \
+        #          np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))* \
+        #          special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])* \
+        #          np.exp(-self.attenuation_factor(fi)*self.r) for fi in self.f]
+        return res
+    def c_fun(self):
+        self.f = self.frequency_array()
+        res = []
+        for check_day in d:
+            self.day = check_day[1]
+            self.r = check_day[0]
+            integ=self.integrand()
+            res.append(np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
+                   np.trapz(np.transpose(np.array(integ)), x=self.f, axis=1)))
+        return (res[0]/self.d[0][0]+res[1]/self.d[1][0])/2*(self.d[0][0]+self.d[1][0])
 
-def c(r):
-    return np.sqrt(np.pi*DELTAF/HI*sc.integrate.quad(integrand, 0, np.inf, args=(r)))
+    def integrand(self):
+        res_rtf = self.receiver_transfer_function()
+        res_itf = self.ionosphere_transfer_function()
+        return [np.absolute(res_itf[i]*res_rtf[i])**2
+                for i in range(round(self.CONST_N/2))]
 
-def integrand(f,r):
-    return np.absolute(ionosphere_transfer_function(r,f)*receiver_transfer_function(f))**2
+    def magnetic_altitude(self,fi):
+        return np.real(self.magnetic_characteristic_altitude(fi))
 
-def magnetic_altitude(f):
-    return np.real(magnetic_characteristic_altitude(f))
+    def phase_velocity(self,fi):
+        return self.CONST_C/np.real(self.propagation_parameter(fi))
 
-def phase_velocity(f):
-    return C/np.real(propagation_parameter(f))
+    def attenuation_factor(self,fi):
+        return self.omega(fi)/self.CONST_C*np.imag(self.propagation_parameter(fi))
 
-def attenuation_factor(f):
-    return OMEGA/C*np.imag(propagation_parameter(f))
+    def propagation_parameter(self,fi):
+        return np.sqrt(self.magnetic_characteristic_altitude(fi)/ \
+                       self.electric_characteristic_altitude(fi))
 
-def propagation_parameter(f):
-    return np.sqrt(magnetic_characteristic_altitude(f)/electric_characteristic_altitude(f))
+    def magnetic_characteristic_altitude(self,fi):
+        if self.day:
+            return 101.5 - 3.1*np.log(fi/7.7) + \
+                1j*(7.0 - 0.9*np.log(fi/7.7))
+        else:
+            return 114.7 - 8.4*np.log(fi/7.7) + \
+                1j*(13.2 - 2.0*np.log(fi/7.7))
 
-def magnetic_characteristic_altitude(f,day):
-    if day:
-        return 101.5 - 3.1*np.log(f/7.7) +
-            j*(7.0 - 0.9*np.log(f/7.7))
-    else:
-        return 114.7 - 8.4*np.log(f/7.7) +
-            j*(13.2 - 2.0*np.log(f/7.7))
+    def electric_characteristic_altitude(self,fi):
+        if self.day:
+            return 51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
+                1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645)
+        else:
+            return 67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
+                1j*(-3.14 - 87*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626)
 
-def electric_characteristic_altitude(f,day):
-    if day:
-        return 51.1 + 1.9*np.log(f/1.7) - 2.45*(1.7/f)**0.822 - 2.84*(1.7/f)**1.645 +
-            j*(-2.98 - 8.8*(1.7/f)**0.822 + 1.86*(7.7/f)**1.645)
-    else:
-        return 67.5 + 2.0*np.log(f/7.7) - 2.54*(7.7/f)**0.813 - 2.72*(7.7/f)**1.626 +
-            j*(-3.14 - 87*(7.7/f)**0.813 + 1.92*(7.7/f)**1.626)
+    def charge_moment(self):
+        return float(self.B/self.c_fun())
 
-def group_delay():
-    pass
+if __name__ == '__main__':
+    B = 4.5
+    d = ((6061e3,False),(1,False))
+
+    charge_moment_class = Charge_Moment_Class(B=B,d=d)
+    res = charge_moment_class.charge_moment()
+
+    print ('p =',res)

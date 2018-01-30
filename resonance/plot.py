@@ -21,35 +21,35 @@ def Murnaghan(parameters, x):
 data = pd.read_table('/root/Downloads/201109062220.dat', names=['f','X','Y','Z'], sep=' ')
 x = data.f
 y = normalize(data.X)
-p=[1.947E-05,
-1,
-0.8,
-0.0005807,
--0.8618,
-8.885,
-9.671,
--4.178E-05,
--0.3296,
-14.29,
-4.546,
-0.0002202,
--0.5604,
-19.89,
-5.824,
-6.258E-05,
--0.1746,
-26.25,
-4.507,
-0.001448,
--0.04974,
-32.31,
-24.29]
+
+p = [-0.1368,
+  1      ,
+  0.8    ,
+ -5.583  ,
+ -0.4332 ,
+  9       ,
+  2       ,
+ -0.03063,
+  6.277  ,
+  12.32  ,
+  1.563  ,
+ -0.002739,
+ -15.9   ,
+  20.8   ,
+  3      ,
+  0.2162 ,
+ -0.08681,
+  28     ,
+  3.5    ,
+  2.207  ,
+  0.115  ,
+  36     ,
+  2.701  ]
+
 fity = [Murnaghan(p,xi) for xi in x]
-
-
 plt.clf()
 plt.plot(x,y,label='data')
-plt.plot(x,fity,label='fit')
+# plt.plot(x,fity,label='fit')
 plt.legend()
 plt.grid()
 plt.ylabel('W / W_max')

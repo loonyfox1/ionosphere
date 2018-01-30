@@ -2,10 +2,10 @@ from iminuit import Minuit, describe, Struct
 from iminuit.frontends import ConsoleFrontend
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def funct(x,s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5):
 	# print(*p)
-
 	# s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5 = p
 	try:
 		res = s + \
@@ -18,12 +18,11 @@ def funct(x,s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4,
 		return 0
 	return res
 
-def color_noise(W,f):
-	y = [np.log(i) for i in W]
-	x = [-np.log(i) for i in f]
-	c = np.polyfit(x,y,1)
-	# print c[0], np.exp(c[1])
-	return W - np.exp(c[1])*np.power(f,-c[0])
+def color_noise(x,m,z):
+	return z*x**(-m)
+
+def minimize_color_noise(m,z):
+	return sum((color_noise(x,m,z)-y)**2 for x,y in zip(x,y))
 
 def normalize(y):
 	maxy = max(y)
@@ -38,14 +37,24 @@ def minimizeMe(s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, 
 	# p3, e3, f3, g3,
 	# p4, e4, f4, g4,
 	# p5, e5, f5, g5 = p
-	return sum((funct(x, s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5) - y)**2/y/	y
+	return sum((funct(x, s, z, m, p1, e1, f1, g1, p2, e2, f2, g2, p3, e3, f3, g3, p4, e4, f4, g4, p5, e5, f5, g5) - y)**2/y/y
 			for x, y in zip(x, y))
 
 data = pd.read_table('/root/Downloads/201109062220.dat', names=['f','X','Y','Z'], sep=' ')
 
 x = data.f
 y = normalize(data.Z)
-y = color_noise(x,y)
+
+plt.clf()
+plt.plot(x,y,label='data')
+# mi = Minuit(minimize_color_noise, m=0.1, z=0.5)
+# mi.migrad()
+m = 1.685
+z = 0.4813
+plt.plot(x,[(y-color_noise(x,m,z)) for x,y in zip(x,y)],label='without color noise')
+plt.title('m = '+str(m)+', z = '+str(z))
+plt.legend()
+plt.show()
 
 p = [8e-4, 1., 0.8,
 	8e-3, -0.25, 7.01, 1.,

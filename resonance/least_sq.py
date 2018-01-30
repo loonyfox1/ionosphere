@@ -27,26 +27,27 @@ def normalize(y,maxy):
 	y = [i/maxy for i in y]
 	return y
 
-def main(data,lims,N):
+def main(x,y,lims,N):
+
 	res = []
-	maxw = max(data.X)
+	maxw = max(y)
 	res = []
 	#print lims[i],lims[i+1]
-	p = [[1e-3, 9e-3, -0.5, 2.1, 0.5],
+	p = [#[1e-3, 9e-3, -0.5, 2.1, 0.5],
 		[5e-4, 8e-3, -0.25, 7.01, 1.],
 		[3e-4, 7e-3, -0.15, 14.0, 1.9],
 		[2e-4,  6e-3, -0.2, 20.0, 2.2],
 		[1e-4,  5e-3, -0.2, 25.0, 3.0],
 		[0.5e-4,  4e-3, -0.2, 32.0, 4.2]]
 	for i in range(N):
-		W = np.array(data.X[data.f>lims[i]][data.f<lims[i+1]])
+		W = np.array([y[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
 		W = [x-8e-3 for x in normalize(W,maxw)]
 		for x in range(len(W)):
 			if W[x]<0:
 				W[x]=1e-8
-		F = data.f[data.f>lims[i]][data.f<lims[i+1]]
+		F = np.array([x[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
 		#W = color_noise(W,F)
-		popt, pcov = curve_fit(funct, F, W, method='lm',p0=p[i])
+		popt, pcov = curve_fit(funct, F, W, p0=p[i])
 		print('par ',popt)
 		#print 'err ',np.sqrt(np.diag(pcov))
 		# plt.plot(F,W)
@@ -56,10 +57,21 @@ def main(data,lims,N):
 		res.append(popt)
 	return res
 
-lims = [11.1,17.9,25.1,29.9,36.1]   # limits between resonances
-N = 6                             # number of resonances
+lims = [4.9,11.1,17.9,25.1,29.9,36.1]   # limits between resonances
+N = 5                          # number of resonances
 
-res = main(data,lims,N)
+x = data.f
+y = data.X
+step = 10
+ys = []
+xs = []
+for i in range(int(len(y)/step)):
+	suma=0
+	for j in range(i*step,(i+1)*step):
+		suma += y[j]
+	xs.append(x[int((i+1/2)*step)])
+	ys.append(suma/step)
+res = main(np.array(xs),np.array(ys),lims,N)
 
 # s, p1, e1, f1, g1 = res              # parameters
 
