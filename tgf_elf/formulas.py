@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import signal,special
+from scipy import signal,special,integrate
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
@@ -11,10 +11,10 @@ class Charge_Moment_Class(object):
     CONST_HI = 1.02
     # MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
     CONST_MU0 = 4e-7*np.pi
-    # A - Earth's radius, km
-    CONST_A = 6375e3
-    # C - velocity of light, km/sec
-    CONST_C = 3e8
+    # A - Earth's radius, m
+    CONST_A = 6371e3
+    # C - velocity of light, m/sec
+    CONST_C = 299792458
     # FS - sampling rate, Hz = 1/sec
     CONST_FS = 175.96
     # T - time of data, sec
@@ -35,7 +35,7 @@ class Charge_Moment_Class(object):
         return float(self.B/self.c_fun())
 
     def number_of_point(self):
-        return round(self.CONST_FS*300)
+        return round(self.CONST_FS*self.CONST_T)
 
     def naquist_frequency(self):
         return self.CONST_FS/2
@@ -82,7 +82,7 @@ class Charge_Moment_Class(object):
             if self.r==0:
                 res += 0
                 k -= 1
-                print('\n')
+                print('c(r) is not available\n')
             else:
                 res_c = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
                         np.trapz(np.transpose(np.array(self.integrand())),
@@ -94,12 +94,8 @@ class Charge_Moment_Class(object):
     def integrand(self):
         res_rtf = self.receiver_transfer_function()
         res_itf = self.ionosphere_transfer_function()
-        integ = [np.absolute(res_itf[i]*res_rtf[i])**2
+        return [np.absolute(res_itf[i]*res_rtf[i])**2
                 for i in range(round(self.N/2))]
-        # print(integ)
-        # plt.scatter(self.f, integ, s=0.1)
-        # plt.show()
-        return integ
 
     def magnetic_altitude(self,fi):
         return np.real(self.magnetic_characteristic_altitude(fi))
@@ -137,4 +133,5 @@ if __name__ == '__main__':
     charge_moment_class = Charge_Moment_Class(B=B,d=d)
     res = charge_moment_class.charge_moment()
 
-    print ('p =',res/1000)
+    print ('p =',res/1000,'C*km')
+    print ('excpect 110 C*km')
