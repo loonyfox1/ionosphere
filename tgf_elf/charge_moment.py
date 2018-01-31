@@ -12,7 +12,7 @@ class Charge_Moment_Class(object):
     # MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
     CONST_MU0 = 4e-7*np.pi
     # A - Earth's radius, m
-    CONST_A = 6371e3
+    CONST_A = 6372795
     # C - velocity of light, m/sec
     CONST_C = 299792458
     # FS - sampling rate, Hz = 1/sec
@@ -45,11 +45,12 @@ class Charge_Moment_Class(object):
 
     def frequency_array(self):
         self.N = self.number_of_point()
-        return np.fft.rfftfreq(self.N)[1:]
+        return np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
         fn = self.naquist_frequency()
-        z0 = [1]+np.zeros(self.N-1)
+        z0 = np.zeros(self.N)
+        z0[0] = 1
 
         b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/fn, analog=False)
         z1 = signal.lfilter(b, a, z0)
@@ -60,7 +61,8 @@ class Charge_Moment_Class(object):
         b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/fn, analog=False)
         z3 = signal.lfilter(b, a, z2)
 
-        return np.fft.rfft(z3)
+        res = np.fft.rfft(z3)
+        return res/max(res)
 
     def ionosphere_transfer_function(self):
         res = []
@@ -104,7 +106,7 @@ class Charge_Moment_Class(object):
         return self.CONST_C/np.real(self.propagation_parameter(fi))
 
     def attenuation_factor(self,fi):
-        return self.omega(fi)/self.CONST_C*np.imag(self.propagation_parameter(fi))
+        return self.omega(fi)/self.CONST_C*abs(np.imag(self.propagation_parameter(fi)))
 
     def propagation_parameter(self,fi):
         return np.sqrt(self.magnetic_characteristic_altitude(fi)/ \
@@ -112,26 +114,28 @@ class Charge_Moment_Class(object):
 
     def magnetic_characteristic_altitude(self,fi):
         if self.day:
-            return (101.5 - 3.1*np.log(fi/7.7) + \
+            res = (101.5 - 3.1*np.log(fi/7.7) + \
                 1j*(7.0 - 0.9*np.log(fi/7.7)))*1e3
         else:
-            return (114.7 - 8.4*np.log(fi/7.7) + \
+            res = (114.7 - 8.4*np.log(fi/7.7) + \
                 1j*(13.2 - 2.0*np.log(fi/7.7)))*1e3
+        return res
 
     def electric_characteristic_altitude(self,fi):
         if self.day:
-            return (51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
+            res = (51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
                 1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645))*1e3
         else:
-            return (67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
-                1j*(-3.14 - 87*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
+            res = (67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
+                1j*(-3.14 - 8.7*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
+        return res
 
 if __name__ == '__main__':
-    B = 4.5e-12
-    d = ((6061e3,True),(0,False))
+    B = 14.4e-12
+    d = ((5352e3,True),(0,False))
 
     charge_moment_class = Charge_Moment_Class(B=B,d=d)
     res = charge_moment_class.charge_moment()
 
     print ('p =',res/1000,'C*km')
-    print ('excpect 110 C*km')
+    print ('excpect 330 C*km')
