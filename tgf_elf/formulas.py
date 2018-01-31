@@ -3,6 +3,7 @@ from scipy import signal,special
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+
 class Charge_Moment_Class(object):
     # DELTAF - energy bandwidth of the receiver, Hz = 1/sec
     CONST_DELTAF = 51.8
@@ -10,9 +11,9 @@ class Charge_Moment_Class(object):
     CONST_HI = 1.02
     # MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
     CONST_MU0 = 4e-7*np.pi
-    # A - Earth's radius, m
+    # A - Earth's radius, km
     CONST_A = 6375e3
-    # C - velocity of light, m/sec
+    # C - velocity of light, km/sec
     CONST_C = 3e8
     # FS - sampling rate, Hz = 1/sec
     CONST_FS = 175.96
@@ -20,14 +21,21 @@ class Charge_Moment_Class(object):
     CONST_T = 300
     # WN - parameter for Cheby filters
     CONST_WN1, CONST_WN2, CONST_WN3 = 55,55,55
-    #
-    CONST_N = round(CONST_FS*300)
+
 
     def __init__(self,B,d):
         # B - B_pulse
         self.B = B
-        # d - array/tuple of distance like r = ((r_day,day=True),(r_night,day=False))
+        # d - array/tuple of distance like ((r_day,day=True),(r_night,day=False))
         self.d = d
+        # f - array of frequencies
+        self.f = self.frequency_array()
+
+    def charge_moment(self):
+        return float(self.B/self.c_fun())
+
+    def number_of_point(self):
+        return round(self.CONST_FS*300)
 
     def naquist_frequency(self):
         return self.CONST_FS/2
@@ -36,11 +44,12 @@ class Charge_Moment_Class(object):
         return 2*np.pi*fi
 
     def frequency_array(self):
-        return np.fft.rfftfreq(self.CONST_N)[1:]
+        self.N = self.number_of_point()
+        return np.fft.rfftfreq(self.N)[1:]
 
     def receiver_transfer_function(self):
         fn = self.naquist_frequency()
-        z0 = [1]+np.zeros(self.CONST_N-1)
+        z0 = [1]+np.zeros(self.N-1)
 
         b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/fn, analog=False)
         z1 = signal.lfilter(b, a, z0)
@@ -54,35 +63,43 @@ class Charge_Moment_Class(object):
         return np.fft.rfft(z3)
 
     def ionosphere_transfer_function(self):
-        res=[]
-        p2=np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))
-        for fi in self.f:
-            p1=-1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
-            p3=special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])
-            p4=np.exp(-self.attenuation_factor(fi)*self.r)
-            res.append(p1*p2*p3*p4)
-
-        # return [-1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)* \
-        #          np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))* \
-        #          special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])* \
-        #          np.exp(-self.attenuation_factor(fi)*self.r) for fi in self.f]
-        return res
-    def c_fun(self):
-        self.f = self.frequency_array()
         res = []
+        itf2 = np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))
+        for fi in self.f:
+            itf1 = -1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
+            itf3 = special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])
+            itf4 = np.exp(-self.attenuation_factor(fi)*self.r)
+            res.append(itf1*itf2*itf3*itf4)
+        return res
+
+    def c_fun(self):
+        res = 0
+        k = 2
         for check_day in d:
+            print('day:',check_day)
             self.day = check_day[1]
             self.r = check_day[0]
-            integ=self.integrand()
-            res.append(np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
-                   np.trapz(np.transpose(np.array(integ)), x=self.f, axis=1)))
-        return (res[0]/self.d[0][0]+res[1]/self.d[1][0])/2*(self.d[0][0]+self.d[1][0])
+            if self.r==0:
+                res += 0
+                k -= 1
+                print('\n')
+            else:
+                res_c = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
+                        np.trapz(np.transpose(np.array(self.integrand())),
+                        x=self.f, axis=1))
+                print('c(r) =',float(res_c),'\n')
+                res += res_c/self.r
+        return res/k*(self.d[0][0]+self.d[1][0])
 
     def integrand(self):
         res_rtf = self.receiver_transfer_function()
         res_itf = self.ionosphere_transfer_function()
-        return [np.absolute(res_itf[i]*res_rtf[i])**2
-                for i in range(round(self.CONST_N/2))]
+        integ = [np.absolute(res_itf[i]*res_rtf[i])**2
+                for i in range(round(self.N/2))]
+        # print(integ)
+        # plt.scatter(self.f, integ, s=0.1)
+        # plt.show()
+        return integ
 
     def magnetic_altitude(self,fi):
         return np.real(self.magnetic_characteristic_altitude(fi))
@@ -99,28 +116,25 @@ class Charge_Moment_Class(object):
 
     def magnetic_characteristic_altitude(self,fi):
         if self.day:
-            return 101.5 - 3.1*np.log(fi/7.7) + \
-                1j*(7.0 - 0.9*np.log(fi/7.7))
+            return (101.5 - 3.1*np.log(fi/7.7) + \
+                1j*(7.0 - 0.9*np.log(fi/7.7)))*1e3
         else:
-            return 114.7 - 8.4*np.log(fi/7.7) + \
-                1j*(13.2 - 2.0*np.log(fi/7.7))
+            return (114.7 - 8.4*np.log(fi/7.7) + \
+                1j*(13.2 - 2.0*np.log(fi/7.7)))*1e3
 
     def electric_characteristic_altitude(self,fi):
         if self.day:
-            return 51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
-                1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645)
+            return (51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
+                1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645))*1e3
         else:
-            return 67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
-                1j*(-3.14 - 87*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626)
-
-    def charge_moment(self):
-        return float(self.B/self.c_fun())
+            return (67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
+                1j*(-3.14 - 87*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
 
 if __name__ == '__main__':
-    B = 4.5
-    d = ((6061e3,False),(1,False))
+    B = 4.5e-12
+    d = ((6061e3,True),(0,False))
 
     charge_moment_class = Charge_Moment_Class(B=B,d=d)
     res = charge_moment_class.charge_moment()
 
-    print ('p =',res)
+    print ('p =',res/1000)

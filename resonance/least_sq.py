@@ -40,12 +40,12 @@ def main(x,y,lims,N):
 		[1e-4,  5e-3, -0.2, 25.0, 3.0],
 		[0.5e-4,  4e-3, -0.2, 32.0, 4.2]]
 	for i in range(N):
-		W = np.array([y[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
+		# W = np.array([y[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
 		W = [x-8e-3 for x in normalize(W,maxw)]
 		for x in range(len(W)):
 			if W[x]<0:
 				W[x]=1e-8
-		F = np.array([x[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
+		# F = np.array([x[j] if x[j]>lims[i] and x[j]<lims[i+1] else pass for j in range(len(x))])
 		#W = color_noise(W,F)
 		popt, pcov = curve_fit(funct, F, W, p0=p[i])
 		print('par ',popt)
