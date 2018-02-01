@@ -72,16 +72,16 @@ if __name__ == '__main__':
 	# latitude  N +, S -
 	# longitude E +, W -
 
-	slat1 = 3.6
-	slon1 = 281.2-360
+	slat1 = -5.25
+	slon1 = 24
 
 	flat1 = 49.19
 	flon1 = 22.55
 
-	utime = 9
-	year = 2013
-	month = 8
-	day = 16
+	utime = 12
+	year = 2009
+	month = 5
+	day = 10
 
 	terminator_class = Terminator_Class(utime=utime,year=year,month=month,day=day)
 	l0,p0,lx,px = terminator_class.terminator()

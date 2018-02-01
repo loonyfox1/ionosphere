@@ -77,19 +77,16 @@ class Charge_Moment_Class(object):
     def c_fun(self):
         res = 0
         k = 2
-        for check_day in d:
-            print('day:',check_day)
+        for check_day in self.d:
             self.day = check_day[1]
             self.r = check_day[0]
             if self.r==0:
                 res += 0
                 k -= 1
-                print('c(r) is not available\n')
             else:
                 res_c = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
                         np.trapz(np.transpose(np.array(self.integrand())),
                         x=self.f, axis=1))
-                print('c(r) =',float(res_c),'\n')
                 res += res_c/self.r
         return res/k*(self.d[0][0]+self.d[1][0])
 
