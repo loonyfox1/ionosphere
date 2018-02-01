@@ -3,6 +3,9 @@ from terminator import Terminator_Class
 from day_night_distance import Day_Night_Distance_Class
 from charge_moment import Charge_Moment_Class
 import numpy as np
+from mpl_toolkits.basemap import Basemap
+import matplotlib.pyplot as plt
+from datetime import datetime as dt
 
 class Main_Class(object):
 	def __init__(self,ID,datetime,lon,lat,B):
@@ -17,8 +20,10 @@ class Main_Class(object):
 		self.year = int(self.datetime[:4])
 		self.month = int(self.datetime[5:7])
 		self.day = int(self.datetime[8:10])
+		self.hour = int(self.datetime[11:13])
+		self.minute = int(self.datetime[14:16])
 		self.utime = round(float(self.datetime[11:13])+float(self.datetime[14:16])/60+float(self.datetime[17:])/3600,2)
-		return self.year,self.month,self.day,self.utime
+		return self.year,self.month,self.day,self.hour,self.minute,self.utime
 
 	def info(self):
 		print('ID',self.id,'\n')
@@ -48,8 +53,22 @@ class Main_Class(object):
 		for i in range(len(self.lx)):
 			print(self.lx[i],'\t',self.px[i])
 
+	def plot_terminator(self):
+		m = Basemap(projection='mill',lon_0=0)
+		m.drawcoastlines()
+		m.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+		m.drawmeridians(np.arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
+		m.drawmapboundary(fill_color='aqua')
+		m.fillcontinents(color='coral',lake_color='aqua')
+		CS = m.nightshade(dt(self.year,self.month,self.day,
+								   self.hour,self.minute))
+		m.drawgreatcircle(self.lon_s,self.lat_s,self.lon,self.lat,
+						  linewidth=2, color='b')
+		plt.title('Day/Night Map for %s (UTC)' % self.datetime)
+		plt.show()
+
 	def main(self):
-		self.year,self.month,self.day,self.utime = self.date_time()
+		self.year,self.month,self.day,self.hour,self.minute,self.utime = self.date_time()
 
 		self.lon_s = 22.55
 		self.lat_s = 49.19
@@ -65,13 +84,16 @@ class Main_Class(object):
 
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d)
 		self.p = charge_moment_class.charge_moment()
+
+		self.plot_terminator()
+
 		return self.p
 
 if __name__ == '__main__':
 	ID = 1
 	datetime = '2008-12-10T14:57:26.365'
 	lat = -5.25
-	lon = 24
+	lon = -24
 	B = 14.4e-12
 
 	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat,B=B)
