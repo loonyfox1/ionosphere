@@ -84,6 +84,7 @@ class Main_Class(object):
 
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d)
 		self.p = charge_moment_class.charge_moment()
+		self.dd,self.dn = charge_moment_class.time_delay()
 
 		return self.p
 

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-class Read_ELF_File_Class(object):
+class Read_ELF_Class(object):
 	def __init__(self,filename,destination):
 		self.filename = filename
 		self.destination = destination
@@ -49,7 +49,7 @@ class Read_ELF_File_Class(object):
 		self.channel1,self.channel2 = self.hex_to_decimal()
 		with open(self.filename, "w") as f:
 			for i in range(len(self.channel1)):
-				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i]))
+				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\')
 		return self.filename
 
 	def plot(self):
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 	destination = '/root/ELF_data/'
 	filename = '201109062210.dat'
 
-	read_elf_file_class = Read_ELF_File_Class(filename=filename,
-											  destination=destination)
-	f = read_elf_file_class.read_and_save()
-	read_elf_file_class.plot()
+	read_elf_class = Read_ELF_Class(filename=filename,
+									destination=destination)
+	f = read_elf_class.read_and_save()
+	read_elf_class.plot()

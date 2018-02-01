@@ -74,6 +74,9 @@ class Charge_Moment_Class(object):
             res.append(itf1*itf2*itf3*itf4)
         return res
 
+    def total_distance(self):
+        return self.d[0][0]+self.d[1][0]
+
     def c_fun(self):
         res = 0
         k = 2
@@ -88,7 +91,8 @@ class Charge_Moment_Class(object):
                         np.trapz(np.transpose(np.array(self.integrand())),
                         x=self.f, axis=1))
                 res += res_c/self.r
-        return res/k*(self.d[0][0]+self.d[1][0])
+        self.total_r = self.total_distance()
+        return res/k*self.total_r
 
     def integrand(self):
         res_rtf = self.receiver_transfer_function()
@@ -127,12 +131,28 @@ class Charge_Moment_Class(object):
                 1j*(-3.14 - 8.7*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
         return res
 
+    def signal_delay(self):
+        return 1/self.CONST_DELTAF
+
+    def group_delay(self):
+        self.day = True
+        tau_day = self.total_r/self.phase_velocity(self.f[-1])
+        self.day = False
+        tau_night = self.total_r/self.phase_velocity(self.f[-1])
+        return tau_day,tau_night
+
+    def time_delay(self):
+        tau_day,tau_night = self.group_delay()
+        tau_rec = self.signal_delay()
+        return round(tau_day+tau_rec,3),round(tau_night+tau_rec,3)
+
 if __name__ == '__main__':
     B = 14.4e-12
     d = ((5352e3,True),(0,False))
 
     charge_moment_class = Charge_Moment_Class(B=B,d=d)
     res = charge_moment_class.charge_moment()
-
+    delay1,delay2 = charge_moment_class.time_delay()
+    print(delay1,delay2)
     print ('p =',res/1000,'C*km')
     print ('excpect 330 C*km')
