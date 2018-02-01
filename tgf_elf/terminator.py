@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime, date, time
 
 class Terminator_Class(object):
     # P = pi/180
@@ -11,6 +12,9 @@ class Terminator_Class(object):
         self.year = year
         self.month = month
         self.day = day
+
+    def UT(self,utime):
+        pass
 
     def modified_julian_date(self):
         return 367*self.year-int(7*(self.year+int((self.month+9)/12))/4) + \
@@ -58,18 +62,18 @@ class Terminator_Class(object):
         # lambda0, phi0 - Sun's coordinates on Earth
         lambda0,phi0 = self.angulation()
         step = 0.1
-        lambdax = [-180+i*step for i in range(0,int(360/step)+1)]
+        lambdax = [round(-180+i*step,2) for i in range(0,int(360/step)+1)]
         phix = [np.arctan(-np.cos((lx-lambda0)*self.CONST_P)/
                 np.tan(phi0*self.CONST_P))/self.CONST_P for lx in lambdax]
-        return lambdax, phix
+        return lambda0,phi0,lambdax,phix
 
 if __name__ == '__main__':
-    utime = 10.57
+    utime = 7.73
     year = 2010
     month = 1
     day = 27
 
     terminator_class = Terminator_Class(utime=utime,year=year,month=month,day=day)
-    lx,px = terminator_class.terminator()
+    l0,p0,lx,px = terminator_class.terminator()
     for i in range(len(lx)):
         print(lx[i],px[i])

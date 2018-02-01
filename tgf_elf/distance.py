@@ -15,9 +15,9 @@ class Distance_Class(object):
         self.lon2 = lon2
 
     def distance(self):
-        a = 0.5 - np.cos((lat2 - lat1)*self.CONST_P)/2 + \
-            np.cos(lat1*self.CONST_P)*np.cos(lat2*self.CONST_P)* \
-            (1 - np.cos((lon2 - lon1)*self.CONST_P))/2
+        a = 0.5 - np.cos((self.lat2 - self.lat1)*self.CONST_P)/2 + \
+            np.cos(self.lat1*self.CONST_P)*np.cos(self.lat2*self.CONST_P)* \
+            (1 - np.cos((self.lon2 - self.lon1)*self.CONST_P))/2
         return 2*self.CONST_R*np.arcsin(np.sqrt(a))
 
 if __name__ == '__main__':
