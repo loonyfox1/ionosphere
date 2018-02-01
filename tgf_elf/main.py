@@ -33,17 +33,17 @@ class Main_Class(object):
 		print('Day  ',self.day)
 		print('UTime',self.utime,'h\n')
 
-		print('TGF Lat',str(round(self.lat,1))+'N' if self.lat>0 else str(-round(self.lat,1))+'S')
-		print('TGF Lon',str(round(self.lon,1))+'E\n' if self.lon>0 else str(-round(self.lon,1))+'W\n')
+		print('TGF Lat',str(round(self.lat,1))+' N' if self.lat>0 else str(-round(self.lat,1))+' S')
+		print('TGF Lon',str(round(self.lon,1))+' E\n' if self.lon>0 else str(-round(self.lon,1))+' W\n')
 
-		print('Stantion Lat',str(round(self.lat_s,1))+'N' if self.lat_s>0 else str(-round(self.lat_s,1))+'S')
-		print('Stantion Lon',str(round(self.lon_s,1))+'E\n' if self.lon_s>0 else str(-round(self.lon_s,1))+'W\n')
+		print('Stantion Lat',str(round(self.lat_s,1))+' N' if self.lat_s>0 else str(-round(self.lat_s,1))+' S')
+		print('Stantion Lon',str(round(self.lon_s,1))+' E\n' if self.lon_s>0 else str(-round(self.lon_s,1))+' W\n')
 
 		print('Distance day  ',int(self.d[0][0]/1000) if self.d[0][1]==True  else int(self.d[1][0]/1000),'km')
 		print('Distance night',int(self.d[0][0]/1000) if self.d[0][1]==False else int(self.d[1][0]/1000),'km\n')
 
-		print('Sun lat',str(round(self.p0,1))+'N' if self.p0>0 else str(-round(self.p0,1))+'S')
-		print('Sun lon',str(round(self.l0,1))+'E\n' if self.l0>0 else str(-round(self.l0,1))+'W\n')
+		print('Sun lat',str(round(self.p0,1))+' N' if self.p0>0 else str(-round(self.p0,1))+' S')
+		print('Sun lon',str(round(self.l0,1))+' E\n' if self.l0>0 else str(-round(self.l0,1))+' W\n')
 
 		print('B pulse',round(self.B*1e12,3),'pT')
 		print('Charge moment',round(self.p/1000,3),'C*km')
@@ -64,7 +64,7 @@ class Main_Class(object):
 								   self.hour,self.minute))
 		m.drawgreatcircle(self.lon_s,self.lat_s,self.lon,self.lat,
 						  linewidth=2, color='b')
-		plt.title('Day/Night Map for %s (UTC)' % self.datetime)
+		plt.title('Day/Night Map for %s' % self.datetime[:10]+' '+self.datetime[11:])
 		plt.show()
 
 	def main(self):
@@ -85,17 +85,16 @@ class Main_Class(object):
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d)
 		self.p = charge_moment_class.charge_moment()
 
-		self.plot_terminator()
-
 		return self.p
 
 if __name__ == '__main__':
-	ID = 1
-	datetime = '2008-12-10T14:57:26.365'
+	ID = '090510'
+	datetime = '2009-05-10T11:57:15.985'
 	lat = -5.25
-	lon = -24
-	B = 14.4e-12
+	lon = 24.08
+	B = 4.5e-12
 
 	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat,B=B)
 	res = main_class.main()
 	main_class.info()
+	main_class.plot_terminator()

@@ -6,17 +6,17 @@ from datetime import datetime
 # example showing how to compute the day/night terminator and shade nightime
 # areas on a map.
 
-# miller projection
-# m = Basemap(projection='mill',lon_0=0)
-# # plot coastlines, draw label meridians and parallels.
-# m.drawcoastlines()
-# m.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-# m.drawmeridians(np.arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
-# # fill continents 'coral' (with zorder=0), color wet areas 'aqua'
-# m.drawmapboundary(fill_color='aqua')
-# m.fillcontinents(color='coral',lake_color='aqua')
-# shade the night areas, with alpha transparency so the
-# map shows through. Use current time in UTC.
+miller projection
+m = Basemap(projection='mill',lon_0=0)
+# plot coastlines, draw label meridians and parallels.
+m.drawcoastlines()
+m.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
+m.drawmeridians(np.arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
+# fill continents 'coral' (with zorder=0), color wet areas 'aqua'
+m.drawmapboundary(fill_color='aqua')
+m.fillcontinents(color='coral',lake_color='aqua')
+shade the night areas, with alpha transparency so the
+map shows through. Use current time in UTC.
 m = Basemap(projection='mill')
 m.bluemarble()
 #date = datetime.utcnow()

@@ -20,7 +20,7 @@ class Charge_Moment_Class(object):
     # T - time of data, sec
     CONST_T = 300
     # WN - parameter for Cheby filters
-    CONST_WN1, CONST_WN2, CONST_WN3 = 55,55,55
+    CONST_WN1, CONST_WN2, CONST_WN3 = 51.8,51.8,51.8
 
 
     def __init__(self,B,d):
@@ -35,7 +35,7 @@ class Charge_Moment_Class(object):
         return float(self.B/self.c_fun())
 
     def number_of_point(self):
-        return round(self.CONST_FS*self.CONST_T)
+        return int(round(self.CONST_FS*self.CONST_T))
 
     def naquist_frequency(self):
         return self.CONST_FS/2
@@ -94,7 +94,7 @@ class Charge_Moment_Class(object):
         res_rtf = self.receiver_transfer_function()
         res_itf = self.ionosphere_transfer_function()
         return [np.absolute(res_itf[i]*res_rtf[i])**2
-                for i in range(round(self.N/2))]
+                for i in range(int(round(self.N/2)))]
 
     def magnetic_altitude(self,fi):
         return np.real(self.magnetic_characteristic_altitude(fi))
