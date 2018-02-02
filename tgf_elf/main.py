@@ -2,18 +2,19 @@ from distance import Distance_Class
 from terminator import Terminator_Class
 from day_night_distance import Day_Night_Distance_Class
 from charge_moment import Charge_Moment_Class
+from time_delay import Time_Delay_Class
+from elf_data_processing import ELF_Data_Processing_Class
 import numpy as np
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from datetime import datetime as dt
 
 class Main_Class(object):
-	def __init__(self,ID,datetime,lon,lat,B):
+	def __init__(self,ID,datetime,lon,lat):
 		self.id = ID
 		self.datetime = datetime
 		self.lat = lat
 		self.lon = lon
-		self.B = B
 
 	def date_time(self):
 		# 'yy-mm-ddTHH:MM:SS.SSS'
@@ -22,11 +23,13 @@ class Main_Class(object):
 		self.day = int(self.datetime[8:10])
 		self.hour = int(self.datetime[11:13])
 		self.minute = int(self.datetime[14:16])
+		self.second = float(self.datetime[17:])
 		self.utime = round(float(self.datetime[11:13])+float(self.datetime[14:16])/60+float(self.datetime[17:])/3600,2)
-		return self.year,self.month,self.day,self.hour,self.minute,self.utime
+		return self.year,self.month,self.day,self.hour,self.minute,self.second,self.utime
 
 	def info(self):
-		print('ID',self.id,'\n')
+		print('TGF ID',self.id)
+		print('ELF file',self.filename,'\n')
 
 		print('Year ',self.year)
 		print('Month',self.month)
@@ -67,35 +70,70 @@ class Main_Class(object):
 		plt.title('Day/Night Map for %s' % self.datetime[:10]+' '+self.datetime[11:])
 		plt.show()
 
+	def find_filename(self):
+		if self.month<10: smonth = '0'+str(self.month)
+		else: smonth = str(self.month)
+
+		if self.day<10: sday = '0'+str(self.day)
+		else: sday = str(self.day)
+
+		if self.hour<10: shour = '0'+str(self.hour)
+		else: shour = str(self.hour)
+
+		sminute = self.minute//5*5
+		if sminute<10: sminute = '0'+str(sminute)
+		else: sminute = str(sminute)
+
+		return str(self.year)+smonth+sday+shour+sminute+'.dat'
+
+	def time_to_sec(self):
+		return self.minute%5*60+self.second
+
 	def main(self):
-		self.year,self.month,self.day,self.hour,self.minute,self.utime = self.date_time()
+		self.year,self.month,self.day,self.hour,self.minute, \
+			      self.second,self.utime = self.date_time()
 
 		self.lon_s = 22.55
 		self.lat_s = 49.19
 
+		# define coordinates of terminator
 		terminator_class = Terminator_Class(
 				utime=self.utime,year=self.year,month=self.month,day=self.day)
 		self.l0,self.p0,self.lx,self.px = terminator_class.terminator()
 
+		# define distance in day/night
 		day_night_distance_class = Day_Night_Distance_Class(
 				slat1=self.lat,slon1=self.lon,flat1=self.lat_s,flon1=self.lon_s,
 				lambda0=self.l0,phi0=self.p0,lambdax=self.lx,phix=self.px)
 		self.d = day_night_distance_class.day_night_distance()
 
+		# define day/night time delay
+		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
+		dd,dn = time_delay_class.time_delay()
+
+		# find elf filename for tgf (data in decimal format !!!)
+		self.filename = self.find_filename()
+
+		# processing data and define B
+		elf_data_processing_class = ELF_Data_Processing_Class(
+				filename=self.filename,delta_day=dd,delta_night=dn,
+				time=self.time_to_sec())
+		self.B = elf_data_processing_class.data_processing()
+		elf_data_processing_class.plot()
+
+		# calculate charge moment p
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d)
 		self.p = charge_moment_class.charge_moment()
-		self.dd,self.dn = charge_moment_class.time_delay()
 
 		return self.p
 
 if __name__ == '__main__':
-	ID = '090510'
-	datetime = '2009-05-10T11:57:15.985'
-	lat = -5.25
-	lon = 24.08
-	B = 4.5e-12
+	ID = '081113'
+	datetime = '2008-11-13T07:44:04.238'
+	lat = 2.89
+	lon = 7.33
 
-	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat,B=B)
+	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat)
 	res = main_class.main()
 	main_class.info()
 	main_class.plot_terminator()

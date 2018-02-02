@@ -19,8 +19,11 @@ class ELF_Data_Processing_Class(object):
 		with open(self.filename,'r') as f:
 			for line in f:
 				s = f.readline()
-				self.channel1.append(int(s[:s.find('\t')]))
-				self.channel2.append(int(s[s.find('\t')+1:]))
+				try:
+					self.channel1.append(int(s[:s.find('\t')]))
+					self.channel2.append(int(s[s.find('\t')+1:]))
+				except ValueError:
+					pass
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
@@ -52,8 +55,9 @@ class ELF_Data_Processing_Class(object):
 			delta = self.dd
 		else:
 			delta = self.dn
-		peak = max([self.peaked[i] for i in range(self.N)
-					if self.t[i]>=time-delta and self.t[i]<=time+delta])
+		peak = max([abs(self.peaked[i]) for i in range(self.N)
+					if self.t[i]>=self.time-delta and
+					self.t[i]<=self.time+delta])
 		return peak
 
 	def data_processing(self):
@@ -63,19 +67,19 @@ class ELF_Data_Processing_Class(object):
 		self.detrended = self.detrending()
 		self.peaked = self.peaking()
 		self.B = self.find_peak()
-		return self.B
+		return self.B/19.5454817e12
 
 	def plot(self):
 		fig = plt.figure()
 
 		ax1 = fig.add_subplot(3,1,1)
 		ax1.plot(self.t,self.data,label='data',color='blue')
-		ax1.set_title(filename)
+		ax1.set_title(self.filename)
 
-		ax1.axvline(time+dd,color='grey',linestyle=':',label='delta day')
-		ax1.axvline(time+dn,color='grey',linestyle='--',label='delta night')
-		ax1.axvline(time-dd,color='grey',linestyle=':')
-		ax1.axvline(time-dn,color='grey',linestyle='--')
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
+		ax1.axvline(self.time-self.dd,color='grey',linestyle=':')
+		ax1.axvline(self.time-self.dn,color='grey',linestyle='--')
 
 		major_ticks = np.arange(0, 301, 30)
 		minor_ticks = np.arange(0, 301, 15)
@@ -89,10 +93,10 @@ class ELF_Data_Processing_Class(object):
 		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
 		ax2.plot(self.t,self.detrended,label='detrended',color='green')
 
-		ax2.axvline(time+dd,color='grey',linestyle=':')
-		ax2.axvline(time+dn,color='grey',linestyle='--')
-		ax2.axvline(time-dd,color='grey',linestyle=':')
-		ax2.axvline(time-dn,color='grey',linestyle='--')
+		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax2.axvline(self.time-self.dd,color='grey',linestyle=':')
+		ax2.axvline(self.time-self.dn,color='grey',linestyle='--')
 
 		ax2.set_xticks(major_ticks)
 		ax2.set_xticks(minor_ticks, minor=True)
@@ -103,10 +107,10 @@ class ELF_Data_Processing_Class(object):
 		ax = fig.add_subplot(3,1,3,sharex=ax1,sharey=ax2)
 		ax.plot(self.t,self.peaked,label='peaked',color='red')
 
-		ax.axvline(time+dd,color='grey',linestyle=':')
-		ax.axvline(time+dn,color='grey',linestyle='--')
-		ax.axvline(time-dd,color='grey',linestyle=':')
-		ax.axvline(time-dn,color='grey',linestyle='--')
+		ax.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax.axvline(self.time-self.dd,color='grey',linestyle=':')
+		ax.axvline(self.time-self.dn,color='grey',linestyle='--')
 
 		ax.set_xticks(major_ticks)
 		ax.set_xticks(minor_ticks, minor=True)

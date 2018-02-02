@@ -20,8 +20,7 @@ class Charge_Moment_Class(object):
     # T - time of data, sec
     CONST_T = 300
     # WN - parameter for Cheby filters
-    CONST_WN1, CONST_WN2, CONST_WN3 = 51.8,51.8,51.8
-
+    CONST_WN1, CONST_WN2, CONST_WN3 = 50,50,50
 
     def __init__(self,B,d):
         # B - B_pulse
@@ -130,21 +129,6 @@ class Charge_Moment_Class(object):
             res = (67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
                 1j*(-3.14 - 8.7*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
         return res
-
-    def signal_delay(self):
-        return 1/self.CONST_DELTAF
-
-    def group_delay(self):
-        self.day = True
-        tau_day = self.total_r/self.phase_velocity(self.f[-1])
-        self.day = False
-        tau_night = self.total_r/self.phase_velocity(self.f[-1])
-        return tau_day,tau_night
-
-    def time_delay(self):
-        tau_day,tau_night = self.group_delay()
-        tau_rec = self.signal_delay()
-        return round(tau_day+tau_rec,3),round(tau_night+tau_rec,3)
 
 if __name__ == '__main__':
     B = 14.4e-12

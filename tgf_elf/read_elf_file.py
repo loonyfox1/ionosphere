@@ -48,8 +48,9 @@ class Read_ELF_Class(object):
 	def read_and_save(self):
 		self.channel1,self.channel2 = self.hex_to_decimal()
 		with open(self.filename, "w") as f:
-			for i in range(len(self.channel1)):
-				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\')
+			for i in range(len(self.channel1)-1):
+				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\n')
+			f.write(repr(self.channel1[-1])+'\t'+repr(self.channel2[-1]))
 		return self.filename
 
 	def plot(self):
@@ -66,7 +67,7 @@ class Read_ELF_Class(object):
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
-	filename = '201109062210.dat'
+	filename = '200811130740.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
 									destination=destination)
