@@ -101,11 +101,11 @@ class Main_Class(object):
 				utime=self.utime,year=self.year,month=self.month,day=self.day)
 		self.l0,self.p0,self.lx,self.px = terminator_class.terminator()
 
-		# define distance in day/night
+		# define distance in day/night, azimuth
 		day_night_distance_class = Day_Night_Distance_Class(
 				slat1=self.lat,slon1=self.lon,flat1=self.lat_s,flon1=self.lon_s,
 				lambda0=self.l0,phi0=self.p0,lambdax=self.lx,phix=self.px)
-		self.d = day_night_distance_class.day_night_distance()
+		self.d,self.A = day_night_distance_class.day_night_distance()
 
 		# define day/night time delay
 		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
@@ -128,10 +128,15 @@ class Main_Class(object):
 		return self.p
 
 if __name__ == '__main__':
-	ID = '081113'
-	datetime = '2008-11-13T07:44:04.238'
-	lat = 2.89
-	lon = 7.33
+	# ID = '081113'
+	# datetime = '2008-11-13T07:44:04.238'
+	# lat = 2.89
+	# lon = 7.33
+
+	ID = '090510'
+	datetime = '2009-05-10T11:57:15.985'
+	lat = -5.25
+	lon = 24.08
 
 	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat)
 	res = main_class.main()

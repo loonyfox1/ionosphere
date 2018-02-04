@@ -36,6 +36,15 @@ class Day_Night_Distance_Class(object):
 		else:
 			return True
 
+	def azimuth(self):
+		cos_gamma = np.cos(self.slat1*self.CONST_P)*np.cos(self.slat1*self.CONST_P)* \
+				   (np.cos((self.slon1-self.flon1)*self.CONST_P)-1) + \
+					np.cos((self.slat1-self.flat1)*self.CONST_P)
+		sin_gamma = np.sqrt(1-cos_gamma**2)
+		cos_A = (np.cos(self.flat1*self.CONST_P) - np.cos(self.slat1*self.CONST_P)* \
+				 cos_gamma) / (np.sin(self.slat1*self.CONST_P)*sin_gamma)
+		return np.arccos(cos_A)/self.CONST_P
+
 	def intersection_point(self):
 		t2 = -((self.flat1 - self.slat1) * (self.slon1 - self.slon2) - \
 			  (self.slat2 - self.slat1) * (self.flon1 - self.slon1))/ \
@@ -52,6 +61,7 @@ class Day_Night_Distance_Class(object):
 	def day_night_distance(self):
 		self.slat2,self.slon2,self.flat2,self.flon2 = self.terminator_points()
 		self.lat,self.lon = self.intersection_point()
+		self.A = self.azimuth()
 		if self.lat==-1 and self.lon==-1:
 			day = self.day_or_night(self.slat1,self.slon1)
 			r = Distance_Class(self.slat1,self.slon1,
@@ -64,7 +74,7 @@ class Day_Night_Distance_Class(object):
 		r2 = Distance_Class(self.lat,self.lon,
 							self.flat1,self.flon1).distance()
 		if day1!=day2:
-			return ((r1,day1),(r2,day2))
+			return ((r1,day1),(r2,day2)),self.A
 		print('Error day night distance')
 		return -1
 
@@ -87,5 +97,6 @@ if __name__ == '__main__':
 	l0,p0,lx,px = terminator_class.terminator()
 	day_night_distance_class = Day_Night_Distance_Class(slat1=slat1,slon1=slon1,
 				  flat1=flat1,flon1=flon1,lambda0=l0,phi0=p0,lambdax=lx,phix=px)
-	res = day_night_distance_class.day_night_distance()
+	res,A = day_night_distance_class.day_night_distance()
 	print ('d =',res)
+	print('A =',A)

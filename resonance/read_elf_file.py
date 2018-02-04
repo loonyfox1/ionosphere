@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-class Read_ELF_Class(object):
+class Read_ELF_File_Class(object):
 	def __init__(self,filename,destination):
 		self.filename = filename
 		self.destination = destination
@@ -8,7 +8,7 @@ class Read_ELF_Class(object):
 	def header(self):
 		with open(self.destination+self.filename, "rb") as f:
 			header = str(f.read(46))
-		return header[2:-13]
+		return header
 
 	def read_bytes(self):
 		byte_array = []
@@ -20,7 +20,7 @@ class Read_ELF_Class(object):
 		return byte_array
 
 	def bytes_to_hex(self):
-		byte_array = self.read_bytes()
+		byte_array = read_bytes()
 		new_byte = []
 		for i in range(64,len(byte_array),1):
 			time_s = str(byte_array[i])
@@ -46,31 +46,28 @@ class Read_ELF_Class(object):
 		return channel1[:channel1.index(0)],channel2[:channel2.index(0)]
 
 	def read_and_save(self):
-		self.channel1,self.channel2 = self.hex_to_decimal()
+		channel1,channel2 = self.hex_to_decimal()
 		with open(self.filename, "w") as f:
-			for i in range(len(self.channel1)-1):
-				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\n')
-			f.write(repr(self.channel1[-1])+'\t'+repr(self.channel2[-1]))
+			for i in range(len(channel1)):
+				f.write(repr(channel1[i]),'\t',repr(channel2[i]))
 		return self.filename
 
 	def plot(self):
-		t = [i*300/len(self.channel1) for i in range(len(self.channel1))]
 		plt.clf()
-		plt.plot(t,self.channel1,color='blue',label='NS')
-		plt.plot(t,self.channel2,color='red', label='EW')
+		plt.plot(channel1,color='blue',label='NS')
+		plt.plot(channel2,color='red',label='EW')
 		plt.legend()
 		plt.grid()
-		plt.ylabel('Amplitude')
-		plt.xlabel('Time, sec')
-		plt.title(self.header())
+		plt.ylabel(Amplitude)
+		plt.xlabel('Time')
+		plt.title(self.header)
 		plt.show()
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
-	filename = '200811130740.dat'
-	# filename = '200905101155.dat'
+	filename = '201109062210.dat'
 
-	read_elf_class = Read_ELF_Class(filename=filename,
-									destination=destination)
-	f = read_elf_class.read_and_save()
-	read_elf_class.plot()
+	read_elf_file_class = Read_ELF_File_Class(filename=filename,
+											  destination=destination)
+	f = read_elf_file_class.read_and_save()
+	read_data_from_file.plot()
