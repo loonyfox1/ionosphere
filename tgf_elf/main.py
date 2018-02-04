@@ -16,6 +16,51 @@ class Main_Class(object):
 		self.lat = lat
 		self.lon = lon
 
+	def constants(self):
+		with open(self.filename,'r') as f:
+			s = f.readline()
+		s = s[s.find('ELA')+3]
+		if s=='7':
+			return self.ELA7_constants,s
+		elif s=='1':
+			return self.ELA10_constants,s
+		print('Error of header')
+		return -1
+
+	def ELA10_constants(self):
+		# FS - sampling rate, Hz = 1/sec
+		CONST_FS = 887.7841
+		# FN - naquist frequency
+		CONST_FN = CONST_FS/2
+		# SCALE - full scale, pT/scale
+		CONST_SCALE = 2**16/3353 # NOTE: clarify, may be 24
+		# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
+		CONST_DELTAF = 304.9 # NOTE: clarify
+		# HI - correction coefficient of lfilter
+		CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
+		# WN - parameter for Cheby filters
+		CONST_WN1,CONST_WN2,CONST_WN3 = 457,334,334 # NOTE: clarify
+
+		return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
+			   CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
+
+	def ELA7_constants(self):
+		# FS - sampling rate, Hz = 1/sec
+		CONST_FS = 175.96
+		# FN - naquist frequency
+		CONST_FN = CONST_FS/2
+		# SCALE - full scale, pT/scale
+		CONST_SCALE = 2**16/3353e-12
+		# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
+		CONST_DELTAF = 51.8
+		# HI - correction coefficient of lfilter
+		CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
+		# WN - parameter for Cheby filters
+		CONST_WN1,CONST_WN2,CONST_WN3 = 50,50,50 # NOTE: clarify
+
+		return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
+			   CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
+
 	def date_time(self):
 		# 'yy-mm-ddTHH:MM:SS.SSS'
 		self.year = int(self.datetime[:4])
@@ -29,7 +74,8 @@ class Main_Class(object):
 
 	def info(self):
 		print('TGF ID',self.id)
-		print('ELF file',self.filename,'\n')
+		print('ELF file',self.filename)
+		print('Stantion ELA',self.s,'\n')
 
 		print('Year ',self.year)
 		print('Month',self.month)
@@ -91,7 +137,13 @@ class Main_Class(object):
 
 	def main(self):
 		self.year,self.month,self.day,self.hour,self.minute, \
-			      self.second,self.utime = self.date_time()
+				  self.second,self.utime = self.date_time()
+
+		# find elf filename for tgf (data in decimal format !!!)
+		self.filename = self.find_filename()
+
+		# define the constants of stantion
+		self.stantion,self.s = self.constants()
 
 		self.lon_s = 22.55
 		self.lat_s = 49.19
@@ -108,35 +160,34 @@ class Main_Class(object):
 		self.d,self.A = day_night_distance_class.day_night_distance()
 
 		# define day/night time delay
-		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
+		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0],
+											stantion=self.stantion)
 		dd,dn = time_delay_class.time_delay()
-
-		# find elf filename for tgf (data in decimal format !!!)
-		self.filename = self.find_filename()
 
 		# processing data and define B
 		elf_data_processing_class = ELF_Data_Processing_Class(
 				filename=self.filename,delta_day=dd,delta_night=dn,
-				time=self.time_to_sec())
+				time=self.time_to_sec(),A=self.A,stantion=self.stantion)
 		self.B = elf_data_processing_class.data_processing()
 		elf_data_processing_class.plot()
 
 		# calculate charge moment p
-		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d)
+		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
+												  stantion=self.stantion)
 		self.p = charge_moment_class.charge_moment()
 
 		return self.p
 
 if __name__ == '__main__':
-	# ID = '081113'
-	# datetime = '2008-11-13T07:44:04.238'
-	# lat = 2.89
-	# lon = 7.33
-
-	ID = '090510'
-	datetime = '2009-05-10T11:57:15.985'
-	lat = -5.25
-	lon = 24.08
+	ID = '081113'
+	datetime = '2008-11-13T07:44:04.238'
+	lat = 2.89
+	lon = 7.33
+    #
+	# ID = '090510'
+	# datetime = '2009-05-10T11:57:15.985'
+	# lat = -5.25
+	# lon = 24.08
 
 	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat)
 	res = main_class.main()

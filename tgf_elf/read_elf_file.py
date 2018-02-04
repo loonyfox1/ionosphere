@@ -46,8 +46,10 @@ class Read_ELF_Class(object):
 		return channel1[:channel1.index(0)],channel2[:channel2.index(0)]
 
 	def read_and_save(self):
+		self.fileheader = self.header()
 		self.channel1,self.channel2 = self.hex_to_decimal()
 		with open(self.filename, "w") as f:
+			f.write(self.fileheader+'\n')
 			for i in range(len(self.channel1)-1):
 				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\n')
 			f.write(repr(self.channel1[-1])+'\t'+repr(self.channel2[-1]))
@@ -67,8 +69,8 @@ class Read_ELF_Class(object):
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
-	filename = '200811130740.dat'
-	# filename = '200905101155.dat'
+	# filename = '200811130740.dat'
+	filename = '200905101155.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
 									destination=destination)

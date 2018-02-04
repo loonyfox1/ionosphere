@@ -13,8 +13,6 @@ class Terminator_Class(object):
         self.month = month
         self.day = day
 
-    def UT(self,utime):
-        pass
 
     def modified_julian_date(self):
         return 367*self.year-int(7*(self.year+int((self.month+9)/12))/4) + \

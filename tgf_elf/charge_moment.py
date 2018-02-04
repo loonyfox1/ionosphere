@@ -5,28 +5,21 @@ import matplotlib.pyplot as plt
 import math
 
 class Charge_Moment_Class(object):
-    # DELTAF - energy bandwidth of the receiver, Hz = 1/sec
-    CONST_DELTAF = 51.8
-    # HI - correction coefficient of lfilter
-    CONST_HI = 1.02
-    # MU0 - vacuum permeability, H/m = kg*m*m/(sec*sec*A*A)/m (SI)
     CONST_MU0 = 4e-7*np.pi
     # A - Earth's radius, m
     CONST_A = 6372795
     # C - velocity of light, m/sec
     CONST_C = 299792458
     # FS - sampling rate, Hz = 1/sec
-    CONST_FS = 175.96
-    # T - time of data, sec
     CONST_T = 300
-    # WN - parameter for Cheby filters
-    CONST_WN1, CONST_WN2, CONST_WN3 = 50,50,50
 
-    def __init__(self,B,d):
+    def __init__(self,B,d,stantion):
         # B - B_pulse
         self.B = B
         # d - array/tuple of distance like ((r_day,day=True),(r_night,day=False))
         self.d = d
+        self.CONST_FS,self.CONST_FN,_,self.CONST_DELTAF,self.CONST_HI, \
+        self.CONST_WN1,self.CONST_WN2,self.CONST_WN3 = stantion()
         # f - array of frequencies
         self.f = self.frequency_array()
 
@@ -36,9 +29,6 @@ class Charge_Moment_Class(object):
     def number_of_point(self):
         return int(round(self.CONST_FS*self.CONST_T))
 
-    def naquist_frequency(self):
-        return self.CONST_FS/2
-
     def omega(self,fi):
         return 2*np.pi*fi
 
@@ -47,17 +37,16 @@ class Charge_Moment_Class(object):
         return np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
-        fn = self.naquist_frequency()
         z0 = np.zeros(self.N)
         z0[0] = 1
 
-        b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/fn, analog=False)
+        b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
         z1 = signal.lfilter(b, a, z0)
 
-        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/fn, analog=False)
+        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/self.CONST_FN, analog=False)
         z2 = signal.lfilter(b, a, z1)
 
-        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/fn, analog=False)
+        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
         z3 = signal.lfilter(b, a, z2)
 
         res = np.fft.rfft(z3)

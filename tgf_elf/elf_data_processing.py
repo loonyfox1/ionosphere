@@ -9,31 +9,25 @@ class ELF_Data_Processing_Class(object):
 	DEGREE = 10
 	# SIGMA - parameter of peaking
 	SIGMA = 1
-	# SCALE - full scale, pT/scale
-	CONST_SCALE = 2**16/3353
-	# FS - sampling rate, Hz = 1/sec
-	CONST_FS = 175.96
 
-	def __init__(self,filename,delta_day,delta_night,time,A):
+	def __init__(self,filename,delta_day,delta_night,time,A,stantion):
 		self.filename = filename
 		self.dd = delta_day
 		self.dn = delta_night
 		# time in this 5 min in second
 		self.time = time
-		# A - azimuth
+		# A - azimuth, degree
 		self.A = A
+		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, _, _, _, _, _ = stantion()
 
 	def read_data(self):
 		self.channel1,self.channel2 = [],[]
 		with open(self.filename,'r') as f:
-			lines = f.readlines()
+			lines = f.readlines()[1:]
 			for s in lines:
 				self.channel1.append(int(s[:s.find('\t')]))
 				self.channel2.append(int(s[s.find('\t')+1:]))
 		return self.channel1,self.channel2,len(self.channel1)
-
-	def naquist_frequency(self):
-		return self.CONST_FS/2
 
 	def channels_to_data(self):
 		self.data = [np.sqrt(self.channel1[i]**2+self.channel2[i]**2)
@@ -41,18 +35,19 @@ class ELF_Data_Processing_Class(object):
 		return self.data
 
 	def filtering(self):
-		self.fn = self.naquist_frequency()
-		b, a = signal.butter(N=3,Wn=[(50-0.25)/self.fn,(50+0.25)/self.fn],
+		b, a = signal.butter(N=3,Wn=[(50-0.25)/self.CONST_FN,(50+0.25)/self.CONST_FN],
 							 btype='bandstop',analog=False)
-		self.filtered = signal.lfilter(b, a, self.data)
-		#
-		# b, a = signal.butter(N=3,Wn=[(150-0.25)/self.fn,(150+0.25)/self.fn],
-		# 					 btype='bandpass',analog=False)
-		# filtered2 = signal.lfilter(b, a, filtered1)
-		#
-		# b, a = signal.butter(N=3,Wn=[(250-0.25)/self.fn,(250+0.25)/self.fn],
-		# 					 btype='bandpass',analog=False)
-		# self.filtered = signal.lfilter(b, a, filtered2)
+		filtered1 = signal.lfilter(b, a, self.data)
+		try:
+			b, a = signal.butter(N=3,Wn=[(150-0.25)/self.CONST_FN,(150+0.25)/self.CONST_FN],
+								 btype='bandpass',analog=False)
+			filtered2 = signal.lfilter(b, a, filtered1)
+
+			b, a = signal.butter(N=3,Wn=[(250-0.25)/self.CONST_FN,(250+0.25)/self.CONST_FN],
+								 btype='bandpass',analog=False)
+			self.filtered = signal.lfilter(b, a, filtered2)
+		except ValueError:
+			self.filtered = filtered1
 
 		return list(self.filtered)
 
@@ -159,7 +154,7 @@ class ELF_Data_Processing_Class(object):
 		self.detrended,self.mov_avg = self.detrending()
 		self.peaked = self.peaking()
 		self.B = self.find_peak()
-		return self.B/24
+		return self.B/self.CONST_SCALE
 
 	def plot(self):
 		fig = plt.figure()
