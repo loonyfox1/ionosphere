@@ -8,6 +8,8 @@ class ELF_Data_Processing_Class(object):
 
 	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
 				 degree,sigma,plot):
+		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
+		 _, _, _, _ = stantion()
 		self.filename = filename
 		self.dd = delta_day
 		self.dn = delta_night
@@ -15,10 +17,10 @@ class ELF_Data_Processing_Class(object):
 		self.plot = plot
 		self.SIGMA = sigma
 		# time in this 5 min in second
-		self.time = time
+		self.time = time + 1/self.CONST_DELTAF
 		# A - azimuth, degree
 		self.A = A
-		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, _, _, _, _, _ = stantion()
+
 
 	def read_data(self):
 		self.channel1,self.channel2 = [],[]
@@ -48,18 +50,37 @@ class ELF_Data_Processing_Class(object):
 			self.filtered = signal.lfilter(b, a, filtered2)
 		except ValueError:
 			self.filtered = filtered1
+		if self.plot:
+			self.plot_filtering()
 
 		return list(self.filtered)
 
 	def plot_filtering(self):
 		fig = plt.figure()
-		ax1 = fig.add_subplot(1,1,1)
-		ax1.plot(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
-				np.abs(np.fft.rfft(self.data))**2,label='data',color='blue')
-		ax1.plot(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
-				np.abs(np.fft.rfft(self.filtered))**2,label='filtered',color='red')
-		ax1.set_title(self.filename)
+
+		ax1 = fig.add_subplot(2,1,1)
+		ax1.semilogy(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
+				np.abs(np.fft.rfft(self.data))**2,label='data',color='red')
+		ax1.semilogy(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
+				np.abs(np.fft.rfft(self.filtered))**2,label='filtered',color='blue')
+		ax1.set_title('Spectum '+self.filename)
+		ax1.set_xlabel('Freq, Hz')
+		ax1.set_ylabel('log(W**2)')
+		ax1.grid()
 		ax1.legend()
+
+		ax2 = fig.add_subplot(2,1,2)
+		ax2.plot(self.t,
+				self.data,label='data',color='red')
+		ax2.plot(self.t,
+				self.filtered,label='filtered',color='blue')
+		ax2.set_title('Data '+self.filename)
+		ax2.set_xlabel('Time, sec')
+		ax2.set_ylabel('Amplitude')
+		ax2.grid()
+		ax2.legend()
+
+		plt.subplots_adjust(hspace=0.4)
 		plt.show()
 
 	def detrending(self):
@@ -113,21 +134,33 @@ class ELF_Data_Processing_Class(object):
 		return self.peaked
 
 	def azimuth(self):
+		self.data = self.channel1
+		self.filtered = self.filtering()
+		self.channel1,_ = self.detrending()
+		self.channel1 = [self.channel1[i] if self.channel1[i]!=0 else 1e-8
+						 for i in range(self.N)]
+		self.data = self.channel2
+		self.filtered = self.filtering()
+		self.channel2, _ = self.detrending()
+		self.channel2 = [self.channel2[i] if self.channel2[i]!=0 else 1e-8
+						 for i in range(self.N)]
+
 		return [np.arctan(self.channel1[i]/self.channel2[i])/self.CONST_P
 				for i in range(self.N)], \
-			   [np.arctan(self.channel1[i]/self.channel2[i]-np.pi)/self.CONST_P
+			   [-np.arctan(self.channel1[i]/self.channel2[i])/self.CONST_P
 				for i in range(self.N)]
 
 	def plot_azimuth(self):
 		plt.axhline(self.A,label='TGF')
-		plt.axvline(self.time)
+		plt.axvline(self.time,color='grey')
 		plt.axvline(self.time+self.dd,color='grey',linestyle=':')
 		plt.axvline(self.time+self.dn,color='grey',linestyle='--')
-		plt.plot(self.t,self.azimuth_positive,label='CG+')
-		plt.plot(self.t,self.azimuth_negative,label='CG+')
+		plt.plot(self.t,self.azimuth_positive,color='violet',label='CG+')
+		plt.plot(self.t,self.azimuth_negative,color='orange',label='CG+')
 		plt.xlabel('Time, sec')
 		plt.ylabel('Azimuth, degree')
-		plt.title('Azimuth'+self.filename)
+		plt.xlim(self.time-0.1,self.time+0.1)
+		plt.title('Azimuth '+self.filename)
 		plt.grid()
 		plt.show()
 
@@ -155,12 +188,13 @@ class ELF_Data_Processing_Class(object):
 		self.filtered = self.filtering()
 		self.detrended,self.mov_avg = self.detrending()
 		self.peaked = self.peaking()
-		self.B = self.find_peak()
 		if self.plot:
-			self.plot()
+			self.plot_processing()
+		self.B = self.find_peak()
+
 		return self.B/self.CONST_SCALE
 
-	def plot(self):
+	def plot_processing(self):
 		fig = plt.figure()
 
 		ax1 = fig.add_subplot(2,1,1)

@@ -70,7 +70,8 @@ class Read_ELF_Class(object):
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
 	# filename = '200811130740.dat'
-	filename = '200905101155.dat'
+	# filename = '200905101155.dat'
+	filename = '201109062210.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
 									destination=destination)

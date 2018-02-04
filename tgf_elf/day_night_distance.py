@@ -44,9 +44,9 @@ class Day_Night_Distance_Class(object):
 		cos_A = (np.cos(self.flat1*self.CONST_P) - np.cos(self.slat1*self.CONST_P)* \
 				 cos_gamma) / (np.sin(self.slat1*self.CONST_P)*sin_gamma)
 		if cos_A<-1 or cos_A>1:
-			print('Warning: abs(cos(A))>1')
+			print('\nWarning: abs(cos(A))>1\n')
 			cos_A = int(cos_A)
-		return np.arccos(cos_A)/self.CONST_P
+		return np.arccos(cos_A)/self.CONST_P-90
 
 	def intersection_point(self):
 		t2 = -((self.flat1 - self.slat1) * (self.slon1 - self.slon2) - \

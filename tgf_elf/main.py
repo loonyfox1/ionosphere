@@ -173,8 +173,7 @@ class Main_Class(object):
 		self.d,self.A = day_night_distance_class.day_night_distance()
 
 		# define day/night time delay
-		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0],
-											stantion=self.stantion)
+		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
 		dd,dn = time_delay_class.time_delay()
 
 		# processing data and define B
@@ -189,7 +188,7 @@ class Main_Class(object):
 												  stantion=self.stantion)
 		self.p = charge_moment_class.charge_moment()
 		if not self.verbose:
-			print('p =',self.p/1000,'C*km')
+			print('\np =',self.p/1000,'C*km')
 		return self.p
 
 if __name__ == '__main__':
