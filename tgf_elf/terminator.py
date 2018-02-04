@@ -13,7 +13,6 @@ class Terminator_Class(object):
         self.month = month
         self.day = day
 
-
     def modified_julian_date(self):
         return 367*self.year-int(7*(self.year+int((self.month+9)/12))/4) + \
                int(275*self.month/9) + self.day-678987

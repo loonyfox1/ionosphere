@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
 	CONST_P = np.pi/180
-	# DEGREE - parameter of detrending
-	DEGREE = 10
-	# SIGMA - parameter of peaking
-	SIGMA = 1
 
-	def __init__(self,filename,delta_day,delta_night,time,A,stantion):
+	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
+				 degree,sigma,plot):
 		self.filename = filename
 		self.dd = delta_day
 		self.dn = delta_night
+		self.DEGREE = degree
+		self.plot = plot
+		self.SIGMA = sigma
 		# time in this 5 min in second
 		self.time = time
 		# A - azimuth, degree
@@ -101,7 +101,8 @@ class ELF_Data_Processing_Class(object):
 		plt.xlabel('Time, sec')
 		plt.ylabel('Amplitude')
 		plt.title('Peaking '+self.filename)
-		plt.show()
+		if self.plot:
+			plt.show()
 
 		mean = np.mean(peaked)
 		self.peaked = [pi-mean for pi in self.detrended]
@@ -132,7 +133,8 @@ class ELF_Data_Processing_Class(object):
 
 	def find_peak(self):
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
-		self.plot_azimuth()
+		if self.plot:
+			self.plot_azimuth()
 		if self.dd>self.dn:
 			delta = self.dd
 		else:
@@ -154,6 +156,8 @@ class ELF_Data_Processing_Class(object):
 		self.detrended,self.mov_avg = self.detrending()
 		self.peaked = self.peaking()
 		self.B = self.find_peak()
+		if self.plot:
+			self.plot()
 		return self.B/self.CONST_SCALE
 
 	def plot(self):

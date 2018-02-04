@@ -5,16 +5,29 @@ from charge_moment import Charge_Moment_Class
 from time_delay import Time_Delay_Class
 from elf_data_processing import ELF_Data_Processing_Class
 import numpy as np
+from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from datetime import datetime as dt
 
+EXTRA_HELP = """
+Example usage:
+python main.py -v -p -id 081113 -t 2008-11-13T07:44:04.238 -lat 2.89 -lon 7.33 -d /root/git/ionosphere/tgf_elf/ --degree 10 --sigma 3
+
+"""
+
+
 class Main_Class(object):
-	def __init__(self,ID,datetime,lon,lat):
-		self.id = ID
-		self.datetime = datetime
-		self.lat = lat
-		self.lon = lon
+	def __init__(self,args):
+		self.id = args.id
+		self.datetime = args.datetime
+		self.lat = args.lat
+		self.lon = args.lon
+		self.verbose = args.verbose
+		self.plot = args.plot
+		self.destination = args.dest
+		self.degree = args.degree
+		self.sigma = args.sigma
 
 	def constants(self):
 		with open(self.filename,'r') as f:
@@ -73,7 +86,7 @@ class Main_Class(object):
 		return self.year,self.month,self.day,self.hour,self.minute,self.second,self.utime
 
 	def info(self):
-		print('TGF ID',self.id)
+		print('\nTGF ID',self.id)
 		print('ELF file',self.filename)
 		print('Stantion ELA',self.s,'\n')
 
@@ -167,29 +180,53 @@ class Main_Class(object):
 		# processing data and define B
 		elf_data_processing_class = ELF_Data_Processing_Class(
 				filename=self.filename,delta_day=dd,delta_night=dn,
-				time=self.time_to_sec(),A=self.A,stantion=self.stantion)
+				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
+				degree=self.degree,sigma=self.sigma,plot=self.plot)
 		self.B = elf_data_processing_class.data_processing()
-		elf_data_processing_class.plot()
 
 		# calculate charge moment p
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
 												  stantion=self.stantion)
 		self.p = charge_moment_class.charge_moment()
-
+		if not self.verbose:
+			print('p =',self.p/1000,'C*km')
 		return self.p
 
 if __name__ == '__main__':
-	ID = '081113'
-	datetime = '2008-11-13T07:44:04.238'
-	lat = 2.89
-	lon = 7.33
-    #
-	# ID = '090510'
-	# datetime = '2009-05-10T11:57:15.985'
-	# lat = -5.25
-	# lon = 24.08
+	parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
+			 description='Automated script for analysis of ELF electromaghetic \
+			 field pulses', add_help=True, usage=EXTRA_HELP)
 
-	main_class = Main_Class(ID=ID,datetime=datetime,lon=lon,lat=lat)
+	parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+						help="If set, verbose information output")
+	parser.add_argument("-p", "--plot", dest="plot", action="store_true",
+						help="If set, graphs output")
+
+	parser.add_argument("-i", "--id", dest="id", type=str, default='0',
+						help="ID of TGF pulse in the catalogue")
+
+	parser.add_argument("-t", "--datetime", dest="datetime", type=str,
+						help="Datetime of TGF pulse")
+
+	parser.add_argument("-lat", "--lat", dest="lat", type=float,
+						help="Latitude of TGF pulse")
+
+	parser.add_argument("-lon", "--lon ", dest="lon", type=float,
+						help="Longitude of TGF pulse")
+
+	parser.add_argument("-d", "--dest", dest="dest", type=str, default='',
+							help="Destination folder of ELF data")
+
+	parser.add_argument("-g", "--degree", dest="degree", type=int, default=10,
+						help="Parameter of detrending with moving average")
+
+	parser.add_argument("-s", "--sigma", dest="sigma", type=float, default=3,
+						help="Filtering of noise parameter")
+
+	args = parser.parse_args()
+	main_class = Main_Class(args)
 	res = main_class.main()
-	main_class.info()
-	main_class.plot_terminator()
+	if args.verbose:
+		main_class.info()
+	if args.plot:
+		main_class.plot_terminator()
