@@ -86,7 +86,7 @@ class Charge_Moment_Class(object):
         res_rtf = self.receiver_transfer_function()
         res_itf = self.ionosphere_transfer_function()
         return [np.absolute(res_itf[i]*res_rtf[i])**2
-                for i in range(int(round(self.N/2)))]
+                for i in range(int(len(res_itf)))]
 
     def magnetic_altitude(self,fi):
         return np.real(self.magnetic_characteristic_altitude(fi))

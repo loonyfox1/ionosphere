@@ -11,16 +11,15 @@ class ELF_Data_Processing_Class(object):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
 		self.filename = filename
-		self.dd = delta_day
-		self.dn = delta_night
+		self.dd = delta_day + 1/self.CONST_DELTAF
+		self.dn = delta_night + 1/self.CONST_DELTAF
 		self.DEGREE = degree
 		self.plot = plot
 		self.SIGMA = sigma
 		# time in this 5 min in second
-		self.time = time + 1/self.CONST_DELTAF
+		self.time = time
 		# A - azimuth, degree
 		self.A = A
-
 
 	def read_data(self):
 		self.channel1,self.channel2 = [],[]
@@ -32,28 +31,28 @@ class ELF_Data_Processing_Class(object):
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
-		self.data = [np.sqrt(self.channel1[i]**2+self.channel2[i]**2)
-				for i in range(self.N)]
+		self.data = [np.sqrt(self.peaked1[i]**2+self.peaked2[i]**2)
+					 for i in range(self.N)]
 		return self.data
 
-	def filtering(self):
-		b, a = signal.butter(N=3,Wn=[(50-0.25)/self.CONST_FN,(50+0.25)/self.CONST_FN],
+	def filtering(self,data):
+		b, a = signal.butter(N=3,Wn=[(50-0.5)/self.CONST_FN,(50+0.5)/self.CONST_FN],
 							 btype='bandstop',analog=False)
-		filtered1 = signal.lfilter(b, a, self.data)
+		filtered1 = signal.lfilter(b, a, data)
 		try:
-			b, a = signal.butter(N=3,Wn=[(150-0.25)/self.CONST_FN,(150+0.25)/self.CONST_FN],
-								 btype='bandpass',analog=False)
+			b, a = signal.butter(N=3,Wn=[(150-0.5)/self.CONST_FN,(150+0.5)/self.CONST_FN],
+								 btype='bandstop',analog=False)
 			filtered2 = signal.lfilter(b, a, filtered1)
 
-			b, a = signal.butter(N=3,Wn=[(250-0.25)/self.CONST_FN,(250+0.25)/self.CONST_FN],
-								 btype='bandpass',analog=False)
-			self.filtered = signal.lfilter(b, a, filtered2)
+			b, a = signal.butter(N=3,Wn=[(250-0.5)/self.CONST_FN,(250+0.5)/self.CONST_FN],
+								 btype='bandstop',analog=False)
+			filtered = signal.lfilter(b, a, filtered2)
 		except ValueError:
-			self.filtered = filtered1
-		if self.plot:
-			self.plot_filtering()
+			filtered = filtered1
+		# if self.plot:
+		# 	self.plot_filtering()
 
-		return list(self.filtered)
+		return list(filtered)
 
 	def plot_filtering(self):
 		fig = plt.figure()
@@ -83,114 +82,158 @@ class ELF_Data_Processing_Class(object):
 		plt.subplots_adjust(hspace=0.4)
 		plt.show()
 
-	def detrending(self):
-		self.mov_avg = self.filtered[:self.DEGREE]
-		self.detrended=[0]*self.DEGREE
+	def detrending(self,filtered):
+		mov_avg = filtered[:self.DEGREE]
+		detrended=[0]*self.DEGREE
 		for i in range(self.DEGREE,self.N-self.DEGREE):
-			chunk = self.filtered[i-self.DEGREE:i+self.DEGREE]
+			chunk = filtered[i-self.DEGREE:i+self.DEGREE]
 			chunk = sum(chunk)/len(chunk)
-			self.mov_avg.append(chunk)
-			self.detrended.append(self.filtered[i]-chunk)
-		self.detrended = self.detrended+[0]*self.DEGREE
-		self.mov_avg = self.mov_avg+self.filtered[-self.DEGREE:]
-		return self.detrended,self.mov_avg
+			mov_avg.append(chunk)
+			detrended.append(filtered[i]-chunk)
+		detrended = detrended+[0]*self.DEGREE
+		mov_avg = mov_avg+filtered[-self.DEGREE:]
+		return detrended,mov_avg
 
-	def peaking(self):
-		peaked = self.detrended[:]
-		plt.plot(self.t,peaked,label='step 0')
+	def peaking(self,detrended):
+		peaked = detrended[:]
+		# plt.plot(self.t,peaked,label='step 0')
 
 		std0 = np.std(peaked)
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std0:
 				peaked[i] = self.SIGMA*std0*np.sign(peaked[i])
-		plt.plot(self.t,peaked,label='step 1')
+		# plt.plot(self.t,peaked,label='step 1')
 
 		std1 = np.std(peaked)
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std1:
 				peaked[i] = self.SIGMA*std1*np.sign(peaked[i])
-		plt.plot(self.t,peaked,label='step 2')
+		# plt.plot(self.t,peaked,label='step 2')
 
 		std2 = np.std(peaked)
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std2:
 				peaked[i] = self.SIGMA*std2*np.sign(peaked[i])
-		plt.plot(self.t,peaked,label='step 3')
-
-		plt.legend()
-		plt.grid()
-		plt.xlabel('Time, sec')
-		plt.ylabel('Amplitude')
-		plt.title('Peaking '+self.filename)
-		if self.plot:
-			plt.show()
+		# plt.plot(self.t,peaked,label='step 3')
+        #
+		# plt.legend()
+		# plt.grid()
+		# plt.xlabel('Time, sec')
+		# plt.ylabel('Amplitude')
+		# plt.title('Peaking '+self.filename)
+		# if self.plot:
+		# 	plt.show()
 
 		mean = np.mean(peaked)
-		self.peaked = [pi-mean for pi in self.detrended]
+		peaked = [pi-mean for pi in detrended]
 		for i in range(self.N):
-			if abs(self.peaked[i])<=self.SIGMA*std2:
-				self.peaked[i] = 0
+			if abs(peaked[i])<=self.SIGMA*std2:
+				peaked[i] = 0
 
-		return self.peaked
+		return peaked
 
 	def azimuth(self):
-		self.data = self.channel1
-		self.filtered = self.filtering()
-		self.channel1,_ = self.detrending()
-		self.channel1 = [self.channel1[i] if self.channel1[i]!=0 else 1e-8
-						 for i in range(self.N)]
-		self.data = self.channel2
-		self.filtered = self.filtering()
-		self.channel2, _ = self.detrending()
-		self.channel2 = [self.channel2[i] if self.channel2[i]!=0 else 1e-8
-						 for i in range(self.N)]
-
-		return [np.arctan(self.channel1[i]/self.channel2[i])/self.CONST_P
-				for i in range(self.N)], \
-			   [-np.arctan(self.channel1[i]/self.channel2[i])/self.CONST_P
-				for i in range(self.N)]
+		if self.CONST_DELTAF==51.8:
+			return [(np.arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
+					for i in range(self.N)], \
+				   [((np.arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
+					for i in range(self.N)]
+		else:
+			return [(np.arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
+					for i in range(self.N)], \
+				   [((np.arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
+					for i in range(self.N)]
 
 	def plot_azimuth(self):
-		plt.axhline(self.A,label='TGF')
-		plt.axvline(self.time,color='grey')
-		plt.axvline(self.time+self.dd,color='grey',linestyle=':')
-		plt.axvline(self.time+self.dn,color='grey',linestyle='--')
-		plt.plot(self.t,self.azimuth_positive,color='violet',label='CG+')
-		plt.plot(self.t,self.azimuth_negative,color='orange',label='CG+')
-		plt.xlabel('Time, sec')
-		plt.ylabel('Azimuth, degree')
-		plt.xlim(self.time-0.1,self.time+0.1)
-		plt.title('Azimuth '+self.filename)
-		plt.grid()
+		fig = plt.figure()
+
+		ax1 = fig.add_subplot(3,1,1)
+		ax1.plot(self.t,[self.channel1[i]-self.mov_avg1[i] for i in range(self.N)],color='yellow',marker='o',markersize=0.8,label='data NS')
+		ax1.plot(self.t,self.detrended1,label='detrended NS',color='red',marker='o',markersize=0.8)
+		# ax1.plot(self.t,self.mov_avg1,label='mov avg NS',color='black',marker='o',markersize=0.8)
+		ax1.axhline(0,color='black')
+		ax1.axvline(self.time,color='grey')
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax1.legend()
+		ax1.grid()
+
+		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
+		ax2.plot(self.t,[self.channel2[i]-self.mov_avg2[i] for i in range(self.N)],color='yellow',marker='o',markersize=0.8,label='data EW')
+		ax2.plot(self.t,self.detrended2,label='detrended EW',color='blue',marker='o',markersize=0.8)
+		# ax2.plot(self.t,self.mov_avg2,label='mov avg EW',color='black',marker='o',markersize=0.8)
+		ax2.axhline(0,color='black')
+		ax2.axvline(self.time,color='grey')
+		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax2.legend()
+		ax2.grid()
+
+		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
+		ax3.plot(self.t,self.azimuth_positive,color='black',label='CG+',marker='o',markersize=0.8)
+		ax3.plot(self.t,self.azimuth_negative,color='violet',label='CG-',marker='o',markersize=0.8)
+		ax3.axhline(self.A,label='TGF')
+		ax3.axvline(self.time,color='grey')
+		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax3.legend()
+		ax3.set_xlabel('Time, sec')
+		ax3.set_ylabel('Azimuth, degree')
+		ax3.set_title('Azimuth '+self.filename)
+		ax3.grid()
+
 		plt.show()
 
 	def find_peak(self):
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		if self.plot:
 			self.plot_azimuth()
-		if self.dd>self.dn:
-			delta = self.dd
-		else:
-			delta = self.dn
-		peak = max([abs(self.peaked[i]) for i in range(self.N)
-					if self.t[i]>=self.time-delta and
-					self.t[i]<=self.time+delta])
+
+		print('dd',self.dd)
+		print('dn',self.dn)
+
+		peak = max([abs(self.total_data[i]) for i in range(self.N)
+					if self.t[i]>=self.time+self.dd-1/self.CONST_FS and
+					self.t[i]<=self.time+self.dn+1/self.CONST_FS])
 		return peak
 
 	def data_processing(self):
 		self.channel1,self.channel2,self.N = self.read_data()
-		# data = sqrt(channel1**2 + channel2**2)
-		self.data = self.channels_to_data()
 
 		# t - time array
 		self.t = [i*300/self.N for i in range(self.N)]
 
-		self.filtered = self.filtering()
-		self.detrended,self.mov_avg = self.detrending()
-		self.peaked = self.peaking()
-		if self.plot:
-			self.plot_processing()
+		# processing for channel1
+		self.filtered1 = self.filtering(self.channel1)
+		self.peaked1,self.mov_avg1 = self.detrending(self.filtered1)
+		self.detrended1 = self.peaked1
+		# self.peaked1 = self.peaking(self.detrended1)
+		# if self.plot:
+		# 	self.plot_processing()
+
+		# processing for channel2
+		self.filtered2 = self.filtering(self.channel2)
+		self.peaked2,self.mov_avg2 = self.detrending(self.filtered2)
+		self.detrended2 = self.peaked2
+		# self.peaked2 = self.peaking(self.detrended2)
+		# if self.plot:
+		# 	self.plot_processing()
+
+		# data = sqrt(channel1**2 + channel2**2)
+		self.total_data = self.channels_to_data()
 		self.B = self.find_peak()
+
+		if self.plot:
+			plt.plot(self.t,self.total_data,marker='o',markersize=1)
+			plt.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
+			plt.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
+			plt.axvline(self.time,color='grey',label='TGF time')
+			plt.grid()
+			plt.legend()
+			plt.xlabel('Time, sec')
+			plt.ylabel('sqrt(NS**2+EW**2)')
+			plt.title('Total data')
+			plt.show()
 
 		return self.B/self.CONST_SCALE
 

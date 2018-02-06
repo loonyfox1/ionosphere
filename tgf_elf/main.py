@@ -46,13 +46,13 @@ class Main_Class(object):
 		# FN - naquist frequency
 		CONST_FN = CONST_FS/2
 		# SCALE - full scale, pT/scale
-		CONST_SCALE = 2**16/3353 # NOTE: clarify, may be 24
+		CONST_SCALE = 2**16/3353e-12
 		# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
 		CONST_DELTAF = 304.9 # NOTE: clarify
 		# HI - correction coefficient of lfilter
 		CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
 		# WN - parameter for Cheby filters
-		CONST_WN1,CONST_WN2,CONST_WN3 = 457,334,334 # NOTE: clarify
+		CONST_WN1,CONST_WN2,CONST_WN3 = 443,334,334 # NOTE: clarify
 
 		return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
 			   CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
@@ -63,13 +63,13 @@ class Main_Class(object):
 		# FN - naquist frequency
 		CONST_FN = CONST_FS/2
 		# SCALE - full scale, pT/scale
-		CONST_SCALE = 2**16/3353e-12
+		CONST_SCALE = 2**16/3826e-12 # NOTE: WTF???????
 		# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
 		CONST_DELTAF = 51.8
 		# HI - correction coefficient of lfilter
 		CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
 		# WN - parameter for Cheby filters
-		CONST_WN1,CONST_WN2,CONST_WN3 = 50,50,50 # NOTE: clarify
+		CONST_WN1,CONST_WN2,CONST_WN3 = 45,45,45 # NOTE: clarify
 
 		return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
 			   CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
@@ -201,7 +201,7 @@ if __name__ == '__main__':
 	parser.add_argument("-p", "--plot", dest="plot", action="store_true",
 						help="If set, graphs output")
 
-	parser.add_argument("-i", "--id", dest="id", type=str, default='0',
+	parser.add_argument("-id", "--id", dest="id", type=str, default='0',
 						help="ID of TGF pulse in the catalogue")
 
 	parser.add_argument("-t", "--datetime", dest="datetime", type=str,
