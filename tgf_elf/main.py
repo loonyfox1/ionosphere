@@ -22,7 +22,7 @@ class Main_Class(object):
 		self.id = args.id
 		self.datetime = args.datetime
 		self.lat = args.lat
-		self.lon = args.lon if args.lon<=180 else -360+args.lon
+		self.lon = args.lon
 		self.verbose = args.verbose
 		self.plot = args.plot
 		self.destination = args.dest
@@ -76,6 +76,7 @@ class Main_Class(object):
 
 	def date_time(self):
 		# 'yy-mm-ddTHH:MM:SS.SSS'
+		print(self.datetime)
 		self.year = int(self.datetime[:4])
 		self.month = int(self.datetime[5:7])
 		self.day = int(self.datetime[8:10])
@@ -180,7 +181,8 @@ class Main_Class(object):
 		elf_data_processing_class = ELF_Data_Processing_Class(
 				filename=self.filename,delta_day=dd,delta_night=dn,
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
-				degree=self.degree,sigma=self.sigma,plot=self.plot)
+				degree=self.degree,sigma=self.sigma,plot=self.plot,
+				idd=self.id,datetime=self.datetime)
 		self.B = elf_data_processing_class.data_processing()
 
 		# calculate charge moment p

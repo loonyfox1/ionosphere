@@ -37,7 +37,7 @@ def read(datetime):
 
 if __name__ == '__main__':
 	tgf_file = '/root/Downloads/eventlist.dat'
-	tgf_data = pd.read_table(tgf_file,dtype={'TIMESTAMP':str})
+	tgf_data = pd.read_table(tgf_file)
 	print(tgf_data.TIMESTAMP)
 
 	read('2009-05-20T13:54:24.882')
