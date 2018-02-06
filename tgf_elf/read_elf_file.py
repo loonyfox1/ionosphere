@@ -1,18 +1,19 @@
 import matplotlib.pyplot as plt
 
 class Read_ELF_Class(object):
-	def __init__(self,filename,destination):
+	def __init__(self,filename,destination_in,destination_out):
 		self.filename = filename
-		self.destination = destination
+		self.dest_in = destination_in
+		self.dest_out = destination_out
 
 	def header(self):
-		with open(self.destination+self.filename, "rb") as f:
+		with open(self.dest_in+self.filename, "rb") as f:
 			header = str(f.read(46))
 		return header[2:-13]
 
 	def read_bytes(self):
 		byte_array = []
-		with open(self.destination+self.filename, "rb") as f:
+		with open(self.dest_in+self.filename, "rb") as f:
 			byte = f.read(1)
 			while byte != b'':
 				byte_array.append(byte)
@@ -48,7 +49,7 @@ class Read_ELF_Class(object):
 	def read_and_save(self):
 		self.fileheader = self.header()
 		self.channel1,self.channel2 = self.hex_to_decimal()
-		with open(self.filename, "w") as f:
+		with open(self.dest_out+self.filename, "w") as f:
 			f.write(self.fileheader+'\n')
 			for i in range(len(self.channel1)-1):
 				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\n')

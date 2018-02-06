@@ -22,7 +22,7 @@ class Main_Class(object):
 		self.id = args.id
 		self.datetime = args.datetime
 		self.lat = args.lat
-		self.lon = args.lon
+		self.lon = args.lon if args.lon<=180 else -360+args.lon
 		self.verbose = args.verbose
 		self.plot = args.plot
 		self.destination = args.dest
