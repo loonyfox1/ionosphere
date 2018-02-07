@@ -183,15 +183,16 @@ class Main_Class(object):
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
 				idd=self.id,datetime=self.datetime)
-		self.B = elf_data_processing_class.data_processing()
+		# self.B = elf_data_processing_class.data_processing()
+		elf_data_processing_class.data_processing()
 
 		# calculate charge moment p
-		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
-												  stantion=self.stantion)
-		self.p = charge_moment_class.charge_moment()
-		if not self.verbose:
-			print('\np =',self.p/1000,'C*km')
-		return self.p
+		# charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
+		# 										  stantion=self.stantion)
+		# self.p = charge_moment_class.charge_moment()
+		# if not self.verbose:
+		# 	print('\np =',self.p/1000,'C*km')
+		# return self.p
 
 if __name__ == '__main__':
 	parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,

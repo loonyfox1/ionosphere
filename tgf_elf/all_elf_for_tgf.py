@@ -41,11 +41,14 @@ if __name__ == '__main__':
 	print(tgf_data.TIMESTAMP)
 
 	read('2009-05-20T13:54:24.882')
-
+	k = 0
 	jobs = []
 	for datetime in tgf_data.TIMESTAMP:
+		if k>10:
+			break
 		p = Process(target=read,args=(str(datetime),))
 		jobs.append(p)
 		p.start()
+		k += 1
 
 	[x.join() for x in jobs]

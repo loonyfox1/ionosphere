@@ -22,6 +22,7 @@ class ELF_Data_Processing_Class(object):
 		self.A = A
 		self.id = idd
 		self.datetime = datetime
+		self.CONST_SCALE = self.CONST_SCALE*1e-12
 
 	def read_data(self):
 		self.channel1,self.channel2 = [],[]
@@ -33,7 +34,7 @@ class ELF_Data_Processing_Class(object):
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
-		self.data = [np.sqrt(self.peaked1[i]**2+self.peaked2[i]**2)
+		self.data = [np.sqrt(self.detrended1[i]**2+self.detrended2[i]**2)
 					 for i in range(self.N)]
 		return self.data
 
@@ -88,7 +89,7 @@ class ELF_Data_Processing_Class(object):
 		mov_avg = filtered[:self.DEGREE]
 		detrended=[0]*self.DEGREE
 		for i in range(self.DEGREE,self.N-self.DEGREE):
-			chunk = filtered[i-self.DEGREE:i+self.DEGREE]
+			chunk = filtered[i-self.DEGREE:i+self.DEGREE+1]
 			chunk = sum(chunk)/len(chunk)
 			mov_avg.append(chunk)
 			detrended.append(filtered[i]-chunk)
@@ -100,24 +101,41 @@ class ELF_Data_Processing_Class(object):
 		peaked = detrended[:]
 		# plt.plot(self.t,peaked,label='step 0')
 
-		std0 = np.std(peaked)
+		std0 = np.nanstd(peaked)
+		# plt.axhline(std0,c='orange')
+		# plt.axhline(-std0,c='orange')
+
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std0:
-				peaked[i] = self.SIGMA*std0*np.sign(peaked[i])
-		# plt.plot(self.t,peaked,label='step 1')
+				peaked[i] = np.nan #self.SIGMA*std0*np.sign(peaked[i])
+		# plt.plot(self.t,eaked,label='step 1')
 
-		std1 = np.std(peaked)
+		std1 = np.nanstd(peaked)
+		# plt.axhline(std1,c='red')
+		# plt.axhline(-std1,c='red')
+
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std1:
-				peaked[i] = self.SIGMA*std1*np.sign(peaked[i])
+				peaked[i] = np.nan #self.SIGMA*std1*np.sign(peaked[i])
 		# plt.plot(self.t,peaked,label='step 2')
 
-		std2 = np.std(peaked)
+		std2 = np.nanstd(peaked)
+		# plt.axhline(std2,c='green')
+		# plt.axhline(-std2,c='green')
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std2:
-				peaked[i] = self.SIGMA*std2*np.sign(peaked[i])
+				peaked[i] = np.nan #self.SIGMA*std2*np.sign(peaked[i])
 		# plt.plot(self.t,peaked,label='step 3')
-        #
+
+		std3 = np.nanstd(peaked)
+		# plt.axhline(std3,c='black')
+		# plt.axhline(-std3,c='black')
+
+		for i in range(self.N):
+			if abs(peaked[i])>self.SIGMA*std3:
+				peaked[i] = np.nan #self.SIGMA*std3*np.sign(peaked[i])
+		# plt.plot(self.t,peaked,label='step 4')
+
 		# plt.legend()
 		# plt.grid()
 		# plt.xlabel('Time, sec')
@@ -126,8 +144,6 @@ class ELF_Data_Processing_Class(object):
 		# if self.plot:
 		# 	plt.show()
 
-		mean = np.mean(peaked)
-		peaked = [pi-mean for pi in detrended]
 		return peaked,std2
 
 	def azimuth(self):
@@ -141,6 +157,65 @@ class ELF_Data_Processing_Class(object):
 					for i in range(self.N)], \
 				   [((np.arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
 					for i in range(self.N)]
+
+	def plot_antennas(self):
+		fig = plt.figure()
+		fig.tight_layout()
+		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
+		start = self.t.index(time_array[0])
+		end = self.t.index(time_array[-1])+1
+
+		ax1 = fig.add_subplot(3,1,1)
+		ax1.plot(time_array,[self.channel1[i]-self.mov_avg1[i] for i in range(start,end)],color='yellow',label='data')
+		ax1.plot(time_array,self.detrended1[start:end],label='filter',color='red',marker='o',markersize=1.5)
+		ax1.axhline(0,color='black')
+		ax1.axvline(self.time,color='grey')
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax1.axhline(self.std1,color='lightgreen',linestyle=':')
+		ax1.axhline(-self.std1,color='lightgreen',linestyle=':')
+		ax1.axhline(2*self.std1,color='lightsalmon',linestyle=':')
+		ax1.axhline(-2*self.std1,color='lightsalmon',linestyle=':')
+		ax1.axhline(3*self.std1,color='lightskyblue',linestyle=':')
+		ax1.axhline(-3*self.std1,color='lightskyblue',linestyle=':')
+		ax1.set_ylabel('Antenna NS, pT')
+		ax1.set_title('TGF'+self.id+', '+self.datetime+', '+'deg'+str(self.DEGREE)+', sgm'+str(self.SIGMA)+', A='+str(round(self.A)))
+		ax1.legend(loc=1)
+		ax1.set_xlim([time_array[0],time_array[-1]])
+
+		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
+		ax2.plot(time_array,[self.channel2[i]-self.mov_avg2[i] for i in range(start,end)],color='yellow',label='data')
+		ax2.plot(time_array,self.detrended2[start:end],label='filter',color='blue',marker='o',markersize=1.5)
+		ax2.axhline(0,color='black')
+		ax2.axvline(self.time,color='grey')
+		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax2.axhline(self.std2,color='lightgreen',linestyle=':')
+		ax2.axhline(-self.std2,color='lightgreen',linestyle=':')
+		ax2.axhline(2*self.std2,color='lightsalmon',linestyle=':')
+		ax2.axhline(-2*self.std2,color='lightsalmon',linestyle=':')
+		ax2.axhline(3*self.std2,color='lightskyblue',linestyle=':')
+		ax2.axhline(-3*self.std2,color='lightskyblue',linestyle=':')
+		ax2.set_ylabel('Antenna EW, pT')
+		ax2.legend(loc=1)
+		ax2.set_xlim([time_array[0],time_array[-1]])
+
+		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
+		ax3.plot(time_array,self.total_data[start:end],color='green',label='total data',marker='o',markersize=1.5)
+		# ax3.plot(time_array,self.total_peaked[start:end],color='green',label='peaked',marker='o',markersize=1.5)
+		ax3.axhline(0,color='black')
+		ax3.axvline(self.time,color='grey')
+		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax3.axhline(self.std_total,color='lightgreen',linestyle=':')
+		ax3.axhline(2*self.std_total,color='lightsalmon',linestyle=':')
+		ax3.axhline(3*self.std_total,color='lightskyblue',linestyle=':')
+		ax3.legend(loc=1)
+		ax3.set_xlabel('Time, sec')
+		ax3.set_ylabel('Total, pT')
+		ax3.set_xlim([time_array[0],time_array[-1]])
+
+		plt.savefig('/root/ELF_data/img/TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
 
 	def plot_azimuth(self):
 		fig = plt.figure()
@@ -165,7 +240,7 @@ class ELF_Data_Processing_Class(object):
 		ax1.set_ylabel('Antenna NS')
 		ax1.set_title('TGF'+self.id+', '+self.datetime+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A)))
 		ax1.legend(loc=1)
-		ax1.set_xlim(time_array[0],time_array[-1])
+		ax1.set_xlim([time_array[0],time_array[-1]])
 
 		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
 		ax2.plot(time_array,[self.channel2[i]-self.mov_avg2[i] for i in range(start,end)],color='yellow',label='data')
@@ -182,6 +257,7 @@ class ELF_Data_Processing_Class(object):
 		ax2.axhline(-3*self.std2,color='lightskyblue',linestyle=':')
 		ax2.set_ylabel('Antenna EW')
 		ax2.legend(loc=1)
+		ax2.set_xlim([time_array[0],time_array[-1]])
 
 		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
 		ax3.plot(time_array,self.azimuth_positive[start:end],color='black',label='CG+',marker='o',markersize=1.5)
@@ -193,13 +269,14 @@ class ELF_Data_Processing_Class(object):
 		ax3.legend(loc=1)
 		ax3.set_xlabel('Time, sec')
 		ax3.set_ylabel('Azimuth, degree')
+		ax3.set_xlim([time_array[0],time_array[-1]])
 
 		plt.show()
 
 	def find_peak(self):
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
-		if self.plot:
-			self.plot_azimuth()
+		# if self.plot:
+		# 	self.plot_azimuth()
 
 		print('dd',self.dd)
 		print('dn',self.dn)
@@ -235,60 +312,55 @@ class ELF_Data_Processing_Class(object):
 
 		# data = sqrt(channel1**2 + channel2**2)
 		self.total_data = self.channels_to_data()
-		self.B = self.find_peak()
-
+		self.total_peaked,self.std_total = self.peaking(self.total_data)
+		# self.std_total = np.std(self.total_data)
 		if self.plot:
-			plt.plot(self.t,self.total_data,marker='o',markersize=1)
-			plt.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
-			plt.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
-			plt.axvline(self.time,color='grey',label='TGF time')
-			plt.grid()
-			plt.legend()
-			plt.xlabel('Time, sec')
-			plt.ylabel('sqrt(NS**2+EW**2)')
-			plt.title('Total data')
-			plt.show()
+			self.plot_antennas()
+			self.plot_processing()
+		# self.B = self.find_peak()
 
-		return self.B/self.CONST_SCALE
+		# if self.plot:
+		# 	plt.plot(self.t,self.total_data,marker='o',markersize=1)
+		# 	plt.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
+		# 	plt.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
+		# 	plt.axvline(self.time,color='grey',label='TGF time')
+		# 	plt.grid()
+		# 	plt.legend()
+		# 	plt.xlabel('Time, sec')
+		# 	plt.ylabel('sqrt(NS**2+EW**2)')
+		# 	plt.title('Total data')
+		# 	plt.show()
+
+		# return self.B/self.CONST_1CALE
 
 	def plot_processing(self):
 		fig = plt.figure()
+		fig.tight_layout()
+		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
+		start = self.t.index(time_array[0])
+		end = self.t.index(time_array[-1])+1
 
 		ax1 = fig.add_subplot(2,1,1)
-		ax1.plot(self.t,self.data,label='data',color='blue')
-		ax1.plot(self.t,self.filtered,label='filtered',color='yellow')
-		ax1.plot(self.t,self.mov_avg,label='moving average',color='black')
-		ax1.set_title(self.filename)
+		ax1.plot(time_array,self.channel1[start:end],label='data',color='yellow')
+		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
+		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
+		ax1.set_title('TGF'+self.id+', '+self.datetime+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A)))
 
 		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
 		ax1.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
 		ax1.axvline(self.time,color='grey',label='TGF time')
-
-		major_ticks = np.arange(0, 301, 30)
-		minor_ticks = np.arange(0, 301, 15)
-
-		ax1.set_xticks(major_ticks)
-		ax1.set_xticks(minor_ticks, minor=True)
-		ax1.grid(which='minor', alpha=0.2)
-		ax1.grid(which='major', alpha=0.5)
 		ax1.legend(loc=1)
 
 		ax2 = fig.add_subplot(2,1,2,sharex=ax1)
-		ax2.plot(self.t,self.detrended,label='detrended',color='green')
-		ax2.plot(self.t,self.peaked,label='peaked',color='red')
-
+		ax2.plot(time_array,self.channel2[start:end],label='data',color='yellow')
+		ax2.plot(time_array,self.filtered2[start:end],label='filtered',color='blue')
+		ax2.plot(time_array,self.mov_avg2[start:end],label='mov avg',color='black')
 		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
 		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
 		ax2.axvline(self.time,color='grey')
-
-		ax2.set_xticks(major_ticks)
-		ax2.set_xticks(minor_ticks, minor=True)
-		ax2.grid(which='minor', alpha=0.2)
-		ax2.grid(which='major', alpha=0.5)
 		ax2.legend(loc=1)
 
-
-		plt.show()
+		plt.savefig('/root/ELF_data/img/TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
