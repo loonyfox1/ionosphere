@@ -7,7 +7,7 @@ class ELF_Data_Processing_Class(object):
 	CONST_P = np.pi/180
 
 	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
-				 degree,sigma,plot,datetime,idd):
+				 degree,sigma,plot,datetime,idd,dest_img):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
 		self.filename = filename
@@ -23,6 +23,7 @@ class ELF_Data_Processing_Class(object):
 		self.id = idd
 		self.datetime = datetime
 		self.CONST_SCALE = self.CONST_SCALE*1e-12
+		self.dest_img = dest_img
 
 	def read_data(self):
 		self.channel1,self.channel2 = [],[]
@@ -215,7 +216,7 @@ class ELF_Data_Processing_Class(object):
 		ax3.set_ylabel('Total, pT')
 		ax3.set_xlim([time_array[0],time_array[-1]])
 
-		plt.savefig('/root/ELF_data/img/TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
+		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
 
 	def plot_azimuth(self):
 		fig = plt.figure()
@@ -360,7 +361,7 @@ class ELF_Data_Processing_Class(object):
 		ax2.axvline(self.time,color='grey')
 		ax2.legend(loc=1)
 
-		plt.savefig('/root/ELF_data/img/TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
+		plt.savefig(self.dest_img'TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'

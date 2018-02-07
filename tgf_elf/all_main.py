@@ -9,6 +9,8 @@ def process_func(args):
 
 if __name__ == '__main__':
 	tgf_file = '/root/Downloads/eventlist.dat'
+	dest_img = ''
+	dest_elf = ''
 	tgf_data = pd.read_table(tgf_file,sep=' ')
 
 	# print(tgf_data.TIMESTAMP.values[4])
@@ -25,7 +27,8 @@ if __name__ == '__main__':
 		if float(args.lon>180): args.lon = -360+float(args.lon)
 		args.verbose = False
 		args.plot = True
-		args.dest = ''
+		args.dest = dest_elf
+		args.dest_img = dest_img
 		args.degree = 45
 		args.sigma = 3
 

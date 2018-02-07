@@ -28,6 +28,7 @@ class Main_Class(object):
 		self.destination = args.dest
 		self.degree = args.degree
 		self.sigma = args.sigma
+		self.dest_img = args.dest_img
 
 	def constants(self):
 		with open(self.filename,'r') as f:
@@ -182,7 +183,7 @@ class Main_Class(object):
 				filename=self.filename,delta_day=dd,delta_night=dn,
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
-				idd=self.id,datetime=self.datetime)
+				idd=self.id,datetime=self.datetime,dest_img=self.dest_img)
 		# self.B = elf_data_processing_class.data_processing()
 		elf_data_processing_class.data_processing()
 
