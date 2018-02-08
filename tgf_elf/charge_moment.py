@@ -2,7 +2,7 @@ import numpy as np
 from scipy import signal,special,integrate
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
+import time
 
 class Charge_Moment_Class(object):
     CONST_MU0 = 4e-7*np.pi
@@ -22,9 +22,15 @@ class Charge_Moment_Class(object):
         self.CONST_WN1,self.CONST_WN2,self.CONST_WN3 = stantion()
         # f - array of frequencies
         self.f = self.frequency_array()
+        # self.filter = list(filt)
 
     def charge_moment(self):
-        return float(self.B/self.c_fun())
+        c = float(self.c_fun())
+        res = {
+            'p': float(self.B/c),
+            'c': c
+        }
+        return res
 
     def number_of_point(self):
         return int(round(self.CONST_FS*self.CONST_T))
@@ -37,6 +43,14 @@ class Charge_Moment_Class(object):
         return np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
+        # delt = self.N-len(self.filter)
+        # if delt>0:
+        #     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
+        #         self.filter.append(0)
+        # else:
+        #     self.filter[:self.N]
+        # return self.filter
+
         z0 = np.zeros(self.N)
         z0[0] = 1
 

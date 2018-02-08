@@ -77,6 +77,6 @@ if __name__ == '__main__':
 	# filename = '201308201525.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
-									destination=destination)
+				destination_in=destination,destination_out='/root/ELF_data/txt_files/')
 	f = read_elf_class.read_and_save()
 	read_elf_class.plot()

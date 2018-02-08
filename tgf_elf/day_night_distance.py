@@ -66,7 +66,7 @@ class Day_Night_Distance_Class(object):
 			day = self.day_or_night(self.slat1,self.slon1)
 			r = Distance_Class(self.slat1,self.slon1,
 							   self.flat1,self.flon1).distance()
-			return ((r,day),(0,not day)),self.A
+			return [[r,day],[0,not day]],self.A
 		day1 = self.day_or_night(self.slat1,self.slon1)
 		day2 = self.day_or_night(self.flat1,self.flon1)
 		r1 = Distance_Class(self.slat1,self.slon1,
@@ -74,7 +74,7 @@ class Day_Night_Distance_Class(object):
 		r2 = Distance_Class(self.lat,self.lon,
 							self.flat1,self.flon1).distance()
 		if day1!=day2:
-			return ((r1,day1),(r2,day2)),self.A
+			return [[r1,day1],[r2,day2]],self.A
 		print('Error day night distance')
 		return -1
 

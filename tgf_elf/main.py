@@ -29,6 +29,7 @@ class Main_Class(object):
 		self.degree = args.degree
 		self.sigma = args.sigma
 		self.dest_img = args.dest_img
+		# self.filt = args.filt
 
 	def constants(self):
 		with open(self.destination+self.filename,'r') as f:
@@ -77,7 +78,6 @@ class Main_Class(object):
 
 	def date_time(self):
 		# 'yy-mm-ddTHH:MM:SS.SSS'
-		print(self.datetime)
 		self.year = int(self.datetime[:4])
 		self.month = int(self.datetime[5:7])
 		self.day = int(self.datetime[8:10])
@@ -111,6 +111,27 @@ class Main_Class(object):
 
 		print('B pulse',round(self.B*1e12,3),'pT')
 		print('Charge moment',round(self.p/1000,3),'C*km')
+
+	def write_info(self):
+		if self.d[0][1]==True:
+			dayd = float(self.d[0][0])
+		else:
+			dayd = -float(self.d[1][0])
+		print(self.d)
+		res = {
+			'id': self.id,
+			'dist': int((self.d[0][0]+self.d[1][0])/1000),
+			'day coef': round(dayd/(float(self.d[0][0])+float(self.d[1][0])),2),
+			'c(r)': round(self.c*1e17,1),
+			'B pulse': round(self.B*1e12,1),
+			'B noise': round(self.std*1e12,1),
+			'P': round(self.p/1000,1),
+			'P min': round(self.std/self.c/1000,1),
+			'calc dd': int(self.dd*1000),
+			'calc dn': int(self.dn*1000),
+			'real delay': int(self.delta*1000)
+		}
+		return res
 
 	def info_terminator(self):
 		print('Lon\tLat\n')
@@ -184,16 +205,25 @@ class Main_Class(object):
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
 				idd=self.id,datetime=self.datetime,dest_img=self.dest_img)
-		# self.B = elf_data_processing_class.data_processing()
-		elf_data_processing_class.data_processing()
+		res = elf_data_processing_class.data_processing()
+		self.delta = res['delta']
+		self.dd = res['dd']
+		self.dn = res['dn']
+		self.B = res['B']
+		self.std = res['std']
 
 		# calculate charge moment p
-		# charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
-		# 										  stantion=self.stantion)
-		# self.p = charge_moment_class.charge_moment()
-		# if not self.verbose:
-		# 	print('\np =',self.p/1000,'C*km')
-		# return self.p
+		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
+										stantion=self.stantion)
+		res = charge_moment_class.charge_moment()
+		self.p = res['p']
+		self.c = res['c']
+
+		res = self.write_info()
+		if not self.verbose:
+			print('\np =',self.p/1000,'C*km')
+		return res
+
 
 if __name__ == '__main__':
 	parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,

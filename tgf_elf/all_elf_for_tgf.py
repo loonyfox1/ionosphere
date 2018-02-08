@@ -31,7 +31,7 @@ def read(datetime):
 	dest_in = '/root/ELF_data/bin_files/'
 	dest_out = '/root/ELF_data/txt_files/'
 	folder,filename = find_filename(datetime)
-	# dest_in = dest_in+folder
+	dest_in = dest_in+folder
 	print(datetime,'\n'+dest_in+filename,'\n')
 	filename = Read_ELF_Class(filename=filename,destination_in=dest_in,destination_out=dest_out).read_and_save()
 
