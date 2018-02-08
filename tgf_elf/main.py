@@ -31,7 +31,7 @@ class Main_Class(object):
 		self.dest_img = args.dest_img
 
 	def constants(self):
-		with open(self.filename,'r') as f:
+		with open(self.destination+self.filename,'r') as f:
 			s = f.readline()
 		s = s[s.find('ELA')+3]
 		if s=='7':
@@ -180,7 +180,7 @@ class Main_Class(object):
 
 		# processing data and define B
 		elf_data_processing_class = ELF_Data_Processing_Class(
-				filename=self.filename,delta_day=dd,delta_night=dn,
+				filename=self.destination+self.filename,delta_day=dd,delta_night=dn,
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
 				idd=self.id,datetime=self.datetime,dest_img=self.dest_img)

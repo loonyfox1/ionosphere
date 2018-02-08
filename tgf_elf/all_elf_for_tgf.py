@@ -28,27 +28,31 @@ def find_filename(datetime):
 	return str(year)+smonth+sday+'/', str(year)+smonth+sday+shour+sminute+'.dat'
 
 def read(datetime):
-	dest_in = ''
-	dest_out = ''
+	dest_in = '/root/ELF_data/bin_files/'
+	dest_out = '/root/ELF_data/txt_files/'
 	folder,filename = find_filename(datetime)
-	dest_in = dest_in+folder
+	# dest_in = dest_in+folder
 	print(datetime,'\n'+dest_in+filename,'\n')
 	filename = Read_ELF_Class(filename=filename,destination_in=dest_in,destination_out=dest_out).read_and_save()
 
 if __name__ == '__main__':
 	tgf_file = '/root/Downloads/eventlist.dat'
-	tgf_data = pd.read_table(tgf_file)
-	print(tgf_data.TIMESTAMP)
+	tgf_data = pd.read_table(tgf_file,sep=' ')
+	# print(tgf_data)
 
-	read('2009-05-20T13:54:24.882')
-	k = 0
+	idd_array = [i for i in range(678,687)]
+
 	jobs = []
-	for datetime in tgf_data.TIMESTAMP:
-		if k>10:
-			break
-		p = Process(target=read,args=(str(datetime),))
-		jobs.append(p)
-		p.start()
-		k += 1
+
+	for idd in tgf_data.ID:
+		if int(idd) in idd_array:
+			try:
+				datetime = str(tgf_data.TIMESTAMP[tgf_data.ID==idd].values[0])
+				p = Process(target=read,args=(str(datetime),))
+				jobs.append(p)
+				p.start()
+				# p.join()
+			except FileNotFoundError:
+				break
 
 	[x.join() for x in jobs]

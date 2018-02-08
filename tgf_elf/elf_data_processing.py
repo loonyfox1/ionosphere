@@ -180,7 +180,7 @@ class ELF_Data_Processing_Class(object):
 		ax1.axhline(3*self.std1,color='lightskyblue',linestyle=':')
 		ax1.axhline(-3*self.std1,color='lightskyblue',linestyle=':')
 		ax1.set_ylabel('Antenna NS, pT')
-		ax1.set_title('TGF'+self.id+', '+self.datetime+', '+'deg'+str(self.DEGREE)+', sgm'+str(self.SIGMA)+', A='+str(round(self.A)))
+		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg'+str(self.DEGREE)+', sgm'+str(self.SIGMA)+', A='+str(round(self.A))))
 		ax1.legend(loc=1)
 		ax1.set_xlim([time_array[0],time_array[-1]])
 
@@ -345,7 +345,7 @@ class ELF_Data_Processing_Class(object):
 		ax1.plot(time_array,self.channel1[start:end],label='data',color='yellow')
 		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
 		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
-		ax1.set_title('TGF'+self.id+', '+self.datetime+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A)))
+		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A))))
 
 		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
 		ax1.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
@@ -361,25 +361,25 @@ class ELF_Data_Processing_Class(object):
 		ax2.axvline(self.time,color='grey')
 		ax2.legend(loc=1)
 
-		plt.savefig(self.dest_img'TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
-
-if __name__ == '__main__':
-	destination = '/root/ELF_data/'
-	filename = '200905101155.dat'
-	time = 2*60+15.985
-
-	filename = '200811130740.dat'
-	time = 4*60+4.279
-
-	dd = 0.050
-	dn = 0.042
-
-	A = 98
-
-	elf_data_processing_class = ELF_Data_Processing_Class(filename=filename,
-				delta_day=dd,delta_night=dn,time=time,A=A)
-	B = elf_data_processing_class.data_processing()
-
-	print('B =',B)
-
-	elf_data_processing_class.plot()
+		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
+#
+# if __name__ == '__main__':
+# 	destination = '/root/ELF_data/'
+# 	filename = '200905101155.dat'
+# 	time = 2*60+15.985
+#
+# 	filename = '200811130740.dat'
+# 	time = 4*60+4.279
+#
+# 	dd = 0.050
+# 	dn = 0.042
+#
+# 	A = 98
+#
+# 	elf_data_processing_class = ELF_Data_Processing_Class(filename=filename,
+# 				delta_day=dd,delta_night=dn,time=time,A=A)
+# 	B = elf_data_processing_class.data_processing()
+#
+# 	print('B =',B)
+#
+# 	elf_data_processing_class.plot()
