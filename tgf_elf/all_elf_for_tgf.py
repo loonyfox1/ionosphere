@@ -34,14 +34,16 @@ def read(datetime,dest_bin,dest_txt):
 	filename = Read_ELF_Class(filename=filename,destination_in=dest_bin,destination_out=dest_txt).read_and_save()
 
 if __name__ == '__main__':
+	file_tgf,dest_bin,dest_txt = '','',''
 	# DESTINATIONS #############################################################
-	dest_bin = '/root/ELF_data/bin_files/'
-	dest_txt = '/root/ELF_data/txt_files/'
-	file_tgf = '/root/Downloads/eventlist.dat'
+	with open('config.txt','r') as f:
+		for line in f:
+			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
+			dest_bin = line[11:-1] if 'dest_bin' in line else dest_bin
+			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
 	############################################################################
 
 	tgf_data = pd.read_table(file_tgf,sep=' ')
-	# print(tgf_data)
 
 	idd_array = [i for i in range(678,687)]
 

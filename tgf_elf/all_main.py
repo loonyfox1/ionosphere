@@ -16,11 +16,14 @@ def process_func(args,counts,geog,dur,file_res):
 	print(res)
 
 if __name__ == '__main__':
+	file_tgf,dest_img,dest_txt,file_res = '','','',''
 	# DESTINATIONS #############################################################
-	file_tgf = '/root/Downloads/eventlist.dat'
-	dest_img = '/root/ELF_data/img/'
-	dest_txt = '/root/ELF_data/txt_files/'
-	file_res = '/root/ELF_data/results/result.txt'
+	with open('config.txt','r') as f:
+		for line in f:
+			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
+			dest_img = line[11:-1] if 'dest_img' in line else dest_img
+			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
+			file_res = line[11:-1] if 'file_res' in line else file_res
 	############################################################################
 
 	tgf_data = pd.read_table(file_tgf,sep=' ')
@@ -51,7 +54,7 @@ if __name__ == '__main__':
 			if float(args.lon>180): args.lon = round(-360+float(args.lon),5)
 			args.verbose = False
 			args.plot = True
-			args.dest = dest_elf
+			args.dest = dest_txt
 			args.dest_img = dest_img
 			args.degree = 35
 			args.sigma = 3
