@@ -7,10 +7,8 @@ class Distance_Class(object):
     CONST_P = np.pi/180
 
     def __init__(self,lat1,lon1,lat2,lon2):
-        # latitude = широта
         self.lat1 = lat1
         self.lat2 = lat2
-        # longitude = долгота
         self.lon1 = lon1
         self.lon2 = lon2
 

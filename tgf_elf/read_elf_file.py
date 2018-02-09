@@ -49,11 +49,15 @@ class Read_ELF_Class(object):
 	def read_and_save(self):
 		self.fileheader = self.header()
 		self.channel1,self.channel2 = self.hex_to_decimal()
+		if len(self.channel1)>len(self.channel2):
+			self.channel1 = self.channel1[:len(self.channel2)]
+		if len(self.channel1)<len(self.channel2):
+			self.channel2 = self.channel2[:len(self.channel1)]
 		with open(self.dest_out+self.filename, "w") as f:
 			f.write(self.fileheader+'\n')
 			for i in range(len(self.channel1)-1):
-				f.write(repr(self.channel1[i])+'\t'+repr(self.channel2[i])+'\n')
-			f.write(repr(self.channel1[-1])+'\t'+repr(self.channel2[-1]))
+				f.write(str(self.channel1[i])+'\t'+str(self.channel2[i])+'\n')
+			f.write(str(self.channel1[-1])+'\t'+str(self.channel2[-1]))
 		return self.filename
 
 	def plot(self):
