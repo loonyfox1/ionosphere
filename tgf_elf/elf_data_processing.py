@@ -233,12 +233,12 @@ class ELF_Data_Processing_Class(object):
 	def find_peak(self):
 		res = []
 		for i in range(self.N):
-			if self.t[i]>=self.time+self.dd+self.CONST_INDENT/self.CONST_FS and \
-			   self.t[i]<=self.time+self.dn-self.CONST_INDENT/self.CONST_FS:
+			if self.t[i]<=self.time+self.dd+self.CONST_INDENT/self.CONST_FS and \
+			   self.t[i]>=self.time+self.dn-self.CONST_INDENT/self.CONST_FS:
 				res.append(abs(self.total_data[i]))
 				start = i
 		peak = max(res)
-		time_peak = self.t[res.index(peak)+start+1]
+		time_peak = self.t[res.index(peak)+start-1]
 		return peak,time_peak
 
 	def data_processing(self):
