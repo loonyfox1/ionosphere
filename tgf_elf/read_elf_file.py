@@ -46,7 +46,7 @@ class Read_ELF_Class(object):
 			channel2.append(c2)
 		k = 0
 		rev1 = channel1[::-1]
-		while rev1[i]==0:
+		while rev1[k]==0:
 			k += 1
 		return channel1[:-k],channel2[:-k]
 
