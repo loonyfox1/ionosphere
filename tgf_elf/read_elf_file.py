@@ -45,7 +45,7 @@ class Read_ELF_Class(object):
 			channel1.append(c1)
 			channel2.append(c2)
 		k = 0
-		rev1 = channel1[::-1]
+		rev1 = channel1[::-1][1:]
 		while rev1[k]==0:
 			k += 1
 		return channel1[:-k],channel2[:-k]
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 	filename = '200811130740.dat'
 	# filename = '200905101155.dat'
 	# filename = '201109062210.dat'
-	# filename = '201308160900.dat'
+	filename = '201308160900.dat'
 	# filename = '201308201525.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
