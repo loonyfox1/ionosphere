@@ -5,4 +5,4 @@ file_tgf = /root/Downloads/eventlist.dat
 file_res = /root/ELF_data/results/result.txt
 
 sta = 1042
-end = 1052
+end = 1043

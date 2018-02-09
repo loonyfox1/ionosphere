@@ -102,6 +102,14 @@ class ELF_Data_Processing_Class(object):
 
 	def peaking(self,detrended):
 		peaked = detrended[:]
+		# check = 10000
+		# while check>10:
+		# 	check = 0
+		# 	std = np.nanstd(peaked)
+		# 	for i in range(self.N):
+		# 		if abs(peaked[i])>self.SIGMA*std:
+		# 			peaked[i] = np.nan
+		# 			check += 1
 		# plt.plot(self.t,peaked,label='step 0')
 
 		std0 = np.nanstd(peaked)
@@ -164,7 +172,6 @@ class ELF_Data_Processing_Class(object):
 
 	def plot_antennas(self):
 		fig = plt.figure()
-		fig.tight_layout()
 		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
@@ -277,7 +284,6 @@ class ELF_Data_Processing_Class(object):
 
 	def plot_processing(self):
 		fig = plt.figure()
-		fig.tight_layout()
 		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1

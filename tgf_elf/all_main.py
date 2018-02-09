@@ -36,7 +36,6 @@ if __name__ == '__main__':
 				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
 
 	idd_array = [i for i in range(sta,end)]
-
 	jobs = []
 	for idd in tgf_data.ID:
 		if int(idd) in idd_array:
