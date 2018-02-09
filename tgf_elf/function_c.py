@@ -5,6 +5,40 @@ import matplotlib.pyplot as plt
 import time
 from main import Main_Class
 
+def ELA10_constants(self):
+    # FS - sampling rate, Hz = 1/sec
+    CONST_FS = 887.7841
+    # FN - naquist frequency
+    CONST_FN = CONST_FS/2
+    # SCALE - full scale, pT/scale
+    CONST_SCALE = 2**16/3353e-12
+    # DELTAF - energy bandwidth of the receiver, Hz = 1/sec
+    CONST_DELTAF = 304.9 # NOTE: clarify
+    # HI - correction coefficient of lfilter
+    CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
+    # WN - parameter for Cheby filters
+    CONST_WN1,CONST_WN2,CONST_WN3 = 443,334,334 # NOTE: clarify
+
+    return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
+           CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
+
+def ELA7_constants(self):
+    # FS - sampling rate, Hz = 1/sec
+    CONST_FS = 175.96
+    # FN - naquist frequency
+    CONST_FN = CONST_FS/2
+    # SCALE - full scale, pT/scale
+    CONST_SCALE = 2**16/3826e-12 # NOTE: WTF???????
+    # DELTAF - energy bandwidth of the receiver, Hz = 1/sec
+    CONST_DELTAF = 51.8
+    # HI - correction coefficient of lfilter
+    CONST_HI = 1.02 # NOTE: one const for ELA7/10 ??
+    # WN - parameter for Cheby filters
+    CONST_WN1,CONST_WN2,CONST_WN3 = 45,45,45 # NOTE: clarify
+
+    return CONST_FS,CONST_FN,CONST_SCALE,CONST_DELTAF, \
+           CONST_HI,CONST_WN1,CONST_WN2,CONST_WN3
+
 class Charge_Moment_Class(object):
     CONST_MU0 = 4e-7*np.pi
     # A - Earth's radius, m
@@ -14,24 +48,11 @@ class Charge_Moment_Class(object):
     # FS - sampling rate, Hz = 1/sec
     CONST_T = 300
 
-    def __init__(self,B,d,stantion):
-        # B - B_pulse
-        self.B = B
-        # d - array/tuple of distance like ((r_day,day=True),(r_night,day=False))
-        self.d = d
+    def __init__(self,r,stantion):
+        self.r = r
         self.CONST_FS,self.CONST_FN,_,self.CONST_DELTAF,self.CONST_HI, \
         self.CONST_WN1,self.CONST_WN2,self.CONST_WN3 = stantion()
-        # f - array of frequencies
         self.f = self.frequency_array()
-        # self.filter = list(filt)
-
-    def charge_moment(self):
-        c = float(self.c_fun())
-        res = {
-            'p': float(self.B/c),
-            'c': c
-        }
-        return res
 
     def number_of_point(self):
         return int(round(self.CONST_FS*self.CONST_T))
@@ -44,14 +65,6 @@ class Charge_Moment_Class(object):
         return np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
-        # delt = self.N-len(self.filter)
-        # if delt>0:
-        #     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
-        #         self.filter.append(0)
-        # else:
-        #     self.filter[:self.N]
-        # return self.filter
-
         z0 = np.zeros(self.N)
         z0[0] = 1
 
@@ -77,25 +90,12 @@ class Charge_Moment_Class(object):
             res.append(itf1*itf2*itf3*itf4)
         return res
 
-    def total_distance(self):
-        return self.d[0][0]+self.d[1][0]
 
     def c_fun(self):
-        res = 0
-        k = 2
-        for check_day in self.d:
-            self.day = check_day[1]
-            self.r = check_day[0]
-            if self.r==0:
-                res += 0
-                k -= 1
-            else:
-                res_c = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
-                        np.trapz(np.transpose(np.array(self.integrand())),
-                        x=self.f, axis=1))
-                res += res_c/self.r
-        self.total_r = self.total_distance()
-        return res/k*self.total_r
+        res = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
+                      np.trapz(np.transpose(np.array(self.integrand())),
+                      x=self.f, axis=1))
+        return res
 
     def integrand(self):
         res_rtf = self.receiver_transfer_function()
@@ -135,12 +135,5 @@ class Charge_Moment_Class(object):
         return res
 
 if __name__ == '__main__':
-    B = 14.4e-12
-    d = ((5352e3,True),(0,False))
-
-    charge_moment_class = Charge_Moment_Class(B=B,d=d)
-    res = charge_moment_class.charge_moment()
-    delay1,delay2 = charge_moment_class.time_delay()
-    print(delay1,delay2)
-    print ('p =',res/1000,'C*km')
-    print ('excpect 330 C*km')
+    for i in range(1,20000):
+        

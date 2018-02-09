@@ -3,7 +3,6 @@ from multiprocessing import Process
 import pandas as pd
 import argparse
 import numpy as np
-from tabulate import tabulate
 
 def process_func(args,counts,geog,dur,file_res):
 	res = Main_Class(args).main()
@@ -31,7 +30,14 @@ if __name__ == '__main__':
 			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
 			dest_img = line[11:-1] if 'dest_img' in line else dest_img
 			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
-			file_res = line[11:-1] if 'file_res' in line else file_res
+			file_res = line[11:-1] if 'file_res' in line else file_res        # delt = self.N-len(self.filter)
+        # if delt>0:
+        #     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
+        #         self.filter.append(0)
+        # else:
+        #     self.filter[:self.N]
+        # return self.filter
+
 			sta = int(line[6:-1]) if 'sta' in line else sta
 			end = int(line[6:-1]) if 'end' in line else end
 	############################################################################

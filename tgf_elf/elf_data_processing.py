@@ -297,7 +297,6 @@ class ELF_Data_Processing_Class(object):
 		ax1.plot(time_array,self.channel1[start:end],label='data',color='yellow')
 		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
 		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
-		ax1.scatter(self.time_peak,self.B,color='red',s=5)
 		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A))))
 
 		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
@@ -309,7 +308,6 @@ class ELF_Data_Processing_Class(object):
 		ax2.plot(time_array,self.channel2[start:end],label='data',color='yellow')
 		ax2.plot(time_array,self.filtered2[start:end],label='filtered',color='blue')
 		ax2.plot(time_array,self.mov_avg2[start:end],label='mov avg',color='black')
-		ax2.scatter(self.time_peak,self.B,color='red',s=5)
 		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
 		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
 		ax2.axvline(self.time,color='grey')
@@ -320,7 +318,6 @@ class ELF_Data_Processing_Class(object):
 		ax3.plot(time_array,self.azimuth_negative[start:end],color='violet',label='CG-',marker='o',markersize=1.5)
 		ax3.axhline(self.A,label='TGF',color='lime',linewidth=2)
 		ax3.axvline(self.time,color='grey')
-		ax3.scatter(self.time_peak,self.B,color='red',s=5)
 		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
 		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
 		ax3.legend(loc=1)
