@@ -34,18 +34,20 @@ def read(datetime,dest_bin,dest_txt):
 	filename = Read_ELF_Class(filename=filename,destination_in=dest_bin,destination_out=dest_txt).read_and_save()
 
 if __name__ == '__main__':
-	file_tgf,dest_bin,dest_txt = '','',''
+	file_tgf,dest_bin,dest_txt,sta,end = '','','','',''
 	# DESTINATIONS #############################################################
 	with open('config.txt','r') as f:
 		for line in f:
 			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
 			dest_bin = line[11:-1] if 'dest_bin' in line else dest_bin
 			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
+			sta = int(line[6:-1]) if 'sta' in line else sta
+			end = int(line[6:-1]) if 'end' in line else end
 	############################################################################
 
 	tgf_data = pd.read_table(file_tgf,sep=' ')
 
-	idd_array = [i for i in range(678,687)]
+	idd_array = [i for i in range(sta,end)]
 
 	jobs = []
 
@@ -58,6 +60,6 @@ if __name__ == '__main__':
 				p.start()
 				# p.join()
 			except FileNotFoundError:
-				break
+				pass
 
 	[x.join() for x in jobs]

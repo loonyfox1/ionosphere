@@ -44,7 +44,11 @@ class Read_ELF_Class(object):
 			c2 = int(time_s2, 16)
 			channel1.append(c1)
 			channel2.append(c2)
-		return channel1[:channel1.index(0)],channel2[:channel2.index(0)]
+		k = 0
+		rev1 = channel1[::-1]
+		while rev1[i]==0:
+			k += 1
+		return channel1[:-k],channel2[:-k]
 
 	def read_and_save(self):
 		self.fileheader = self.header()

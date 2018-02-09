@@ -16,7 +16,7 @@ def process_func(args,counts,geog,dur,file_res):
 	print(res)
 
 if __name__ == '__main__':
-	file_tgf,dest_img,dest_txt,file_res = '','','',''
+	file_tgf,dest_img,dest_txt,file_res,sta,end = '','','','','',''
 	# DESTINATIONS #############################################################
 	with open('config.txt','r') as f:
 		for line in f:
@@ -24,23 +24,18 @@ if __name__ == '__main__':
 			dest_img = line[11:-1] if 'dest_img' in line else dest_img
 			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
 			file_res = line[11:-1] if 'file_res' in line else file_res
+			sta = int(line[6:-1]) if 'sta' in line else sta
+			end = int(line[6:-1]) if 'end' in line else end
 	############################################################################
 
 	tgf_data = pd.read_table(file_tgf,sep=' ')
-	ela = 10
-
-	# filt = []
-	# if ela==7:
-	# 	filt = np.loadtxt('/root/ELF_data/filter/filter_data_7.dat',dtype=complex)
-	# elif ela==10:
-	# 	filt = np.loadtxt('/root/ELF_data/filter/filter_data_10.dat',dtype=complex)
 
 	with open(file_res,'w') as f:
 		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+
 				'DIST\tD/N\tDD\tDN'+
 				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
 
-	idd_array = [i for i in range(1042,1052)]
+	idd_array = [i for i in range(sta,end)]
 
 	jobs = []
 	for idd in tgf_data.ID:
