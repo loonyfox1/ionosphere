@@ -3,16 +3,24 @@ from multiprocessing import Process
 import pandas as pd
 import argparse
 import numpy as np
+from tabulate import tabulate
 
 def process_func(args,counts,geog,dur,file_res):
 	res = Main_Class(args).main()
+	# table.append([idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
+	# 			  res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
+	# 			  res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']])
 	with open(file_res,'a') as f:
-		f.write(str(idd)+'\t'+str(args.lon)+'\t'+str(args.lat)+'\t'+args.datetime+'\t'+
-				str(counts)+'\t'+str(geog)+'\t'+str(dur)+'\t'+str(res['dist'])+'\t'+
-				str(res['day coef'])+'\t'+str(res['calc dd'])+'\t'+str(res['calc dn'])+
-				'\t'+str(res['real delay'])+'\t'+str(res['B pulse'])+'\t'+str(res['B noise'])+
-				'\t'+str(res['c(r)'])+'\t'+str(res['P'])+'\t'+str(res['P min'])+'\n')
+		f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:8d}{:4d}{:7.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:6.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
+			   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
+		   		res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
+		   	    res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
 
+		# f.write(str(idd)+'\t'+str(args.lon)+'\t\t'+str(args.lat)+'\t\t'+args.datetime+'\t\t'+
+		# 		str(counts)+'\t\t'+str(geog)+'\t\t'+str(dur)+'\t\t'+str(res['dist'])+'\t\t'+
+		# 		str(res['day coef'])+'\t\t'+str(res['calc dd'])+'\t\t'+str(res['calc dn'])+
+		# 		'\t\t'+str(res['real delay'])+'\t\t'+str(res['B pulse'])+'\t\t'+str(res['B noise'])+
+		# 		'\t\t'+str(res['c(r)'])+'\t\t'+str(res['P'])+'\t\t'+str(res['P min'])+'\n')
 	print(res)
 
 if __name__ == '__main__':
@@ -27,14 +35,12 @@ if __name__ == '__main__':
 			sta = int(line[6:-1]) if 'sta' in line else sta
 			end = int(line[6:-1]) if 'end' in line else end
 	############################################################################
-
 	tgf_data = pd.read_table(file_tgf,sep=' ')
 
 	with open(file_res,'w') as f:
-		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+
+		f.write('ID\tLON\tLAT\tTIMESTAMP\t\tCOUNTS\tGEOG\tDUR\t'+
 				'DIST\tD/N\tDD\tDN'+
 				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
-
 	idd_array = [i for i in range(sta,end)]
 	jobs = []
 	for idd in tgf_data.ID:
