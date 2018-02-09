@@ -4,9 +4,9 @@ import pandas as pd
 import argparse
 import numpy as np
 
-def process_func(args,counts,geog,dur):
+def process_func(args,counts,geog,dur,file_res):
 	res = Main_Class(args).main()
-	with open('/root/ELF_data/results/result.txt','a') as f:
+	with open(file_res,'a') as f:
 		f.write(str(idd)+'\t'+str(args.lon)+'\t'+str(args.lat)+'\t'+args.datetime+'\t'+
 				str(counts)+'\t'+str(geog)+'\t'+str(dur)+'\t'+str(res['dist'])+'\t'+
 				str(res['day coef'])+'\t'+str(res['calc dd'])+'\t'+str(res['calc dn'])+
@@ -16,11 +16,14 @@ def process_func(args,counts,geog,dur):
 	print(res)
 
 if __name__ == '__main__':
-	tgf_file = '/root/Downloads/eventlist.dat'
+	# DESTINATIONS #############################################################
+	file_tgf = '/root/Downloads/eventlist.dat'
 	dest_img = '/root/ELF_data/img/'
-	dest_elf = '/root/ELF_data/txt_files/'
-	tgf_data = pd.read_table(tgf_file,sep=' ')
-	# tgf_data = np.loadtxt(tgf_file)
+	dest_txt = '/root/ELF_data/txt_files/'
+	file_res = '/root/ELF_data/results/result.txt'
+	############################################################################
+
+	tgf_data = pd.read_table(file_tgf,sep=' ')
 	ela = 10
 
 	# filt = []
@@ -29,7 +32,7 @@ if __name__ == '__main__':
 	# elif ela==10:
 	# 	filt = np.loadtxt('/root/ELF_data/filter/filter_data_10.dat',dtype=complex)
 
-	with open('/root/ELF_data/results/result.txt','w') as f:
+	with open(file_res,'w') as f:
 		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+
 				'DIST\tD/N\tDD\tDN'+
 				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
@@ -55,7 +58,7 @@ if __name__ == '__main__':
 			# args.filt = filt
 
 			p = Process(target=process_func,args=(args,tgf_data.COUNTS[tgf_data.ID==idd].values[0],
-						tgf_data.GEOG[tgf_data.ID==idd].values[0],tgf_data.DUR[tgf_data.ID==idd].values[0]))
+						tgf_data.GEOG[tgf_data.ID==idd].values[0],tgf_data.DUR[tgf_data.ID==idd].values[0],file_res))
 			jobs.append(p)
 			p.start()
 

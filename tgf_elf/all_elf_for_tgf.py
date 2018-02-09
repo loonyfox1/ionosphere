@@ -27,17 +27,20 @@ def find_filename(datetime):
 
 	return str(year)+smonth+sday+'/', str(year)+smonth+sday+shour+sminute+'.dat'
 
-def read(datetime):
-	dest_in = '/root/ELF_data/bin_files/'
-	dest_out = '/root/ELF_data/txt_files/'
+def read(datetime,dest_bin,dest_txt):
 	folder,filename = find_filename(datetime)
-	dest_in = dest_in+folder
-	print(datetime,'\n'+dest_in+filename,'\n')
-	filename = Read_ELF_Class(filename=filename,destination_in=dest_in,destination_out=dest_out).read_and_save()
+	dest_bin = dest_bin+folder
+	print(datetime,'\n'+dest_bin+filename,'\n')
+	filename = Read_ELF_Class(filename=filename,destination_in=dest_bin,destination_out=dest_txt).read_and_save()
 
 if __name__ == '__main__':
-	tgf_file = '/root/Downloads/eventlist.dat'
-	tgf_data = pd.read_table(tgf_file,sep=' ')
+	# DESTINATIONS #############################################################
+	dest_bin = '/root/ELF_data/bin_files/'
+	dest_txt = '/root/ELF_data/txt_files/'
+	file_tgf = '/root/Downloads/eventlist.dat'
+	############################################################################
+
+	tgf_data = pd.read_table(file_tgf,sep=' ')
 	# print(tgf_data)
 
 	idd_array = [i for i in range(678,687)]
@@ -48,7 +51,7 @@ if __name__ == '__main__':
 		if int(idd) in idd_array:
 			try:
 				datetime = str(tgf_data.TIMESTAMP[tgf_data.ID==idd].values[0])
-				p = Process(target=read,args=(str(datetime),))
+				p = Process(target=read,args=(str(datetime),dest_bin,dest_txt,))
 				jobs.append(p)
 				p.start()
 				# p.join()
