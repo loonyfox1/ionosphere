@@ -4,18 +4,16 @@ from day_night_distance import Day_Night_Distance_Class
 from charge_moment import Charge_Moment_Class
 from time_delay import Time_Delay_Class
 from elf_data_processing import ELF_Data_Processing_Class
-import numpy as np
+from numpy import arange
 from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
-from datetime import datetime as dt
 
 EXTRA_HELP = """
 Example usage:
 python main.py -v -p -id 081113 -t 2008-11-13T07:44:04.238 -lat 2.89 -lon 7.33 -d /root/git/ionosphere/tgf_elf/ --degree 10 --sigma 3
 
 """
-
 
 class Main_Class(object):
 	def __init__(self,args):
@@ -126,7 +124,7 @@ class Main_Class(object):
 			'B pulse': round(self.B*1e12,1),
 			'B noise': round(self.std*1e12,1),
 			'P': round(self.p/1000,1),
-			'P min': round(self.std/self.c/1000,1),
+			'P min': round(self.std/self.c/1000,2),
 			'calc dd': int(self.dd*1000),
 			'calc dn': int(self.dn*1000),
 			'real delay': int(self.delta*1000)
@@ -141,8 +139,8 @@ class Main_Class(object):
 	def plot_terminator(self):
 		m = Basemap(projection='mill',lon_0=0)
 		m.drawcoastlines()
-		m.drawparallels(np.arange(-90,90,30), labels=[1,0,0,0])
-		m.drawmeridians(np.arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
+		m.drawparallels(arange(-90,90,30), labels=[1,0,0,0])
+		m.drawmeridians(arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
 		m.drawmapboundary(fill_color='aqua')
 		m.fillcontinents(color='coral',lake_color='aqua')
 		CS = m.nightshade(dt(self.year,self.month,self.day,

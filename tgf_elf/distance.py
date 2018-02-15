@@ -1,10 +1,10 @@
-import numpy as np
+from numpy import pi,cos,arcsin,sqrt
 
 class Distance_Class(object):
     # R - rasius of Earth
     CONST_R = 6372795
     # P = pi/180
-    CONST_P = np.pi/180
+    CONST_P = pi/180
 
     def __init__(self,lat1,lon1,lat2,lon2):
         self.lat1 = lat1
@@ -13,10 +13,10 @@ class Distance_Class(object):
         self.lon2 = lon2
 
     def distance(self):
-        a = 0.5 - np.cos((self.lat2 - self.lat1)*self.CONST_P)/2 + \
-            np.cos(self.lat1*self.CONST_P)*np.cos(self.lat2*self.CONST_P)* \
-            (1 - np.cos((self.lon2 - self.lon1)*self.CONST_P))/2
-        return 2*self.CONST_R*np.arcsin(np.sqrt(a))
+        a = 0.5 - cos((self.lat2 - self.lat1)*self.CONST_P)/2 + \
+            cos(self.lat1*self.CONST_P)*cos(self.lat2*self.CONST_P)* \
+            (1 - cos((self.lon2 - self.lon1)*self.CONST_P))/2
+        return 2*self.CONST_R*arcsin(sqrt(a))
 
 if __name__ == '__main__':
     # latitude  N +, S -

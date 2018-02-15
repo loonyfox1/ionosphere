@@ -4,5 +4,5 @@ dest_img = /root/ELF_data/img/
 file_tgf = /root/Downloads/eventlist.dat
 file_res = /root/ELF_data/results/result.txt
 
-sta = 1042
-end = 1043
+sta = 1044
+end = 1045

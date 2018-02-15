@@ -1,10 +1,10 @@
-import numpy as np
+from numpy import pi,sqrt,fft,nanstd,nan,arctan2,abs
 from scipy import signal
 import matplotlib.pyplot as plt
 
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
-	CONST_P = np.pi/180
+	CONST_P = pi/180
 
 	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
 				 degree,sigma,plot,datetime,idd,dest_img):
@@ -36,7 +36,7 @@ class ELF_Data_Processing_Class(object):
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
-		self.data = [np.sqrt(self.detrended1[i]**2+self.detrended2[i]**2)
+		self.data = [sqrt(self.detrended1[i]*self.detrended1[i]+self.detrended2[i]*self.detrended2[i])
 					 for i in range(self.N)]
 		return self.data
 
@@ -64,10 +64,10 @@ class ELF_Data_Processing_Class(object):
 		fig = plt.figure()
 
 		ax1 = fig.add_subplot(2,1,1)
-		ax1.semilogy(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
-				np.abs(np.fft.rfft(self.data))**2,label='data',color='red')
-		ax1.semilogy(np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
-				np.abs(np.fft.rfft(self.filtered))**2,label='filtered',color='blue')
+		ax1.semilogy(fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
+				abs(fft.rfft(self.data))**2,label='data',color='red')
+		ax1.semilogy(fft.rfftfreq(n=self.N,d=1/self.CONST_FS),
+				abs(fft.rfft(self.filtered))**2,label='filtered',color='blue')
 		ax1.set_title('Spectum '+self.filename)
 		ax1.set_xlabel('Freq, Hz')
 		ax1.set_ylabel('log(W**2)')
@@ -105,47 +105,47 @@ class ELF_Data_Processing_Class(object):
 		# check = 10000
 		# while check>10:
 		# 	check = 0
-		# 	std = np.nanstd(peaked)
+		# 	std = nanstd(peaked)
 		# 	for i in range(self.N):
 		# 		if abs(peaked[i])>self.SIGMA*std:
-		# 			peaked[i] = np.nan
+		# 			peaked[i] = nan
 		# 			check += 1
 		# plt.plot(self.t,peaked,label='step 0')
 
-		std0 = np.nanstd(peaked)
+		std0 = nanstd(peaked)
 		# plt.axhline(std0,c='orange')
 		# plt.axhline(-std0,c='orange')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std0:
-				peaked[i] = np.nan #self.SIGMA*std0*np.sign(peaked[i])
+				peaked[i] = nan #self.SIGMA*std0*sign(peaked[i])
 		# plt.plot(self.t,eaked,label='step 1')
 
-		std1 = np.nanstd(peaked)
+		std1 = nanstd(peaked)
 		# plt.axhline(std1,c='red')
 		# plt.axhline(-std1,c='red')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std1:
-				peaked[i] = np.nan #self.SIGMA*std1*np.sign(peaked[i])
+				peaked[i] = nan #self.SIGMA*std1*sign(peaked[i])
 		# plt.plot(self.t,peaked,label='step 2')
 
-		std2 = np.nanstd(peaked)
+		std2 = nanstd(peaked)
 		# plt.axhline(std2,c='green')
 		# plt.axhline(-std2,c='green')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std2:
-				peaked[i] = np.nan #self.SIGMA*std2*np.sign(peaked[i])
+				peaked[i] = nan #self.SIGMA*std2*sign(peaked[i])
 		# plt.plot(self.t,peaked,label='step 3')
 
-		std3 = np.nanstd(peaked)
+		std3 = nanstd(peaked)
 		# plt.axhline(std3,c='black')
 		# plt.axhline(-std3,c='black')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std3:
-				peaked[i] = np.nan #self.SIGMA*std3*np.sign(peaked[i])
+				peaked[i] = nan #self.SIGMA*std3*sign(peaked[i])
 		# plt.plot(self.t,peaked,label='step 4')
 
 		# plt.legend()
@@ -160,14 +160,14 @@ class ELF_Data_Processing_Class(object):
 
 	def azimuth(self):
 		if self.CONST_DELTAF==51.8:
-			return [(np.arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
+			return [(arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
 					for i in range(self.N)], \
-				   [((np.arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
+				   [((arctan2(-self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
 					for i in range(self.N)]
 		else:
-			return [(np.arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
+			return [(arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360
 					for i in range(self.N)], \
-				   [((np.arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
+				   [((arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
 					for i in range(self.N)]
 
 	def plot_antennas(self):
@@ -189,9 +189,9 @@ class ELF_Data_Processing_Class(object):
 		ax1.axhline(-2*self.std1,color='lightsalmon',linestyle=':')
 		ax1.axhline(3*self.std1,color='lightskyblue',linestyle=':')
 		ax1.axhline(-3*self.std1,color='lightskyblue',linestyle=':')
-		ax1.scatter(self.time_peak,self.B,color='red',s=5)
-		ax1.set_ylabel('Antenna NS, pT')
-		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg'+str(self.DEGREE)+', sgm'+str(self.SIGMA)+', A='+str(round(self.A))))
+		ax1.scatter(self.time_peak,self.detrended1[self.index],color='black',s=5,zorder=5)
+		ax1.set_ylabel('Antenna NS')
+		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)))
 		ax1.legend(loc=1)
 		ax1.set_xlim([time_array[0],time_array[-1]])
 
@@ -208,8 +208,8 @@ class ELF_Data_Processing_Class(object):
 		ax2.axhline(-2*self.std2,color='lightsalmon',linestyle=':')
 		ax2.axhline(3*self.std2,color='lightskyblue',linestyle=':')
 		ax2.axhline(-3*self.std2,color='lightskyblue',linestyle=':')
-		ax2.scatter(self.time_peak,self.B,color='red',s=5)
-		ax2.set_ylabel('Antenna EW, pT')
+		ax2.scatter(self.time_peak,self.detrended2[self.index],color='black',s=5,zorder=5)
+		ax2.set_ylabel('Antenna EW')
 		ax2.legend(loc=1)
 		ax2.set_xlim([time_array[0],time_array[-1]])
 
@@ -222,10 +222,10 @@ class ELF_Data_Processing_Class(object):
 		ax3.axhline(self.std_total,color='lightgreen',linestyle=':')
 		ax3.axhline(2*self.std_total,color='lightsalmon',linestyle=':')
 		ax3.axhline(3*self.std_total,color='lightskyblue',linestyle=':')
-		ax3.scatter(self.time_peak,self.B,color='red',s=5)
+		ax3.scatter(self.time_peak,self.B,color='red',s=5,zorder=5)
 		ax3.legend(loc=1)
 		ax3.set_xlabel('Time, sec')
-		ax3.set_ylabel('Total, pT')
+		ax3.set_ylabel('Total')
 		ax3.set_xlim([time_array[0],time_array[-1]])
 
 		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
@@ -242,8 +242,9 @@ class ELF_Data_Processing_Class(object):
 				start = i
 				break
 		peak = max(res)
-		time_peak = self.t[res.index(peak)+start]
-		return peak,time_peak
+		index = res.index(peak)+start
+		time_peak = self.t[index]
+		return peak,time_peak,index
 
 	def data_processing(self):
 		self.channel1,self.channel2,self.N = self.read_data()
@@ -269,10 +270,10 @@ class ELF_Data_Processing_Class(object):
 		# data = sqrt(channel1**2 + channel2**2)
 		self.total_data = self.channels_to_data()
 		self.std_total = self.peaking(self.total_data)
-		# self.std_total = np.std(self.total_data)
+		# self.std_total = std(self.total_data)
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
-		self.B,self.time_peak = self.find_peak()
+		self.B,self.time_peak,self.index = self.find_peak()
 
 		if self.plot:
 			self.plot_antennas()
@@ -289,7 +290,7 @@ class ELF_Data_Processing_Class(object):
 
 	def plot_processing(self):
 		fig = plt.figure()
-		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
+		time_array = [ti for ti in self.t if ti>self.time-20e-3 and ti<self.time+410e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
 
@@ -297,12 +298,13 @@ class ELF_Data_Processing_Class(object):
 		ax1.plot(time_array,self.channel1[start:end],label='data',color='yellow')
 		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
 		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
-		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg'+str(self.DEGREE)+', A='+str(round(self.A))))
+		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)+', A='+str(round(self.A))))
 
-		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',label='delta day')
-		ax1.axvline(self.time+self.dn,color='grey',linestyle='--',label='delta night')
-		ax1.axvline(self.time,color='grey',label='TGF time')
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax1.axvline(self.time,color='grey')
 		ax1.legend(loc=1)
+		ax1.set_ylabel('Antenna NS')
 
 		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
 		ax2.plot(time_array,self.channel2[start:end],label='data',color='yellow')
@@ -312,6 +314,7 @@ class ELF_Data_Processing_Class(object):
 		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
 		ax2.axvline(self.time,color='grey')
 		ax2.legend(loc=1)
+		ax2.set_ylabel('Antenna EW')
 
 		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
 		ax3.plot(time_array,self.azimuth_positive[start:end],color='black',label='CG+',marker='o',markersize=1.5)

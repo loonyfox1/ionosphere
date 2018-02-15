@@ -1,12 +1,11 @@
-import numpy as np
+from numpy import pi,log,fft,zeros,sin,exp,sqrt,trapz,array,transpose,absolute,imag,real
 from scipy import signal,special,integrate
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-from main import Main_Class
 
 class Charge_Moment_Class(object):
-    CONST_MU0 = 4e-7*np.pi
+    CONST_MU0 = 4e-7*pi
     # A - Earth's radius, m
     CONST_A = 6372795
     # C - velocity of light, m/sec
@@ -37,22 +36,14 @@ class Charge_Moment_Class(object):
         return int(round(self.CONST_FS*self.CONST_T))
 
     def omega(self,fi):
-        return 2*np.pi*fi
+        return 2*pi*fi
 
     def frequency_array(self):
         self.N = self.number_of_point()
-        return np.fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
+        return fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
-        # delt = self.N-len(self.filter)
-        # if delt>0:
-        #     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
-        #         self.filter.append(0)
-        # else:
-        #     self.filter[:self.N]
-        # return self.filter
-
-        z0 = np.zeros(self.N)
+        z0 = zeros(self.N)
         z0[0] = 1
 
         b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
@@ -64,16 +55,16 @@ class Charge_Moment_Class(object):
         b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
         z3 = signal.lfilter(b, a, z2)
 
-        res = np.fft.rfft(z3)
+        res = fft.rfft(z3)
         return res/max(res)
 
     def ionosphere_transfer_function(self):
         res = []
-        itf2 = np.sqrt(self.r/self.CONST_A/np.sin(self.r/self.CONST_A))
+        itf2 = sqrt(self.r/self.CONST_A/sin(self.r/self.CONST_A))
         for fi in self.f:
-            itf1 = -1j*np.pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
-            itf3 = special.hankel2([1],[2*np.pi*self.r*fi/self.phase_velocity(fi)])
-            itf4 = np.exp(-self.attenuation_factor(fi)*self.r)
+            itf1 = -1j*pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
+            itf3 = special.hankel2([1],[2*pi*self.r*fi/self.phase_velocity(fi)])
+            itf4 = exp(-self.attenuation_factor(fi)*self.r)
             res.append(itf1*itf2*itf3*itf4)
         return res
 
@@ -90,8 +81,8 @@ class Charge_Moment_Class(object):
                 res += 0
                 k -= 1
             else:
-                res_c = np.sqrt(np.pi*self.CONST_DELTAF/self.CONST_HI* \
-                        np.trapz(np.transpose(np.array(self.integrand())),
+                res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
+                        trapz(transpose(array(self.integrand())),
                         x=self.f, axis=1))
                 res += res_c/self.r
         self.total_r = self.total_distance()
@@ -100,37 +91,37 @@ class Charge_Moment_Class(object):
     def integrand(self):
         res_rtf = self.receiver_transfer_function()
         res_itf = self.ionosphere_transfer_function()
-        return [np.absolute(res_itf[i]*res_rtf[i])**2
+        return [absolute(res_itf[i]*res_rtf[i])*absolute(res_itf[i]*res_rtf[i])
                 for i in range(int(len(res_itf)))]
 
     def magnetic_altitude(self,fi):
-        return np.real(self.magnetic_characteristic_altitude(fi))
+        return real(self.magnetic_characteristic_altitude(fi))
 
     def phase_velocity(self,fi):
-        return self.CONST_C/np.real(self.propagation_parameter(fi))
+        return self.CONST_C/real(self.propagation_parameter(fi))
 
     def attenuation_factor(self,fi):
-        return self.omega(fi)/self.CONST_C*abs(np.imag(self.propagation_parameter(fi)))
+        return self.omega(fi)/self.CONST_C*abs(imag(self.propagation_parameter(fi)))
 
     def propagation_parameter(self,fi):
-        return np.sqrt(self.magnetic_characteristic_altitude(fi)/ \
+        return sqrt(self.magnetic_characteristic_altitude(fi)/ \
                        self.electric_characteristic_altitude(fi))
 
     def magnetic_characteristic_altitude(self,fi):
         if self.day:
-            res = (101.5 - 3.1*np.log(fi/7.7) + \
-                1j*(7.0 - 0.9*np.log(fi/7.7)))*1e3
+            res = (101.5 - 3.1*log(fi/7.7) + \
+                1j*(7.0 - 0.9*log(fi/7.7)))*1e3
         else:
-            res = (114.7 - 8.4*np.log(fi/7.7) + \
-                1j*(13.2 - 2.0*np.log(fi/7.7)))*1e3
+            res = (114.7 - 8.4*log(fi/7.7) + \
+                1j*(13.2 - 2.0*log(fi/7.7)))*1e3
         return res
 
     def electric_characteristic_altitude(self,fi):
         if self.day:
-            res = (51.1 + 1.9*np.log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
+            res = (51.1 + 1.9*log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
                 1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645))*1e3
         else:
-            res = (67.5 + 2.0*np.log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
+            res = (67.5 + 2.0*log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
                 1j*(-3.14 - 8.7*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
         return res
 

@@ -1,8 +1,8 @@
-from main import Main_Class
-from multiprocessing import Process
 import pandas as pd
+from main import Main_Class
+# import main
+from multiprocessing import Process
 import argparse
-import numpy as np
 
 def process_func(args,counts,geog,dur,file_res):
 	res = Main_Class(args).main()
@@ -10,10 +10,10 @@ def process_func(args,counts,geog,dur,file_res):
 	# 			  res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
 	# 			  res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']])
 	with open(file_res,'a') as f:
-		f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:8d}{:4d}{:7.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:6.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
+		f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:6d}{:8d}{:11.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:10.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
 			   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
-		   		res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
-		   	    res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
+				res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
+				res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
 
 		# f.write(str(idd)+'\t'+str(args.lon)+'\t\t'+str(args.lat)+'\t\t'+args.datetime+'\t\t'+
 		# 		str(counts)+'\t\t'+str(geog)+'\t\t'+str(dur)+'\t\t'+str(res['dist'])+'\t\t'+
@@ -31,12 +31,12 @@ if __name__ == '__main__':
 			dest_img = line[11:-1] if 'dest_img' in line else dest_img
 			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
 			file_res = line[11:-1] if 'file_res' in line else file_res        # delt = self.N-len(self.filter)
-        # if delt>0:
-        #     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
-        #         self.filter.append(0)
-        # else:
-        #     self.filter[:self.N]
-        # return self.filter
+		# if delt>0:
+		#     for i in range(len(self.filter)-1,len(self.filter)-1+delt):
+		#         self.filter.append(0)
+		# else:
+		#     self.filter[:self.N]
+		# return self.filter
 
 			sta = int(line[6:-1]) if 'sta' in line else sta
 			end = int(line[6:-1]) if 'end' in line else end
@@ -44,9 +44,9 @@ if __name__ == '__main__':
 	tgf_data = pd.read_table(file_tgf,sep=' ')
 
 	with open(file_res,'w') as f:
-		f.write('ID\tLON\tLAT\tTIMESTAMP\t\tCOUNTS\tGEOG\tDUR\t'+
-				'DIST\tD/N\tDD\tDN'+
-				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
+		f.write('ID\t\tLON\t\t   LAT\t\tTIMESTAMP\t\t\t\t   COUNTS\tGEOG\tDUR\t'+
+				'   DIST\t   D/N\t  DD   DN'+
+				'\tDELTA\tBp\t   Bn\t cr\t\t p\t\tpmin\n')
 	idd_array = [i for i in range(sta,end)]
 	jobs = []
 	for idd in tgf_data.ID:

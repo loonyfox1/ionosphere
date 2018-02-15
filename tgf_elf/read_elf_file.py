@@ -48,7 +48,7 @@ class Read_ELF_Class(object):
 		rev1 = channel1[::-1][1:]
 		while rev1[k]==0:
 			k += 1
-		return channel1[:-k],channel2[:-k]
+		return channel1[:-k-1],channel2[:-k-1]
 
 	def read_and_save(self):
 		self.fileheader = self.header()
@@ -77,12 +77,13 @@ class Read_ELF_Class(object):
 		plt.show()
 
 if __name__ == '__main__':
-	destination = '/root/ELF_data/'
-	filename = '200811130740.dat'
+	destination = '/root/ELF_data/bin_files/'
+	# filename = '200811130740.dat'
 	# filename = '200905101155.dat'
 	# filename = '201109062210.dat'
-	filename = '201308160900.dat'
+	# filename = '201308160900.dat'
 	# filename = '201308201525.dat'
+	filename = '201304281410.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
 				destination_in=destination,destination_out='/root/ELF_data/txt_files/')

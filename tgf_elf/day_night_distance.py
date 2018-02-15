@@ -1,10 +1,10 @@
-import numpy as np
+from numpy import pi,sin,cos,arctan2
 from distance import Distance_Class
 from terminator import Terminator_Class
 
 class Day_Night_Distance_Class(object):
 	# P = pi/180
-	CONST_P = np.pi/180
+	CONST_P = pi/180
 
 	def __init__(self,slat1,slon1,flat1,flon1,
 					  lambda0,phi0,lambdax,phix):
@@ -28,21 +28,21 @@ class Day_Night_Distance_Class(object):
 		return self.slat2,self.slon2,self.flat2,self.flon2
 
 	def day_or_night(self,lat,lon):
-		U = np.sin(lat*self.CONST_P)*np.sin(self.phi0*self.CONST_P) + \
-			np.cos(lat*self.CONST_P)*np.cos(self.phi0*self.CONST_P)* \
-			np.cos((lon-self.lambda0)*self.CONST_P)
+		U = sin(lat*self.CONST_P)*sin(self.phi0*self.CONST_P) + \
+			cos(lat*self.CONST_P)*cos(self.phi0*self.CONST_P)* \
+			cos((lon-self.lambda0)*self.CONST_P)
 		if U<0:
 			return False
 		else:
 			return True
 
 	def azimuth(self):
-		x = np.sin((self.slon1-self.flon1)*self.CONST_P)* \
-			np.cos(self.slat1*self.CONST_P)
-		y = np.cos(self.flat1*self.CONST_P)*np.sin(self.slat1*self.CONST_P)- \
-			np.sin(self.flat1*self.CONST_P)*np.cos(self.slat1*self.CONST_P)* \
-			np.cos((self.slon1-self.flon1)*self.CONST_P)
-		A = np.arctan2(x,y)/self.CONST_P
+		x = sin((self.slon1-self.flon1)*self.CONST_P)* \
+			cos(self.slat1*self.CONST_P)
+		y = cos(self.flat1*self.CONST_P)*sin(self.slat1*self.CONST_P)- \
+			sin(self.flat1*self.CONST_P)*cos(self.slat1*self.CONST_P)* \
+			cos((self.slon1-self.flon1)*self.CONST_P)
+		A = arctan2(x,y)/self.CONST_P
 		return (A+360)%360
 
 	def intersection_point(self):
