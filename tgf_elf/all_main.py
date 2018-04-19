@@ -5,6 +5,7 @@ from multiprocessing import Process
 import argparse
 
 def process_func(args,counts,geog,dur,file_res):
+	print(args)
 	res = Main_Class(args).main()
 	# table.append([idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
 	# 			  res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
@@ -58,11 +59,11 @@ if __name__ == '__main__':
 			args.lat = tgf_data.LATITUDE[tgf_data.ID==idd].values[0]
 			args.lon = tgf_data.LONGITUDE[tgf_data.ID==idd].values[0]
 			if float(args.lon>180): args.lon = round(-360+float(args.lon),5)
-			args.verbose = False
+			args.verbose = True
 			args.plot = True
 			args.dest = dest_txt
 			args.dest_img = dest_img
-			args.degree = 35
+			args.degree = 5
 			args.sigma = 3
 			# args.filt = filt
 

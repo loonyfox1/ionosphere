@@ -22,7 +22,7 @@ class ELF_Data_Processing_Class(object):
 		self.datetime = datetime
 		self.dest_img = dest_img
 		if self.CONST_DELTAF==51.8:
-			self.CONST_INDENT = 1
+			self.CONST_INDENT = 5
 		else:
 			self.CONST_INDENT = 3
 
@@ -241,9 +241,14 @@ class ELF_Data_Processing_Class(object):
 			   self.t[i]>=self.time+self.dn-self.CONST_INDENT/self.CONST_FS:
 				start = i
 				break
-		peak = max(res)
-		index = res.index(peak)+start
-		time_peak = self.t[index]
+		if res!=[]:
+			peak = max(res)
+			index = res.index(peak)+start
+			time_peak = self.t[index]
+		else:
+			peak = -1
+			index = 5000
+			time_peak = 5000/self.CONST_FS
 		return peak,time_peak,index
 
 	def data_processing(self):
@@ -252,7 +257,7 @@ class ELF_Data_Processing_Class(object):
 		# self.channel2 = [chi/self.CONST_SCALE for chi in self. channel2]
 
 		# t - time array
-		self.t = [i*300/self.N for i in range(self.N)]
+		self.t = [i*300./self.N for i in range(self.N)]
 
 		# processing for channel1
 		self.filtered1 = self.filtering(self.channel1)
@@ -274,6 +279,7 @@ class ELF_Data_Processing_Class(object):
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
+		print(self.B,self.time_peak,self.index)
 
 		if self.plot:
 			self.plot_antennas()

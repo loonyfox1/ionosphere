@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 EXTRA_HELP = """
 Example usage:
 python main.py -v -p -id 081113 -t 2008-11-13T07:44:04.238 -lat 2.89 -lon 7.33 -d /root/git/ionosphere/tgf_elf/ --degree 10 --sigma 3
-
 """
 
 class Main_Class(object):

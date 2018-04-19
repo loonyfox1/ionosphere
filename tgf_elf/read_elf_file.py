@@ -29,6 +29,7 @@ class Read_ELF_Class(object):
 			if("\\x" in time_s):
 				time_s = time_s[6:8]
 			else:
+				print(time_s)
 				time_s = hex(ord(time_s[3:4]))[2:]
 			new_byte.append(time_s)
 		return new_byte
@@ -77,15 +78,15 @@ class Read_ELF_Class(object):
 		plt.show()
 
 if __name__ == '__main__':
-	destination = '/root/ELF_data/bin_files/'
+	destination = '/home/foxy/ELF_data/bin_files/'
 	# filename = '200811130740.dat'
 	# filename = '200905101155.dat'
 	# filename = '201109062210.dat'
 	# filename = '201308160900.dat'
 	# filename = '201308201525.dat'
-	filename = '201304281410.dat'
+	filename = '201308160900.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
-				destination_in=destination,destination_out='/root/ELF_data/txt_files/')
+				destination_in=destination,destination_out='/home/foxy/ELF_data/txt_files/')
 	f = read_elf_class.read_and_save()
 	read_elf_class.plot()
