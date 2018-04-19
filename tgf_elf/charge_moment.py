@@ -1,8 +1,11 @@
+from __future__ import division
+from __future__ import print_function
 from numpy import pi,log,fft,zeros,sin,exp,sqrt,trapz,array,transpose,absolute,imag,real
 from scipy import signal,special,integrate
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+
 
 class Charge_Moment_Class(object):
     CONST_MU0 = 4e-7*pi

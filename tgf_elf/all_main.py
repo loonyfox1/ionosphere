@@ -1,11 +1,13 @@
+from __future__ import division
+from __future__ import print_function
 import pandas as pd
 from main import Main_Class
 # import main
 from multiprocessing import Process
 import argparse
 
+
 def process_func(args,counts,geog,dur,file_res):
-	print(args)
 	res = Main_Class(args).main()
 	# table.append([idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
 	# 			  res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
@@ -21,7 +23,6 @@ def process_func(args,counts,geog,dur,file_res):
 		# 		str(res['day coef'])+'\t\t'+str(res['calc dd'])+'\t\t'+str(res['calc dn'])+
 		# 		'\t\t'+str(res['real delay'])+'\t\t'+str(res['B pulse'])+'\t\t'+str(res['B noise'])+
 		# 		'\t\t'+str(res['c(r)'])+'\t\t'+str(res['P'])+'\t\t'+str(res['P min'])+'\n')
-	print(res)
 
 if __name__ == '__main__':
 	file_tgf,dest_img,dest_txt,file_res,sta,end = '','','','','',''
@@ -52,7 +53,7 @@ if __name__ == '__main__':
 	jobs = []
 	for idd in tgf_data.ID:
 		if int(idd) in idd_array:
-			print('TGF',idd)
+			# print('TGF',idd)
 			args = argparse.Namespace()
 			args.id = idd
 			args.datetime = str(tgf_data.TIMESTAMP[tgf_data.ID==idd].values[0])

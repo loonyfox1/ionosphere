@@ -1,5 +1,8 @@
+from __future__ import division
+from __future__ import print_function
 import numpy as np
 from datetime import datetime, date, time
+
 
 class Terminator_Class(object):
     # P = pi/180

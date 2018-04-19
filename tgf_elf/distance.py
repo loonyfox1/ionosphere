@@ -1,4 +1,7 @@
+from __future__ import division
+from __future__ import print_function
 from numpy import pi,cos,arcsin,sqrt
+
 
 class Distance_Class(object):
     # R - rasius of Earth

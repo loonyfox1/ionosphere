@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 from distance import Distance_Class
 from terminator import Terminator_Class
 from day_night_distance import Day_Night_Distance_Class
@@ -85,6 +87,7 @@ class Main_Class(object):
 		return self.year,self.month,self.day,self.hour,self.minute,self.second,self.utime
 
 	def info(self):
+		print('-----------------------------')
 		print('\nTGF ID',self.id)
 		print('ELF file',self.filename)
 		print('Stantion ELA',self.s,'\n')
@@ -107,14 +110,13 @@ class Main_Class(object):
 		print('Sun lon',str(round(self.l0,1))+' E\n' if self.l0>0 else str(-round(self.l0,1))+' W\n')
 
 		print('B pulse',round(self.B*1e12,3),'pT')
-		print('Charge moment',round(self.p/1000,3),'C*km')
+		print('Charge moment',round(self.p/1000,3),'C*km\n')
 
 	def write_info(self):
 		if self.d[0][1]==True:
 			dayd = float(self.d[0][0])
 		else:
 			dayd = -float(self.d[1][0])
-		print(self.d)
 		res = {
 			'id': self.id,
 			'dist': int((self.d[0][0]+self.d[1][0])/1000),
@@ -209,6 +211,7 @@ class Main_Class(object):
 		self.B = res['B']
 		self.std = res['std']
 
+
 		# calculate charge moment p
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
 										stantion=self.stantion)
@@ -216,6 +219,7 @@ class Main_Class(object):
 		self.p = res['p']
 		self.c = res['c']
 
+		self.info()
 		res = self.write_info()
 		if not self.verbose:
 			print('\np =',self.p/1000,'C*km')

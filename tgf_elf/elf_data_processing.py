@@ -1,6 +1,9 @@
+from __future__ import division
+from __future__ import print_function
 from numpy import pi,sqrt,fft,nanstd,nan,arctan2,abs
 from scipy import signal
 import matplotlib.pyplot as plt
+
 
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
@@ -279,7 +282,6 @@ class ELF_Data_Processing_Class(object):
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
-		print(self.B,self.time_peak,self.index)
 
 		if self.plot:
 			self.plot_antennas()

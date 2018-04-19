@@ -1,4 +1,7 @@
+from __future__ import division
+from __future__ import print_function
 import numpy as np
+
 
 class Time_Delay_Class(object):
     CONST_C = 299792458

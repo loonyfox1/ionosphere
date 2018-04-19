@@ -1,6 +1,9 @@
+from __future__ import division
+from __future__ import print_function
 from numpy import pi,sin,cos,arctan2
 from distance import Distance_Class
 from terminator import Terminator_Class
+
 
 class Day_Night_Distance_Class(object):
 	# P = pi/180
@@ -98,5 +101,5 @@ if __name__ == '__main__':
 	day_night_distance_class = Day_Night_Distance_Class(slat1=slat1,slon1=slon1,
 				  flat1=flat1,flon1=flon1,lambda0=l0,phi0=p0,lambdax=lx,phix=px)
 	res,A = day_night_distance_class.day_night_distance()
-	print ('d =',res)
-	print('A =',A)
+	# print ('d =',res)
+	# print('A =',A)
