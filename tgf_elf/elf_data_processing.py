@@ -3,7 +3,12 @@ from __future__ import print_function
 from numpy import pi,sqrt,fft,nanstd,nan,arctan2,abs
 from scipy import signal
 import matplotlib.pyplot as plt
+import time
+import matplotlib
 
+font = {'size'   : 8}
+
+matplotlib.rc('font', **font)
 
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
@@ -36,6 +41,7 @@ class ELF_Data_Processing_Class(object):
 		for s in lines:
 			self.channel1.append(int(s[:s.find('\t')]))
 			self.channel2.append(int(s[s.find('\t')+1:]))
+
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
@@ -46,6 +52,7 @@ class ELF_Data_Processing_Class(object):
 	def filtering(self,data):
 		b, a = signal.butter(N=3,Wn=[(50-0.5)/self.CONST_FN,(50+0.5)/self.CONST_FN],
 							 btype='bandstop',analog=False)
+
 		filtered1 = signal.lfilter(b, a, data)
 		try:
 			b, a = signal.butter(N=3,Wn=[(150-0.5)/self.CONST_FN,(150+0.5)/self.CONST_FN],
@@ -92,6 +99,7 @@ class ELF_Data_Processing_Class(object):
 		plt.show()
 
 	def detrending(self,filtered):
+		# start_time = time.time()
 		mov_avg = filtered[:self.DEGREE]
 		detrended=[0]*self.DEGREE
 		for i in range(self.DEGREE,self.N-self.DEGREE):
@@ -101,9 +109,11 @@ class ELF_Data_Processing_Class(object):
 			detrended.append(filtered[i]-chunk)
 		detrended = detrended+[0]*self.DEGREE
 		mov_avg = mov_avg+filtered[-self.DEGREE:]
+		# print('Time_Detrending: ',time.time()-start_time)
 		return detrended,mov_avg
 
 	def peaking(self,detrended):
+		# start_time = time.time()
 		peaked = detrended[:]
 		# check = 10000
 		# while check>10:
@@ -158,7 +168,7 @@ class ELF_Data_Processing_Class(object):
 		# plt.title('Peaking '+self.filename)
 		# if self.plot:
 		# 	plt.show()
-
+		# print('Time_Peaking: ',time.time()-start_time)
 		return std3
 
 	def azimuth(self):
@@ -234,6 +244,7 @@ class ELF_Data_Processing_Class(object):
 		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
 
 	def find_peak(self):
+		# start_time = time.time()
 		res = []
 		for i in range(self.N):
 			if self.t[i]<=self.time+self.dd+self.CONST_INDENT/self.CONST_FS and \
@@ -252,6 +263,7 @@ class ELF_Data_Processing_Class(object):
 			peak = -1
 			index = 5000
 			time_peak = 5000/self.CONST_FS
+		# print('Time_Find_peak: ',time.time()-start_time)
 		return peak,time_peak,index
 
 	def data_processing(self):
@@ -261,6 +273,15 @@ class ELF_Data_Processing_Class(object):
 
 		# t - time array
 		self.t = [i*300./self.N for i in range(self.N)]
+
+		# plt.clf()
+		# plt.plot(self.t,self.channel1,color='blue',label='NS')
+		# plt.plot(self.t,self.channel2,color='red',label='EW')
+		# plt.legend()
+		# plt.title('2008-11-13 07:40 ELA 7')
+		# plt.ylabel('Amplitude')
+		# plt.xlabel('Time, sec')
+		# plt.show()
 
 		# processing for channel1
 		self.filtered1 = self.filtering(self.channel1)
@@ -298,7 +319,7 @@ class ELF_Data_Processing_Class(object):
 
 	def plot_processing(self):
 		fig = plt.figure()
-		time_array = [ti for ti in self.t if ti>self.time-20e-3 and ti<self.time+410e-3]
+		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
 

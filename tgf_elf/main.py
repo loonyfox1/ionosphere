@@ -10,6 +10,8 @@ from numpy import arange
 from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
+from datetime import datetime as dt
+import time
 
 EXTRA_HELP = """
 Example usage:
@@ -138,12 +140,14 @@ class Main_Class(object):
 			print(self.lx[i],'\t',self.px[i])
 
 	def plot_terminator(self):
+		plt.clf()
 		m = Basemap(projection='mill',lon_0=0)
 		m.drawcoastlines()
 		m.drawparallels(arange(-90,90,30), labels=[1,0,0,0])
 		m.drawmeridians(arange(m.lonmin, m.lonmax+30,60), labels=[0,0,0,1])
 		m.drawmapboundary(fill_color='aqua')
 		m.fillcontinents(color='coral',lake_color='aqua')
+		# CS = m.nightshade(self.datetime)
 		CS = m.nightshade(dt(self.year,self.month,self.day,
 								   self.hour,self.minute))
 		m.drawgreatcircle(self.lon_s,self.lat_s,self.lon,self.lat,
@@ -171,6 +175,8 @@ class Main_Class(object):
 		return self.minute%5*60+self.second
 
 	def main(self):
+		start_time = time.time()
+
 		self.year,self.month,self.day,self.hour,self.minute, \
 				  self.second,self.utime = self.date_time()
 
@@ -216,10 +222,16 @@ class Main_Class(object):
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
 										stantion=self.stantion)
 		res = charge_moment_class.charge_moment()
+
+		print('Time: ',time.time()-start_time)
+
 		self.p = res['p']
 		self.c = res['c']
 
 		self.info()
+		if self.plot:
+			self.plot_terminator()
+
 		res = self.write_info()
 		if not self.verbose:
 			print('\np =',self.p/1000,'C*km')

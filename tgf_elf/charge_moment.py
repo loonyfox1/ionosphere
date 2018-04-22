@@ -5,7 +5,9 @@ from scipy import signal,special,integrate
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-
+import threading
+import cPickle as pickle
+import os.path
 
 class Charge_Moment_Class(object):
     CONST_MU0 = 4e-7*pi
@@ -46,29 +48,72 @@ class Charge_Moment_Class(object):
         return fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
 
     def receiver_transfer_function(self):
-        z0 = zeros(self.N)
-        z0[0] = 1
+        # start_time=time.time()
 
-        b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
-        z1 = signal.lfilter(b, a, z0)
+        if self.CONST_DELTAF==51.8:
+            file_name='filter_ela7.dump'
+        else:
+            file_name='filter_ela10.dump'
 
-        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/self.CONST_FN, analog=False)
-        z2 = signal.lfilter(b, a, z1)
+        if os.path.isfile(file_name):
+            with open(file_name, 'rb') as pickle_file:
+                res = pickle.load(pickle_file)
+        else:
+            z0 = zeros(self.N)
+            z0[0] = 1
 
-        b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
-        z3 = signal.lfilter(b, a, z2)
+            b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
+            z1 = signal.lfilter(b, a, z0)
 
-        res = fft.rfft(z3)
-        return res/max(res)
+            b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/self.CONST_FN, analog=False)
+            z2 = signal.lfilter(b, a, z1)
+
+            b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
+            z3 = signal.lfilter(b, a, z2)
+
+            res = fft.rfft(z3)
+            res=res/max(res)
+            with open(file_name, 'wb') as pickle_file:
+                pickle.dump(res, pickle_file)
+
+        # print("Time_Filter: ",time.time()-start_time)
+        return res
+
+    def ionosphere_transfer_function_worker(self,input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2):
+        while len(input_array)>0:
+            time_fi=0
+            if len(input_array)>0:
+                with lock_input_array:
+                    if len(input_array)>0:
+                        time_fi=input_array.pop(0)
+            if time_fi!=0:
+                itf1 = -1j*pi*self.CONST_MU0*time_fi/2/self.magnetic_altitude(time_fi)/self.phase_velocity(time_fi)
+                itf3 = special.hankel2([1],[2*pi*self.r*time_fi/self.phase_velocity(time_fi)])
+                itf4 = exp(-self.attenuation_factor(time_fi)*self.r)
+                output_res=itf1*itf3*itf4*itf2
+                with lock_output_dictionary:
+                    output_dictionary[time_fi]=output_res
 
     def ionosphere_transfer_function(self):
+        # start_time=time.time()
         res = []
         itf2 = sqrt(self.r/self.CONST_A/sin(self.r/self.CONST_A))
+
+        input_array=list(self.f)
+        lock_input_array=threading.Lock()
+
+        output_dictionary={}
+        lock_output_dictionary=threading.Lock()
+
+        worker_array=[]
+        for index_worker in range(100):
+            worker_array.append(threading.Thread(target=self.ionosphere_transfer_function_worker,args=(input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2)))
+            worker_array[-1].start()
+        [x.join() for x in worker_array]
         for fi in self.f:
-            itf1 = -1j*pi*self.CONST_MU0*fi/2/self.magnetic_altitude(fi)/self.phase_velocity(fi)
-            itf3 = special.hankel2([1],[2*pi*self.r*fi/self.phase_velocity(fi)])
-            itf4 = exp(-self.attenuation_factor(fi)*self.r)
-            res.append(itf1*itf2*itf3*itf4)
+            res.append(output_dictionary[fi])
+
+        # print("Time_ITF: ",time.time()-start_time)
         return res
 
     def total_distance(self):
@@ -111,21 +156,27 @@ class Charge_Moment_Class(object):
                        self.electric_characteristic_altitude(fi))
 
     def magnetic_characteristic_altitude(self,fi):
+        logfi77 = log(fi/7.7)
         if self.day:
-            res = (101.5 - 3.1*log(fi/7.7) + \
-                1j*(7.0 - 0.9*log(fi/7.7)))*1e3
+            res = (101.5 - 3.1*logfi77 + \
+                1j*(7.0 - 0.9*logfi77))*1e3
         else:
-            res = (114.7 - 8.4*log(fi/7.7) + \
-                1j*(13.2 - 2.0*log(fi/7.7)))*1e3
+            res = (114.7 - 8.4*logfi77 + \
+                1j*(13.2 - 2.0*logfi77))*1e3
         return res
 
     def electric_characteristic_altitude(self,fi):
+        fi77 = 7.7/fi
         if self.day:
-            res = (51.1 + 1.9*log(fi/1.7) - 2.45*(1.7/fi)**0.822 - 2.84*(1.7/fi)**1.645 + \
-                1j*(-2.98 - 8.8*(1.7/fi)**0.822 + 1.86*(7.7/fi)**1.645))*1e3
+            fi17 = 1.7/fi
+            fi17_822 = (fi17)**0.822
+            res = (51.1 + 1.9*log(fi/1.7) - 2.45*fi17_822 - 2.84*(fi17)**1.645 + \
+                1j*(-2.98 - 8.8*fi17_822 + 1.86*(fi77)**1.645))*1e3
         else:
-            res = (67.5 + 2.0*log(fi/7.7) - 2.54*(7.7/fi)**0.813 - 2.72*(7.7/fi)**1.626 + \
-                1j*(-3.14 - 8.7*(7.7/fi)**0.813 + 1.92*(7.7/fi)**1.626))*1e3
+            fi77_626 = (fi77)**1.626
+            fi77_813 = (fi77)**0.813
+            res = (67.5 + 2.0*log(fi/7.7) - 2.54*fi77_813 - 2.72*fi77_626 + \
+                1j*(-3.14 - 8.7*fi77_813 + 1.92*fi77_626))*1e3
         return res
 
 if __name__ == '__main__':
