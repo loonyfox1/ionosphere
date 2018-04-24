@@ -26,15 +26,15 @@ class Main_Class(object):
 		self.lon = args.lon
 		self.verbose = args.verbose
 		self.plot = args.plot
-		self.destination = args.dest
+		self.destination = args.dest_bin
 		self.degree = args.degree
 		self.sigma = args.sigma
 		self.dest_img = args.dest_img
 		# self.filt = args.filt
 
 	def constants(self):
-		with open(self.destination+self.filename,'r') as f:
-			s = f.readline()
+		with open(self.destination+self.filename,'rb') as f:
+			s = str(f.read(46))
 		s = s[s.find('ELA')+3]
 		if s=='7':
 			return self.ELA7_constants,s
@@ -169,7 +169,9 @@ class Main_Class(object):
 		if sminute<10: sminute = '0'+str(sminute)
 		else: sminute = str(sminute)
 
-		return str(self.year)+smonth+sday+shour+sminute+'.dat'
+		return str(self.year)+'/'+ \
+			   str(self.year)+smonth+sday+'/'+ \
+			   str(self.year)+smonth+sday+shour+sminute+'.dat'
 
 	def time_to_sec(self):
 		return self.minute%5*60+self.second
@@ -206,10 +208,10 @@ class Main_Class(object):
 
 		# processing data and define B
 		elf_data_processing_class = ELF_Data_Processing_Class(
-				filename=self.destination+self.filename,delta_day=dd,delta_night=dn,
+				filename=self.filename,delta_day=dd,delta_night=dn,
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
-				idd=self.id,datetime=self.datetime,dest_img=self.dest_img)
+				idd=self.id,datetime=self.datetime,dest_img=self.dest_img,dest_in=self.destination)
 		res = elf_data_processing_class.data_processing()
 		self.delta = res['delta']
 		self.dd = res['dd']

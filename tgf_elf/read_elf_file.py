@@ -1,10 +1,11 @@
+from __future__ import print_function
 import matplotlib.pyplot as plt
 
 class Read_ELF_Class(object):
-	def __init__(self,filename,destination_in,destination_out):
+	def __init__(self,filename,destination_in):
 		self.filename = filename
 		self.dest_in = destination_in
-		self.dest_out = destination_out
+		# self.dest_out = destination_out
 
 	def header(self):
 		with open(self.dest_in+self.filename, "rb") as f:
@@ -24,12 +25,17 @@ class Read_ELF_Class(object):
 		byte_array = self.read_bytes()
 		new_byte = []
 		for i in range(64,len(byte_array),1):
+			# print(str(hex(ord(byte_array[i]))))
 			time_s = str(byte_array[i])
+			if len(time_s)<=1:
+				time_s = str(hex(ord(byte_array[i])))
+			# time_s = str(byte_array[i])
 			time_s = repr(time_s)
 			if("\\x" in time_s):
 				time_s = time_s[6:8]
 			else:
-				print(time_s)
+				# pass
+				# print(time_s)
 				time_s = hex(ord(time_s[3:4]))[2:]
 			new_byte.append(time_s)
 		return new_byte
@@ -58,12 +64,15 @@ class Read_ELF_Class(object):
 			self.channel1 = self.channel1[:len(self.channel2)]
 		if len(self.channel1)<len(self.channel2):
 			self.channel2 = self.channel2[:len(self.channel1)]
-		with open(self.dest_out+self.filename, "w") as f:
-			f.write(self.fileheader+'\n')
-			for i in range(len(self.channel1)-1):
-				f.write(str(self.channel1[i])+'\t'+str(self.channel2[i])+'\n')
-			f.write(str(self.channel1[-1])+'\t'+str(self.channel2[-1]))
-		return self.filename
+
+		return self.channel1,self.channel2
+
+		# with open(self.dest_out+self.filename, "w") as f:
+		# 	f.write(self.fileheader+'\n')
+		# 	for i in range(len(self.channel1)-1):
+		# 		f.write(str(self.channel1[i])+'\t'+str(self.channel2[i])+'\n')
+		# 	f.write(str(self.channel1[-1])+'\t'+str(self.channel2[-1]))
+		# return self.filename
 
 	def plot(self):
 		t = [i*300/len(self.channel1) for i in range(len(self.channel1))]
@@ -84,9 +93,9 @@ if __name__ == '__main__':
 	# filename = '201109062210.dat'
 	# filename = '201308160900.dat'
 	# filename = '201308201525.dat'
-	filename = '201308160900.dat'
+	filename = '201506301700.dat'
 
 	read_elf_class = Read_ELF_Class(filename=filename,
-				destination_in=destination,destination_out='/home/foxy/ELF_data/txt_files/')
+				destination_in=destination)
 	f = read_elf_class.read_and_save()
-	read_elf_class.plot()
+	# read_elf_class.plot()

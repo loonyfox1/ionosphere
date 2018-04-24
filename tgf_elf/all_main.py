@@ -31,6 +31,7 @@ if __name__ == '__main__':
 		for line in f:
 			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
 			dest_img = line[11:-1] if 'dest_img' in line else dest_img
+			dest_bin = line[11:-1] if 'dest_bin' in line else dest_bin
 			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
 			file_res = line[11:-1] if 'file_res' in line else file_res        # delt = self.N-len(self.filter)
 		# if delt>0:
@@ -62,10 +63,11 @@ if __name__ == '__main__':
 			if float(args.lon>180): args.lon = round(-360+float(args.lon),5)
 			args.verbose = True
 			args.plot = True
-			args.dest = dest_txt
+			args.dest_bin = dest_bin
 			args.dest_img = dest_img
 			args.degree = 5
 			args.sigma = 3
+
 			# args.filt = filt
 
 			p = Process(target=process_func,args=(args,tgf_data.COUNTS[tgf_data.ID==idd].values[0],

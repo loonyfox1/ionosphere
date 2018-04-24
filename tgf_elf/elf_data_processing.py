@@ -5,6 +5,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 import time
 import matplotlib
+from read_elf_file import Read_ELF_Class
 
 font = {'size'   : 8}
 
@@ -15,7 +16,7 @@ class ELF_Data_Processing_Class(object):
 	CONST_P = pi/180
 
 	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
-				 degree,sigma,plot,datetime,idd,dest_img):
+				 degree,sigma,plot,datetime,idd,dest_img,dest_in):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
 		self.filename = filename
@@ -29,18 +30,23 @@ class ELF_Data_Processing_Class(object):
 		self.id = idd
 		self.datetime = datetime
 		self.dest_img = dest_img
+		self.dest_in = dest_in
 		if self.CONST_DELTAF==51.8:
 			self.CONST_INDENT = 5
 		else:
 			self.CONST_INDENT = 3
 
 	def read_data(self):
-		self.channel1,self.channel2 = [],[]
-		with open(self.filename,'r') as f:
-			lines = f.readlines()[1:]
-		for s in lines:
-			self.channel1.append(int(s[:s.find('\t')]))
-			self.channel2.append(int(s[s.find('\t')+1:]))
+		# print(self.filename,self.dest_in)
+		read_class = Read_ELF_Class(filename=self.filename,destination_in=self.dest_in)
+		self.channel1,self.channel2 = read_class.read_and_save()
+
+		# self.channel1,self.channel2 = [],[]
+		# with open(self.filename,'r') as f:
+		# 	lines = f.readlines()[1:]
+		# for s in lines:
+		# 	self.channel1.append(int(s[:s.find('\t')]))
+		# 	self.channel2.append(int(s[s.find('\t')+1:]))
 
 		return self.channel1,self.channel2,len(self.channel1)
 
