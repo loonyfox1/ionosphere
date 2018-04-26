@@ -4,12 +4,13 @@ from numpy import pi,sqrt,fft,nanstd,nan,arctan2,abs
 from scipy import signal
 import matplotlib.pyplot as plt
 import time
-import matplotlib
+import numpy as np
+import matplotlib as mpl
 from read_elf_file import Read_ELF_Class
 
-font = {'size'   : 8}
-
-matplotlib.rc('font', **font)
+# font = {'size'   : 8}
+#
+# matplotlib.rc('font', **font)
 
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
@@ -25,16 +26,16 @@ class ELF_Data_Processing_Class(object):
 		self.DEGREE = degree
 		self.plot = plot
 		self.SIGMA = sigma
-		self.time = time-1.6e-3
+		self.time = time+ 1/self.CONST_DELTAF #-1.6e-3 # NOTE: WTFFFFF??????
 		self.A = A
 		self.id = idd
 		self.datetime = datetime
 		self.dest_img = dest_img
 		self.dest_in = dest_in
 		if self.CONST_DELTAF==51.8:
-			self.CONST_INDENT = 5
+			self.CONST_INDENT = 1
 		else:
-			self.CONST_INDENT = 3
+			self.CONST_INDENT = 1
 
 	def read_data(self):
 		# print(self.filename,self.dest_in)
@@ -189,6 +190,96 @@ class ELF_Data_Processing_Class(object):
 				   [((arctan2(self.detrended1[i],self.detrended2[i])/self.CONST_P+360)%360+180)%360
 					for i in range(self.N)]
 
+	def sec_to_str(self,sec):
+		res = self.filename[-8:-6]+':'+str(int(self.filename[-6:-4])+int(sec//60.))+':'+ \
+			  str(round(sec%60.,3))
+		return res
+
+
+	def normal_plot(self):
+		font = {'size'   : 3}
+		mpl.rc('font', **font)
+		mpl.rcParams['axes.linewidth'] = 0.3
+		mpl.rcParams['lines.linewidth'] = 0.3
+		mpl.rcParams['xtick.direction'] = 'in'
+		mpl.rcParams['ytick.direction'] = 'in'
+		mpl.rcParams['xtick.top'] = True
+		mpl.rcParams['ytick.right'] = True
+		mpl.rcParams['xtick.major.size'] = 2
+		mpl.rcParams['ytick.major.size'] = 2
+		mpl.rcParams['xtick.major.width'] = 0.3
+		mpl.rcParams['ytick.major.width'] = 0.3
+
+		time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+80e-3]
+		start = self.t.index(time_array[0])
+		end = self.t.index(time_array[-1])+1
+		timex = [(t-self.time)*1e3 for t in time_array]
+
+		fig = plt.figure(figsize=(3,4))
+
+		ax1 = fig.add_subplot(4,1,1)
+		ax1.plot(timex,np.array(self.detrended1[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax1.scatter(timex[self.index-start],np.array(self.detrended1[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+		ax1.scatter(timex[self.index-start],np.array(self.detrended1[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+		ax1.set_ylabel('Bx [pT]')
+
+		ax2 = fig.add_subplot(4,1,2,sharey=ax1)
+		ax2.plot(timex,np.array(self.detrended2[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax2.scatter(timex[self.index-start],np.array(self.detrended2[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+		ax2.scatter(timex[self.index-start],np.array(self.detrended2[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+		ax2.set_ylabel('By [pT]')
+
+		ax3 = fig.add_subplot(4,1,3)
+		ax3.plot(timex,np.array(self.total_data[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax3.scatter(timex[self.index-start],np.array(self.total_data[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+		ax3.scatter(timex[self.index-start],np.array(self.total_data[self.index])/self.CONST_SCALE/1e-12,
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+		ax3.set_ylabel('B [pT]')
+
+		ax4 = fig.add_subplot(4,1,4)
+		ax4.plot(timex,self.azimuth_positive[start:end],color='black',label='CG+')
+		ax4.plot(timex,self.azimuth_negative[start:end],color='dimgray',label='CG-')
+		ax4.scatter(timex[self.index-start],np.array(self.azimuth_positive[self.index]),
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+		ax4.scatter(timex[self.index-start],np.array(self.azimuth_positive[self.index]),
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+		ax4.scatter(timex[self.index-start],np.array(self.azimuth_negative[self.index]),
+					facecolors='none',edgecolors='dimgray',marker='o',s=2,linewidths=0.3,zorder=2)
+		ax4.scatter(timex[self.index-start],np.array(self.azimuth_negative[self.index]),
+					facecolors='none',edgecolors='dimgray',marker='o',s=0.2,linewidths=0.3,zorder=2)
+		ax4.axhline(self.A,color='gray',linestyle='dotted',label='TGF')
+		# ax4.text(0,self.A,'TGF',color='gray',fontsize=3)
+		ax4.set_ylabel('Azimuth [degree]')
+		ax4.legend(loc=4,framealpha=1)
+
+		axarr = [ax1,ax2,ax3,ax4]
+
+		[a.set_xlabel('Time after '+self.sec_to_str(self.time-1/self.CONST_DELTAF)+' UT [ms]') for a in axarr]
+		[a.set_xticks(np.arange(-40,81,10)) for a in axarr]
+		[a.margins(0,0.1) for a in axarr[:-1]]
+		ax4.margins(0,0.05)
+
+		[a.axvline(0,c='gray',zorder=1,linestyle='dashed') for a in axarr]
+		# [a.axhline(0,c='gray') for a in axarr[:2]]
+
+		[a.axvline((self.dd)*1e3,c='gray',linestyle='dashed',zorder=1) for a in axarr]
+		[a.axvline((self.dn)*1e3,c='gray',linestyle='dashed',zorder=1) for a in axarr]
+
+		ax1.text((self.dd)*1e3,ax1.get_ylim()[1]*0.6,'day',rotation='vertical',color='grey',
+				fontsize=2,ha='left',va='bottom')
+		ax1.text((self.dn)*1e3,ax1.get_ylim()[1]*0.6,'night',rotation='vertical',color='grey',
+				fontsize=2,ha='right',va='bottom')
+
+		fig.subplots_adjust(top=0.91, bottom=0.08, left=0.12, right=0.95, hspace=0.4,
+						wspace=None)
+		plt.savefig(self.dest_img+'TGF'+str(self.id),dpi=700)
+
+
 	def plot_antennas(self):
 		fig = plt.figure()
 		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
@@ -196,18 +287,18 @@ class ELF_Data_Processing_Class(object):
 		end = self.t.index(time_array[-1])+1
 
 		ax1 = fig.add_subplot(3,1,1)
-		ax1.plot(time_array,[self.channel1[i]-self.mov_avg1[i] for i in range(start,end)],color='yellow',label='data')
-		ax1.plot(time_array,self.detrended1[start:end],label='filter',color='red',marker='o',markersize=1.5)
+		ax1.plot(time_array,[self.channel1[i]-self.mov_avg1[i] for i in range(start,end)],color='gray',label='data',linewidth=1,zorder=1)
+		ax1.plot(time_array,self.detrended1[start:end],label='filter',color='red',marker='o',markersize=1,linewidth=1,zorder=2)
 		ax1.axhline(0,color='black')
 		ax1.axvline(self.time,color='grey')
-		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax1.axhline(self.std1,color='lightgreen',linestyle=':')
-		ax1.axhline(-self.std1,color='lightgreen',linestyle=':')
-		ax1.axhline(2*self.std1,color='lightsalmon',linestyle=':')
-		ax1.axhline(-2*self.std1,color='lightsalmon',linestyle=':')
-		ax1.axhline(3*self.std1,color='lightskyblue',linestyle=':')
-		ax1.axhline(-3*self.std1,color='lightskyblue',linestyle=':')
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':',linewidth=1)
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--',linewidth=1)
+		ax1.axhline(self.std1,color='lightgreen',linestyle=':',linewidth=1)
+		ax1.axhline(-self.std1,color='lightgreen',linestyle=':',linewidth=1)
+		ax1.axhline(2*self.std1,color='lightsalmon',linestyle=':',linewidth=1)
+		ax1.axhline(-2*self.std1,color='lightsalmon',linestyle=':',linewidth=1)
+		ax1.axhline(3*self.std1,color='lightskyblue',linestyle=':',linewidth=1)
+		ax1.axhline(-3*self.std1,color='lightskyblue',linestyle=':',linewidth=1)
 		ax1.scatter(self.time_peak,self.detrended1[self.index],color='black',s=5,zorder=5)
 		ax1.set_ylabel('Antenna NS')
 		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)))
@@ -215,32 +306,32 @@ class ELF_Data_Processing_Class(object):
 		ax1.set_xlim([time_array[0],time_array[-1]])
 
 		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
-		ax2.plot(time_array,[self.channel2[i]-self.mov_avg2[i] for i in range(start,end)],color='yellow',label='data')
-		ax2.plot(time_array,self.detrended2[start:end],label='filter',color='blue',marker='o',markersize=1.5)
+		ax2.plot(time_array,[self.channel2[i]-self.mov_avg2[i] for i in range(start,end)],color='gray',label='data',linewidth=1,zorder=1)
+		ax2.plot(time_array,self.detrended2[start:end],label='filter',color='blue',marker='o',markersize=1,linewidth=1,zorder=2)
 		ax2.axhline(0,color='black')
 		ax2.axvline(self.time,color='grey')
-		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax2.axhline(self.std2,color='lightgreen',linestyle=':')
-		ax2.axhline(-self.std2,color='lightgreen',linestyle=':')
-		ax2.axhline(2*self.std2,color='lightsalmon',linestyle=':')
-		ax2.axhline(-2*self.std2,color='lightsalmon',linestyle=':')
-		ax2.axhline(3*self.std2,color='lightskyblue',linestyle=':')
-		ax2.axhline(-3*self.std2,color='lightskyblue',linestyle=':')
+		ax2.axvline(self.time+self.dd,color='grey',linestyle=':',linewidth=1)
+		ax2.axvline(self.time+self.dn,color='grey',linestyle='--',linewidth=1)
+		ax2.axhline(self.std2,color='lightgreen',linestyle=':',linewidth=1)
+		ax2.axhline(-self.std2,color='lightgreen',linestyle=':',linewidth=1)
+		ax2.axhline(2*self.std2,color='lightsalmon',linestyle=':',linewidth=1)
+		ax2.axhline(-2*self.std2,color='lightsalmon',linestyle=':',linewidth=1)
+		ax2.axhline(3*self.std2,color='lightskyblue',linestyle=':',linewidth=1)
+		ax2.axhline(-3*self.std2,color='lightskyblue',linestyle=':',linewidth=1)
 		ax2.scatter(self.time_peak,self.detrended2[self.index],color='black',s=5,zorder=5)
 		ax2.set_ylabel('Antenna EW')
 		ax2.legend(loc=1)
 		ax2.set_xlim([time_array[0],time_array[-1]])
 
 		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
-		ax3.plot(time_array,self.total_data[start:end],color='green',label='total data',marker='o',markersize=1.5)
+		ax3.plot(time_array,self.total_data[start:end],color='green',label='total data',marker='o',markersize=1,linewidth=1,zorder=1)
 		ax3.axhline(0,color='black')
 		ax3.axvline(self.time,color='grey')
-		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax3.axhline(self.std_total,color='lightgreen',linestyle=':')
-		ax3.axhline(2*self.std_total,color='lightsalmon',linestyle=':')
-		ax3.axhline(3*self.std_total,color='lightskyblue',linestyle=':')
+		ax3.axvline(self.time+self.dd,color='grey',linestyle=':',linewidth=1)
+		ax3.axvline(self.time+self.dn,color='grey',linestyle='--',linewidth=1)
+		ax3.axhline(self.std_total,color='lightgreen',linestyle=':',linewidth=1)
+		ax3.axhline(2*self.std_total,color='lightsalmon',linestyle=':',linewidth=1)
+		ax3.axhline(3*self.std_total,color='lightskyblue',linestyle=':',linewidth=1)
 		ax3.scatter(self.time_peak,self.B,color='red',s=5,zorder=5)
 		ax3.legend(loc=1)
 		ax3.set_xlabel('Time, sec')
@@ -307,8 +398,14 @@ class ELF_Data_Processing_Class(object):
 		self.std_total = self.peaking(self.total_data)
 		# self.std_total = std(self.total_data)
 
+
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
+
+		# print(self.time,self.time_peak)
+		# print(self.dd,self.dn)
+
+		self.normal_plot()
 
 		if self.plot:
 			self.plot_antennas()
@@ -330,7 +427,7 @@ class ELF_Data_Processing_Class(object):
 		end = self.t.index(time_array[-1])+1
 
 		ax1 = fig.add_subplot(3,1,1)
-		ax1.plot(time_array,self.channel1[start:end],label='data',color='yellow')
+		ax1.plot(time_array,self.channel1[start:end],label='data',color='gray')
 		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
 		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
 		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)+', A='+str(round(self.A))))
@@ -342,7 +439,7 @@ class ELF_Data_Processing_Class(object):
 		ax1.set_ylabel('Antenna NS')
 
 		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
-		ax2.plot(time_array,self.channel2[start:end],label='data',color='yellow')
+		ax2.plot(time_array,self.channel2[start:end],label='data',color='gray')
 		ax2.plot(time_array,self.filtered2[start:end],label='filtered',color='blue')
 		ax2.plot(time_array,self.mov_avg2[start:end],label='mov avg',color='black')
 		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')

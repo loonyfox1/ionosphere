@@ -231,8 +231,8 @@ class Main_Class(object):
 		self.c = res['c']
 
 		self.info()
-		if self.plot:
-			self.plot_terminator()
+		# if self.plot:
+		# 	self.plot_terminator()
 
 		res = self.write_info()
 		if not self.verbose:
