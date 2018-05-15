@@ -195,7 +195,6 @@ class ELF_Data_Processing_Class(object):
 			  str(round(sec%60.,3))
 		return res
 
-
 	def normal_plot(self):
 		font = {'size'   : 3}
 		mpl.rc('font', **font)
@@ -210,7 +209,7 @@ class ELF_Data_Processing_Class(object):
 		mpl.rcParams['xtick.major.width'] = 0.3
 		mpl.rcParams['ytick.major.width'] = 0.3
 
-		time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+80e-3]
+		time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+120e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
 		timex = [(t-self.time)*1e3 for t in time_array]
@@ -218,40 +217,46 @@ class ELF_Data_Processing_Class(object):
 		fig = plt.figure(figsize=(3,4))
 
 		ax1 = fig.add_subplot(4,1,1)
-		ax1.plot(timex,np.array(self.detrended1[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax1.plot(timex,np.array(self.detrended1[start:end])/self.CONST_SCALE/1e-12,color='red')
+		ax1.axhline(3*self.std1/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
+		ax1.axhline(-3*self.std1/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
 		ax1.scatter(timex[self.index-start],np.array(self.detrended1[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax1.scatter(timex[self.index-start],np.array(self.detrended1[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
 		ax1.set_ylabel('Bx [pT]')
 
 		ax2 = fig.add_subplot(4,1,2,sharey=ax1)
-		ax2.plot(timex,np.array(self.detrended2[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax2.plot(timex,np.array(self.detrended2[start:end])/self.CONST_SCALE/1e-12,color='blue')
+		ax2.axhline(3*self.std2/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
+		ax2.axhline(-3*self.std2/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
 		ax2.scatter(timex[self.index-start],np.array(self.detrended2[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax2.scatter(timex[self.index-start],np.array(self.detrended2[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
 		ax2.set_ylabel('By [pT]')
 
 		ax3 = fig.add_subplot(4,1,3)
 		ax3.plot(timex,np.array(self.total_data[start:end])/self.CONST_SCALE/1e-12,color='black')
+		ax3.axhline(3*self.std_total/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
+		# ax3.axhline(-3*self.std_total/self.CONST_SCALE/1e-12,color='gray',linestyle='dotted')
 		ax3.scatter(timex[self.index-start],np.array(self.total_data[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax3.scatter(timex[self.index-start],np.array(self.total_data[self.index])/self.CONST_SCALE/1e-12,
-					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
 		ax3.set_ylabel('B [pT]')
 
 		ax4 = fig.add_subplot(4,1,4)
-		ax4.plot(timex,self.azimuth_positive[start:end],color='black',label='CG+')
-		ax4.plot(timex,self.azimuth_negative[start:end],color='dimgray',label='CG-')
+		ax4.plot(timex,self.azimuth_positive[start:end],color='violet',label='CG+')
+		ax4.plot(timex,self.azimuth_negative[start:end],color='green',label='CG-')
 		ax4.scatter(timex[self.index-start],np.array(self.azimuth_positive[self.index]),
-					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax4.scatter(timex[self.index-start],np.array(self.azimuth_positive[self.index]),
-					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
 		ax4.scatter(timex[self.index-start],np.array(self.azimuth_negative[self.index]),
-					facecolors='none',edgecolors='dimgray',marker='o',s=2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax4.scatter(timex[self.index-start],np.array(self.azimuth_negative[self.index]),
-					facecolors='none',edgecolors='dimgray',marker='o',s=0.2,linewidths=0.3,zorder=2)
+					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
 		ax4.axhline(self.A,color='gray',linestyle='dotted',label='TGF')
 		# ax4.text(0,self.A,'TGF',color='gray',fontsize=3)
 		ax4.set_ylabel('Azimuth [degree]')
@@ -260,7 +265,7 @@ class ELF_Data_Processing_Class(object):
 		axarr = [ax1,ax2,ax3,ax4]
 
 		[a.set_xlabel('Time after '+self.sec_to_str(self.time-1/self.CONST_DELTAF)+' UT [ms]') for a in axarr]
-		[a.set_xticks(np.arange(-40,81,10)) for a in axarr]
+		[a.set_xticks(np.arange(-40,121,10)) for a in axarr]
 		[a.margins(0,0.1) for a in axarr[:-1]]
 		ax4.margins(0,0.05)
 
@@ -277,7 +282,15 @@ class ELF_Data_Processing_Class(object):
 
 		fig.subplots_adjust(top=0.91, bottom=0.08, left=0.12, right=0.95, hspace=0.4,
 						wspace=None)
-		plt.savefig(self.dest_img+'TGF'+str(self.id),dpi=700)
+		if len(str(self.id))<4:
+			sid = ''
+			for i in range(4-len(str(self.id))):
+				sid += '0'
+			sid += str(self.id)
+		else:
+			sid = str(self.id)
+
+		plt.savefig(self.dest_img+'TGF'+sid,dpi=700)
 
 
 	def plot_antennas(self):
@@ -338,7 +351,15 @@ class ELF_Data_Processing_Class(object):
 		ax3.set_ylabel('Total')
 		ax3.set_xlim([time_array[0],time_array[-1]])
 
-		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'data.png',dpi=360)
+		if len(str(self.id))<4:
+			sid = ''
+			for i in range(4-len(str(self.id))):
+				sid += '0'
+			sid += str(self.id)
+		else:
+			sid = str(self.id)
+
+		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'data.png',dpi=360)
 
 	def find_peak(self):
 		# start_time = time.time()
@@ -396,7 +417,7 @@ class ELF_Data_Processing_Class(object):
 		# data = sqrt(channel1**2 + channel2**2)
 		self.total_data = self.channels_to_data()
 		self.std_total = self.peaking(self.total_data)
-		# self.std_total = std(self.total_data)
+		# self.std_total = np.std(self.total_data)
 
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
@@ -460,7 +481,15 @@ class ELF_Data_Processing_Class(object):
 		ax3.set_ylabel('Azimuth, degree')
 		ax3.set_xlim([time_array[0],time_array[-1]])
 
-		plt.savefig(self.dest_img+'TGF'+str(self.id)+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
+		if len(str(self.id))<4:
+			sid = ''
+			for i in range(4-len(str(self.id))):
+				sid += '0'
+			sid += str(self.id)
+		else:
+			sid = str(self.id)
+
+		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
