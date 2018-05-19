@@ -13,10 +13,11 @@ def process_func(args,counts,geog,dur,file_res):
 	# 			  res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
 	# 			  res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']])
 	with open(file_res,'a') as f:
-		f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:6d}{:8d}{:11.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:10.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
-			   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
-				res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
-				res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
+		if res is not None:
+			f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:6d}{:8d}{:11.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:10.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
+				   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
+					res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
+					res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
 
 		# f.write(str(idd)+'\t'+str(args.lon)+'\t\t'+str(args.lat)+'\t\t'+args.datetime+'\t\t'+
 		# 		str(counts)+'\t\t'+str(geog)+'\t\t'+str(dur)+'\t\t'+str(res['dist'])+'\t\t'+

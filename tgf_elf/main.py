@@ -33,15 +33,18 @@ class Main_Class(object):
 		# self.filt = args.filt
 
 	def constants(self):
-		with open(self.destination+self.filename,'rb') as f:
-			s = str(f.read(46))
-		s = s[s.find('ELA')+3]
-		if s=='7':
-			return self.ELA7_constants,s
-		elif s=='1':
-			return self.ELA10_constants,s
-		print('Error of header')
-		return -1
+		try:
+			with open(self.destination+self.filename,'rb') as f:
+				s = str(f.read(46))
+			s = s[s.find('ELA')+3]
+			if s=='7':
+				return self.ELA7_constants,s
+			elif s=='1':
+				return self.ELA10_constants,s
+			print('Error of header')
+			return -1
+		except:
+			pass
 
 	def ELA10_constants(self):
 		# FS - sampling rate, Hz = 1/sec
@@ -177,67 +180,70 @@ class Main_Class(object):
 		return self.minute%5*60+self.second
 
 	def main(self):
-		start_time = time.time()
+		try:
+			start_time = time.time()
 
-		self.year,self.month,self.day,self.hour,self.minute, \
-				  self.second,self.utime = self.date_time()
+			self.year,self.month,self.day,self.hour,self.minute, \
+					  self.second,self.utime = self.date_time()
 
-		# find elf filename for tgf (data in decimal format !!!)
-		self.filename = self.find_filename()
+			# find elf filename for tgf (data in decimal format !!!)
+			self.filename = self.find_filename()
 
-		# define the constants of stantion
-		self.stantion,self.s = self.constants()
+			# define the constants of stantion
+			self.stantion,self.s = self.constants()
 
-		self.lon_s = 22.55
-		self.lat_s = 49.19
+			self.lon_s = 22.55
+			self.lat_s = 49.19
 
-		# define coordinates of terminator
-		terminator_class = Terminator_Class(
-				utime=self.utime,year=self.year,month=self.month,day=self.day)
-		self.l0,self.p0,self.lx,self.px = terminator_class.terminator()
+			# define coordinates of terminator
+			terminator_class = Terminator_Class(
+					utime=self.utime,year=self.year,month=self.month,day=self.day)
+			self.l0,self.p0,self.lx,self.px = terminator_class.terminator()
 
-		# define distance in day/night, azimuth
-		day_night_distance_class = Day_Night_Distance_Class(
-				slat1=self.lat,slon1=self.lon,flat1=self.lat_s,flon1=self.lon_s,
-				lambda0=self.l0,phi0=self.p0,lambdax=self.lx,phix=self.px)
-		self.d,self.A = day_night_distance_class.day_night_distance()
+			# define distance in day/night, azimuth
+			day_night_distance_class = Day_Night_Distance_Class(
+					slat1=self.lat,slon1=self.lon,flat1=self.lat_s,flon1=self.lon_s,
+					lambda0=self.l0,phi0=self.p0,lambdax=self.lx,phix=self.px)
+			self.d,self.A = day_night_distance_class.day_night_distance()
 
-		# define day/night time delay
-		time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
-		dd,dn = time_delay_class.time_delay()
+			# define day/night time delay
+			time_delay_class = Time_Delay_Class(r=self.d[0][0]+self.d[1][0])
+			dd,dn = time_delay_class.time_delay()
 
-		# processing data and define B
-		elf_data_processing_class = ELF_Data_Processing_Class(
-				filename=self.filename,delta_day=dd,delta_night=dn,
-				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
-				degree=self.degree,sigma=self.sigma,plot=self.plot,
-				idd=self.id,datetime=self.datetime,dest_img=self.dest_img,dest_in=self.destination)
-		res = elf_data_processing_class.data_processing()
-		self.delta = res['delta']
-		self.dd = res['dd']
-		self.dn = res['dn']
-		self.B = res['B']
-		self.std = res['std']
+			# processing data and define B
+			elf_data_processing_class = ELF_Data_Processing_Class(
+					filename=self.filename,delta_day=dd,delta_night=dn,
+					time=self.time_to_sec(),A=self.A,stantion=self.stantion,
+					degree=self.degree,sigma=self.sigma,plot=self.plot,
+					idd=self.id,datetime=self.datetime,dest_img=self.dest_img,dest_in=self.destination)
+			res = elf_data_processing_class.data_processing()
+			self.delta = res['delta']
+			self.dd = res['dd']
+			self.dn = res['dn']
+			self.B = res['B']
+			self.std = res['std']
 
 
-		# calculate charge moment p
-		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
-										stantion=self.stantion)
-		res = charge_moment_class.charge_moment()
+			# calculate charge moment p
+			charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
+											stantion=self.stantion)
+			res = charge_moment_class.charge_moment()
 
-		print('Time: ',time.time()-start_time)
+			print('Time: ',time.time()-start_time)
 
-		self.p = res['p']
-		self.c = res['c']
+			self.p = res['p']
+			self.c = res['c']
 
-		self.info()
-		# if self.plot:
-		# 	self.plot_terminator()
+			self.info()
+			# if self.plot:
+			# 	self.plot_terminator()
 
-		res = self.write_info()
-		if not self.verbose:
-			print('\np =',self.p/1000,'C*km')
-		return res
+			res = self.write_info()
+			if not self.verbose:
+				print('\np =',self.p/1000,'C*km')
+			return res
+		except:
+			pass
 
 
 if __name__ == '__main__':

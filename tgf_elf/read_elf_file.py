@@ -14,12 +14,15 @@ class Read_ELF_Class(object):
 
 	def read_bytes(self):
 		byte_array = []
-		with open(self.dest_in+self.filename, "rb") as f:
-			byte = f.read(1)
-			while byte != b'':
-				byte_array.append(byte)
+		try:
+			with open(self.dest_in+self.filename, "rb") as f:
 				byte = f.read(1)
-		return byte_array
+				while byte != b'':
+					byte_array.append(byte)
+					byte = f.read(1)
+			return byte_array
+		except:
+			pass
 
 	def bytes_to_hex(self):
 		byte_array = self.read_bytes()
