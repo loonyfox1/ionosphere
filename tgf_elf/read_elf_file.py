@@ -28,18 +28,14 @@ class Read_ELF_Class(object):
 		byte_array = self.read_bytes()
 		new_byte = []
 		for i in range(64,len(byte_array),1):
-			# print(str(hex(ord(byte_array[i]))))
 			time_s = str(byte_array[i])
 			if len(time_s)<=1:
 				time_s = str(hex(ord(byte_array[i])))
-			# time_s = str(byte_array[i])
 			time_s = repr(time_s)
-			if("\\x" in time_s):
-				time_s = time_s[6:8]
+			if(len(time_s)==6):
+				time_s = time_s[3:5]
 			else:
-				# pass
-				# print(time_s)
-				time_s = hex(ord(time_s[3:4]))[2:]
+				time_s = time_s[3:4]+"0"
 			new_byte.append(time_s)
 		return new_byte
 

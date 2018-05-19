@@ -35,19 +35,11 @@ class ELF_Data_Processing_Class(object):
 		if self.CONST_DELTAF==51.8:
 			self.CONST_INDENT = 1
 		else:
-			self.CONST_INDENT = 1
+			self.CONST_INDENT = 3
 
 	def read_data(self):
-		# print(self.filename,self.dest_in)
 		read_class = Read_ELF_Class(filename=self.filename,destination_in=self.dest_in)
 		self.channel1,self.channel2 = read_class.read_and_save()
-
-		# self.channel1,self.channel2 = [],[]
-		# with open(self.filename,'r') as f:
-		# 	lines = f.readlines()[1:]
-		# for s in lines:
-		# 	self.channel1.append(int(s[:s.find('\t')]))
-		# 	self.channel2.append(int(s[s.find('\t')+1:]))
 
 		return self.channel1,self.channel2,len(self.channel1)
 
@@ -416,8 +408,28 @@ class ELF_Data_Processing_Class(object):
 
 		# data = sqrt(channel1**2 + channel2**2)
 		self.total_data = self.channels_to_data()
-		self.std_total = self.peaking(self.total_data)
-		# self.std_total = np.std(self.total_data)
+
+		std_total = [np.sqrt((self.detrended1[i]/self.total_data[i]*self.std1)**2 + \
+							 (self.detrended2[i]/self.total_data[i]*self.std2)**2)
+							  for i in range(len(self.total_data))]
+		self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
+
+		plt.clf()
+		plt.plot(self.t,self.channel1)
+		plt.show()
+
+		plt.clf()
+		plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
+		plt.plot(self.t,self.filtered1-np.array(self.mov_avg1),label='filtered')
+		plt.plot(self.t,self.detrended1,label='detrended')
+		plt.axhline(self.std1,color='yellow')
+		plt.axhline(0,color='black')
+		plt.axhline(-self.std1,color='yellow')
+		plt.axvline(self.dd+self.time,color='black')
+		plt.axvline(self.dn+self.time,color='black')
+		plt.legend()
+		plt.show()
+
 
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
