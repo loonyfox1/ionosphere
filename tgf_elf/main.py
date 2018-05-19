@@ -40,11 +40,11 @@ class Main_Class(object):
 			if s=='7':
 				return self.ELA7_constants,s
 			elif s=='1':
-				return self.ELA10_constants,s
+				return self.ELA10_constants,s+'0'
 			print('Error of header')
-			return -1
+			return -1,-1
 		except:
-			pass
+			return -1,-1
 
 	def ELA10_constants(self):
 		# FS - sampling rate, Hz = 1/sec
@@ -111,9 +111,13 @@ class Main_Class(object):
 		print('Distance day  ',int(self.d[0][0]/1000) if self.d[0][1]==True  else int(self.d[1][0]/1000),'km')
 		print('Distance night',int(self.d[0][0]/1000) if self.d[0][1]==False else int(self.d[1][0]/1000),'km\n')
 
-		print('Sun lat',str(round(self.p0,1))+' N' if self.p0>0 else str(-round(self.p0,1))+' S')
-		print('Sun lon',str(round(self.l0,1))+' E\n' if self.l0>0 else str(-round(self.l0,1))+' W\n')
+		# print('Sun lat',str(round(self.p0,1))+' N' if self.p0>0 else str(-round(self.p0,1))+' S')
+		# print('Sun lon',str(round(self.l0,1))+' E\n' if self.l0>0 else str(-round(self.l0,1))+' W\n')
 
+		print('Day   delay',round(self.dd*1000,3),'ms')
+		print('Night delay',round(self.dn*1000,3),'ms\n')
+
+		print('B noise',round(self.std*1e12,3),'pT')
 		print('B pulse',round(self.B*1e12,3),'pT')
 		print('Charge moment',round(self.p/1000,3),'C*km\n')
 
@@ -191,6 +195,8 @@ class Main_Class(object):
 
 		# define the constants of stantion
 		self.stantion,self.s = self.constants()
+		if self.s==-1 and self.stantion==-1:
+			return None
 
 		self.lon_s = 22.55
 		self.lat_s = 49.19
@@ -217,24 +223,23 @@ class Main_Class(object):
 				degree=self.degree,sigma=self.sigma,plot=self.plot,
 				idd=self.id,datetime=self.datetime,dest_img=self.dest_img,dest_in=self.destination)
 		res = elf_data_processing_class.data_processing()
+
 		self.delta = res['delta']
 		self.dd = res['dd']
 		self.dn = res['dn']
 		self.B = res['B']
 		self.std = res['std']
 
-
 		# calculate charge moment p
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,
 										stantion=self.stantion)
 		res = charge_moment_class.charge_moment()
 
-		print('Time: ',time.time()-start_time)
-
 		self.p = res['p']
 		self.c = res['c']
 
 		self.info()
+		print('Time: ',time.time()-start_time)
 		# if self.plot:
 		# 	self.plot_terminator()
 

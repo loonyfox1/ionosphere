@@ -66,7 +66,7 @@ if __name__ == '__main__':
 			args.plot = True
 			args.dest_bin = dest_bin
 			args.dest_img = dest_img
-			args.degree = 70
+			args.degree = 60
 			args.sigma = 3
 
 			# args.filt = filt

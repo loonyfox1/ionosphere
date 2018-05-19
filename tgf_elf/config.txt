@@ -4,5 +4,5 @@ dest_img = /home/foxy/ELF_data/img/
 file_tgf = /home/foxy/Downloads/eventlist.dat
 file_res = /home/foxy/ELF_data/results/result.txt
 
-sta = 1137
+sta = 1138
 end = 1143

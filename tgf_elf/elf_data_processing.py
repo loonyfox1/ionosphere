@@ -44,9 +44,10 @@ class ELF_Data_Processing_Class(object):
 		return self.channel1,self.channel2,len(self.channel1)
 
 	def channels_to_data(self):
-		self.data = [sqrt(self.detrended1[i]*self.detrended1[i]+self.detrended2[i]*self.detrended2[i])
-					 for i in range(self.N)]
-		return self.data
+		data = np.array([sqrt(self.detrended1[i]*self.detrended1[i]+self.detrended2[i]*self.detrended2[i])
+					 for i in range(self.N)])
+		data[data==0] = 1e-9
+		return data
 
 	def filtering(self,data):
 		b, a = signal.butter(N=3,Wn=[(50-0.5)/self.CONST_FN,(50+0.5)/self.CONST_FN],
@@ -249,7 +250,7 @@ class ELF_Data_Processing_Class(object):
 					facecolors='none',edgecolors='black',marker='o',s=2,linewidths=0.3,zorder=3)
 		ax4.scatter(timex[self.index-start],np.array(self.azimuth_negative[self.index]),
 					facecolors='none',edgecolors='black',marker='o',s=0.2,linewidths=0.3,zorder=3)
-		ax4.axhline(self.A,color='gray',linestyle='dotted',label='TGF')
+		ax4.axhline(self.A,color='gray',label='TGF')
 		# ax4.text(0,self.A,'TGF',color='gray',fontsize=3)
 		ax4.set_ylabel('Azimuth [degree]')
 		ax4.legend(loc=4,framealpha=1)
@@ -376,6 +377,81 @@ class ELF_Data_Processing_Class(object):
 		# print('Time_Find_peak: ',time.time()-start_time)
 		return peak,time_peak,index
 
+	def plot_processing(self):
+		mpl.rcParams['axes.linewidth'] = 0.4
+		mpl.rcParams['lines.linewidth'] = 0.4
+		plt.rc('axes', titlesize=7)
+		plt.rc('axes', labelsize=7)
+		plt.rc('legend', fontsize=5)
+
+		fig = plt.figure()
+		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
+		start = self.t.index(time_array[0])
+		end = self.t.index(time_array[-1])+1
+
+		ax1 = fig.add_subplot(3,1,1)
+		ax1.plot(time_array,self.channel1[start:end],label='data',color='gray')
+		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
+		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
+		ax1.set_title(str('TGF '+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)+', A='+str(round(self.A))),)
+
+		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax1.axvline(self.time,color='grey')
+		ax1.scatter(time_array[self.index-start],self.filtered1[self.index],
+					facecolors='none',edgecolors='black',marker='o',s=3,linewidths=0.3,zorder=3)
+		ax1.scatter(time_array[self.index-start],self.filtered1[self.index],
+					facecolors='none',edgecolors='black',marker='o',s=0.3,linewidths=0.3,zorder=3)
+		ax1.legend(loc=1)
+		ax1.set_ylabel('Antenna NS')
+
+		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
+		ax2.plot(time_array,self.channel2[start:end],label='data',color='gray')
+		ax2.plot(time_array,self.filtered2[start:end],label='filtered',color='blue')
+		ax2.plot(time_array,self.mov_avg2[start:end],label='mov avg',color='black')
+		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax2.axvline(self.time,color='grey')
+		ax2.scatter(time_array[self.index-start],self.filtered2[self.index],
+						facecolors='none',edgecolors='black',marker='o',s=3,linewidths=0.3,zorder=3)
+		ax2.scatter(time_array[self.index-start],self.filtered2[self.index],
+						facecolors='none',edgecolors='black',marker='o',s=0.3,linewidths=0.3,zorder=3)
+		ax2.legend(loc=1)
+		ax2.set_ylabel('Antenna EW')
+
+		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
+		ax3.plot(time_array,self.azimuth_positive[start:end],color='green',label='CG+')
+		ax3.plot(time_array,self.azimuth_negative[start:end],color='violet',label='CG-')
+		ax3.axhline(self.A,label='TGF',color='black')
+		ax3.axvline(self.time,color='grey')
+		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
+		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
+		ax3.scatter(time_array[self.index-start],self.azimuth_positive[self.index],
+						facecolors='none',edgecolors='black',marker='o',s=3,linewidths=0.3,zorder=3)
+		ax3.scatter(time_array[self.index-start],self.azimuth_positive[self.index],
+						facecolors='none',edgecolors='black',marker='o',s=0.3,linewidths=0.3,zorder=3)
+		ax3.scatter(time_array[self.index-start],self.azimuth_negative[self.index],
+					facecolors='none',edgecolors='black',marker='o',s=3,linewidths=0.3,zorder=3)
+		ax3.scatter(time_array[self.index-start],self.azimuth_negative[self.index],
+					facecolors='none',edgecolors='black',marker='o',s=0.3,linewidths=0.3,zorder=3)
+		ax3.legend(loc=1)
+		ax3.set_xlabel('Time, sec')
+		ax3.set_ylabel('Azimuth, degree')
+		ax3.set_xlim([time_array[0],time_array[-1]])
+
+		axarr = [ax1,ax2,ax3]
+		[a.set_xticks(np.arange(time_array[0],time_array[-1],0.01)) for a in axarr]
+
+		if len(str(self.id))<4:
+			sid = ''
+			for i in range(4-len(str(self.id))):
+				sid += '0'
+			sid += str(self.id)
+		else:
+			sid = str(self.id)
+
+		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
+
 	def data_processing(self):
 		self.channel1,self.channel2,self.N = self.read_data()
 		# self.channel1 = [chi/self.CONST_SCALE for chi in self. channel1]
@@ -414,21 +490,21 @@ class ELF_Data_Processing_Class(object):
 							  for i in range(len(self.total_data))]
 		self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
 
-		plt.clf()
-		plt.plot(self.t,self.channel1)
-		plt.show()
+		# plt.clf()
+		# plt.plot(self.t,self.channel1)
+		# plt.show()
 
-		plt.clf()
-		plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
-		plt.plot(self.t,self.filtered1-np.array(self.mov_avg1),label='filtered')
-		plt.plot(self.t,self.detrended1,label='detrended')
-		plt.axhline(self.std1,color='yellow')
-		plt.axhline(0,color='black')
-		plt.axhline(-self.std1,color='yellow')
-		plt.axvline(self.dd+self.time,color='black')
-		plt.axvline(self.dn+self.time,color='black')
-		plt.legend()
-		plt.show()
+		# plt.clf()
+		# plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
+		# plt.plot(self.t,self.filtered1-np.array(self.mov_avg1),label='filtered')
+		# plt.plot(self.t,self.detrended1,label='detrended')
+		# plt.axhline(self.std1,color='yellow')
+		# plt.axhline(0,color='black')
+		# plt.axhline(-self.std1,color='yellow')
+		# plt.axvline(self.dd+self.time,color='black')
+		# plt.axvline(self.dn+self.time,color='black')
+		# plt.legend()
+		# plt.show()
 
 
 
@@ -441,7 +517,6 @@ class ELF_Data_Processing_Class(object):
 		self.normal_plot()
 
 		if self.plot:
-			self.plot_antennas()
 			self.plot_processing()
 
 		res = {
@@ -453,55 +528,6 @@ class ELF_Data_Processing_Class(object):
 		}
 		return res
 
-	def plot_processing(self):
-		fig = plt.figure()
-		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
-		start = self.t.index(time_array[0])
-		end = self.t.index(time_array[-1])+1
-
-		ax1 = fig.add_subplot(3,1,1)
-		ax1.plot(time_array,self.channel1[start:end],label='data',color='gray')
-		ax1.plot(time_array,self.filtered1[start:end],label='filtered',color='red')
-		ax1.plot(time_array,self.mov_avg1[start:end],label='mov avg',color='black')
-		ax1.set_title(str('TGF'+str(self.id)+', '+str(self.datetime)+', '+'deg='+str(self.DEGREE)+', A='+str(round(self.A))))
-
-		ax1.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax1.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax1.axvline(self.time,color='grey')
-		ax1.legend(loc=1)
-		ax1.set_ylabel('Antenna NS')
-
-		ax2 = fig.add_subplot(3,1,2,sharex=ax1)
-		ax2.plot(time_array,self.channel2[start:end],label='data',color='gray')
-		ax2.plot(time_array,self.filtered2[start:end],label='filtered',color='blue')
-		ax2.plot(time_array,self.mov_avg2[start:end],label='mov avg',color='black')
-		ax2.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax2.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax2.axvline(self.time,color='grey')
-		ax2.legend(loc=1)
-		ax2.set_ylabel('Antenna EW')
-
-		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
-		ax3.plot(time_array,self.azimuth_positive[start:end],color='black',label='CG+',marker='o',markersize=1.5)
-		ax3.plot(time_array,self.azimuth_negative[start:end],color='violet',label='CG-',marker='o',markersize=1.5)
-		ax3.axhline(self.A,label='TGF',color='lime',linewidth=2)
-		ax3.axvline(self.time,color='grey')
-		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
-		ax3.axvline(self.time+self.dn,color='grey',linestyle='--')
-		ax3.legend(loc=1)
-		ax3.set_xlabel('Time, sec')
-		ax3.set_ylabel('Azimuth, degree')
-		ax3.set_xlim([time_array[0],time_array[-1]])
-
-		if len(str(self.id))<4:
-			sid = ''
-			for i in range(4-len(str(self.id))):
-				sid += '0'
-			sid += str(self.id)
-		else:
-			sid = str(self.id)
-
-		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 if __name__ == '__main__':
 	destination = '/root/ELF_data/'
