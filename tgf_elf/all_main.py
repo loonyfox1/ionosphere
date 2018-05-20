@@ -14,10 +14,13 @@ def process_func(args,counts,geog,dur,file_res):
 	# 			  res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']])
 	with open(file_res,'a') as f:
 		if res is not None:
-			f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:6d}{:8d}{:11.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:10.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
-				   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
-					res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
-					res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
+			f.write("%d\t%f\t%f\t%s\t%d\t%d\t%f\t%d\t%f\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\n" % (idd,args.lon,args.lat,str(args.datetime),counts,geog,dur,res['dist'], \
+			 res['day coef'],res['calc dd'],res['calc dn'],res['real delay'], \
+			 res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
+			# f.write('{:04d}{:10.3f}{:10.3f}    {:.23}{:6d}{:8d}{:11.2f}{:7d}{:8.2f}{:5d}{:5d}{:5d}{:10.1f}{:6.1f}{:8.1f}{:7.1f}{:6.1f}\n'.format \
+			# 	   (idd,args.lon,args.lat,args.datetime,counts,geog,dur,res['dist'],
+			# 		res['day coef'],res['calc dd'],res['calc dn'],res['real delay'],
+			# 		res['B pulse'],res['B noise'],res['c(r)'],res['P'],res['P min']))
 
 		# f.write(str(idd)+'\t'+str(args.lon)+'\t\t'+str(args.lat)+'\t\t'+args.datetime+'\t\t'+
 		# 		str(counts)+'\t\t'+str(geog)+'\t\t'+str(dur)+'\t\t'+str(res['dist'])+'\t\t'+
@@ -48,9 +51,9 @@ if __name__ == '__main__':
 	tgf_data = pd.read_table(file_tgf,sep=' ')
 
 	with open(file_res,'w') as f:
-		f.write('ID\t\tLON\t\t   LAT\t\tTIMESTAMP\t\t\t\t   COUNTS\tGEOG\tDUR\t'+
-				'   DIST\t   D/N\t  DD   DN'+
-				'\tDELTA\tBp\t   Bn\t cr\t\t p\t\tpmin\n')
+		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+
+				'DIST\tD/N\tDD\tDN'+
+				'\tDELTA\tBp\tBn\tcr\tp\tpmin\n')
 	idd_array = [i for i in range(sta,end)]
 	jobs = []
 	for idd in tgf_data.ID:

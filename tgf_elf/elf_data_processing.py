@@ -21,12 +21,12 @@ class ELF_Data_Processing_Class(object):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
 		self.filename = filename
-		self.dd = delta_day + 1/self.CONST_DELTAF
-		self.dn = delta_night + 1/self.CONST_DELTAF
+		self.dd = delta_day #+ 1/self.CONST_DELTAF
+		self.dn = delta_night #+ 1/self.CONST_DELTAF
 		self.DEGREE = degree
 		self.plot = plot
 		self.SIGMA = sigma
-		self.time = time+ 1/self.CONST_DELTAF #-1.6e-3 # NOTE: WTFFFFF??????
+		self.time = time + 1/self.CONST_DELTAF #-1.6e-3 # NOTE: WTFFFFF??????
 		self.A = A
 		self.id = idd
 		self.datetime = datetime
@@ -420,8 +420,8 @@ class ELF_Data_Processing_Class(object):
 		ax2.set_ylabel('Antenna EW')
 
 		ax3 = fig.add_subplot(3,1,3,sharex=ax1)
-		ax3.plot(time_array,self.azimuth_positive[start:end],color='green',label='CG+')
-		ax3.plot(time_array,self.azimuth_negative[start:end],color='violet',label='CG-')
+		ax3.plot(time_array,self.azimuth_positive[start:end],color='violet',label='CG+')
+		ax3.plot(time_array,self.azimuth_negative[start:end],color='green',label='CG-')
 		ax3.axhline(self.A,label='TGF',color='black')
 		ax3.axvline(self.time,color='grey')
 		ax3.axvline(self.time+self.dd,color='grey',linestyle=':')
@@ -490,9 +490,9 @@ class ELF_Data_Processing_Class(object):
 							  for i in range(len(self.total_data))]
 		self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
 
-		# plt.clf()
-		# plt.plot(self.t,self.channel1)
-		# plt.show()
+		plt.clf()
+		plt.plot(self.t,self.channel1)
+		plt.show()
 
 		# plt.clf()
 		# plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
