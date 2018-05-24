@@ -6,3 +6,5 @@ file_res = /home/foxy/ELF_data/results/result.csv
 
 sta = 1138
 end = 1143
+
+degree = 60

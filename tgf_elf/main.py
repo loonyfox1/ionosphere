@@ -137,7 +137,10 @@ class Main_Class(object):
 			'P min': round(self.std/self.c/1000,2),
 			'calc dd': int(self.dd*1000),
 			'calc dn': int(self.dn*1000),
-			'real delay': int(self.delta*1000)
+			'real delay': int(self.delta*1000),
+			'Ap': int(self.Ap),
+			'An': int(self.An),
+			'A': int(self.A)
 		}
 		return res
 
@@ -229,6 +232,8 @@ class Main_Class(object):
 		self.dn = res['dn']
 		self.B = res['B']
 		self.std = res['std']
+		self.Ap = res['Ap']
+		self.An = res['An']
 
 		# calculate charge moment p
 		charge_moment_class = Charge_Moment_Class(B=self.B,d=self.d,

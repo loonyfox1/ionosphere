@@ -18,29 +18,40 @@ def plot_geog(data):
     plt.show()
 
 if __name__ == '__main__':
-    data = pd.read_table('/home/foxy/ELF_data/results/result.csv',sep='\t',index_col=False)
+    data = pd.read_table('/home/foxy/Documents/result_Ela7_180523.txt',sep='\t',index_col=False)
 
-    print(data)
-    # plot_geog(data)
+    res = []
+    for p,pmin in zip(data.p,data.pmin):
+        if pmin!=0:
+            res.append(p/pmin)
+        else: res.append(0)
 
-    plt.scatter(data.COUNTS[data.GEOG==0],data.p[data.GEOG==0],color='red')
-    plt.scatter(data.COUNTS[data.GEOG==1],data.p[data.GEOG==1],color='green')
-    plt.scatter(data.COUNTS[data.GEOG==2],data.p[data.GEOG==2],color='blue')
+    plt.scatter(data.ID,res)
+    plt.axhline(1)
+    plt.axhline(3)
     plt.show()
 
-
-    plt.hist(data.p[data.GEOG==1],100,color='green')
-    plt.hist(data.p[data.GEOG==2],100,color='blue')
-    plt.hist(data.p[data.GEOG==0],100,color='red')
-    plt.show()
-
-    dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]
-    plt.scatter(data.ID[data.GEOG==0],dt(data.TIMESTAMP[data.GEOG==0]),s=1,color='red')
-    plt.scatter(data.ID[data.GEOG==1],dt(data.TIMESTAMP[data.GEOG==1]),s=1,color='green')
-    plt.scatter(data.ID[data.GEOG==2],dt(data.TIMESTAMP[data.GEOG==2]),s=1,color='blue')
-    plt.show()
-
-    plt.scatter(data.Bn,data.Bp)
-    plt.show()
+    # print(data)
+    # # plot_geog(data)
+    #
+    # plt.scatter(data.COUNTS[data.GEOG==0],data.p[data.GEOG==0],color='red')
+    # plt.scatter(data.COUNTS[data.GEOG==1],data.p[data.GEOG==1],color='green')
+    # plt.scatter(data.COUNTS[data.GEOG==2],data.p[data.GEOG==2],color='blue')
+    # plt.show()
+    #
+    #
+    # plt.hist(data.p[data.GEOG==1],100,color='green')
+    # plt.hist(data.p[data.GEOG==2],100,color='blue')
+    # plt.hist(data.p[data.GEOG==0],100,color='red')
+    # plt.show()
+    #
+    # dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]
+    # plt.scatter(data.ID[data.GEOG==0],dt(data.TIMESTAMP[data.GEOG==0]),s=1,color='red')
+    # plt.scatter(data.ID[data.GEOG==1],dt(data.TIMESTAMP[data.GEOG==1]),s=1,color='green')
+    # plt.scatter(data.ID[data.GEOG==2],dt(data.TIMESTAMP[data.GEOG==2]),s=1,color='blue')
+    # plt.show()
+    #
+    # plt.scatter(data.Bn,data.Bp)
+    # plt.show()
 
     # plt.hist(data.)

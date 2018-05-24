@@ -112,7 +112,7 @@ class ELF_Data_Processing_Class(object):
 		# print('Time_Detrending: ',time.time()-start_time)
 		return detrended,mov_avg
 
-	def peaking(self,detrended):
+	def sigma_clipping(self,detrended):
 		# start_time = time.time()
 		peaked = detrended[:]
 		# check = 10000
@@ -472,12 +472,12 @@ class ELF_Data_Processing_Class(object):
 		# processing for channel1
 		self.filtered1 = self.filtering(self.channel1)
 		self.detrended1,self.mov_avg1 = self.detrending(self.filtered1)
-		self.std1 = self.peaking(self.detrended1)
+		self.std1 = self.sigma_clipping(self.detrended1)
 
 		# processing for channel2
 		self.filtered2 = self.filtering(self.channel2)
 		self.detrended2,self.mov_avg2 = self.detrending(self.filtered2)
-		self.std2 = self.peaking(self.detrended2)
+		self.std2 = self.sigma_clipping(self.detrended2)
 
 		# if self.plot:
 		# 	self.plot_processing()
@@ -490,9 +490,9 @@ class ELF_Data_Processing_Class(object):
 							  for i in range(len(self.total_data))]
 		self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
 
-		plt.clf()
-		plt.plot(self.t,self.channel1)
-		plt.show()
+		# plt.clf()
+		# plt.plot(self.t,self.channel1)
+		# plt.show()
 
 		# plt.clf()
 		# plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
@@ -507,16 +507,15 @@ class ELF_Data_Processing_Class(object):
 		# plt.show()
 
 
-
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
 
 		# print(self.time,self.time_peak)
 		# print(self.dd,self.dn)
 
-		self.normal_plot()
 
 		if self.plot:
+			self.normal_plot()
 			self.plot_processing()
 
 		res = {
@@ -524,7 +523,9 @@ class ELF_Data_Processing_Class(object):
 			'std': self.std_total/self.CONST_SCALE,
 			'dd': self.dd,
 			'dn': self.dn,
-			'delta': self.time_peak-self.time
+			'delta': self.time_peak-self.time,
+			'Ap': self.azimuth_positive[self.index],
+			'An': self.azimuth_negative[self.index]
 		}
 		return res
 
