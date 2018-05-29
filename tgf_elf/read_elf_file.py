@@ -1,5 +1,7 @@
 from __future__ import print_function
 import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib as mpl
 
 class Read_ELF_Class(object):
 	def __init__(self,filename,destination_in):
@@ -10,7 +12,7 @@ class Read_ELF_Class(object):
 	def header(self):
 		with open(self.dest_in+self.filename, "rb") as f:
 			header = str(f.read(46))
-		return header[2:-13]
+		return header[:-14]
 
 	def read_bytes(self):
 		byte_array = []
@@ -56,14 +58,14 @@ class Read_ELF_Class(object):
 			k += 1
 		return channel1[:-k-1],channel2[:-k-1]
 
-	def read_and_save(self):
+	def read(self):
 		self.fileheader = self.header()
 		self.channel1,self.channel2 = self.hex_to_decimal()
 		if len(self.channel1)>len(self.channel2):
 			self.channel1 = self.channel1[:len(self.channel2)]
 		if len(self.channel1)<len(self.channel2):
 			self.channel2 = self.channel2[:len(self.channel1)]
-
+		# self.plot()
 		return self.channel1,self.channel2
 
 		# with open(self.dest_out+self.filename, "w") as f:
@@ -74,15 +76,23 @@ class Read_ELF_Class(object):
 		# return self.filename
 
 	def plot(self):
-		t = [i*300/len(self.channel1) for i in range(len(self.channel1))]
+		plt.rc('axes', titlesize=15)
+		plt.rc('legend', fontsize=15)
+		plt.rc('axes', labelsize=15)
+
+		t = [i*300./len(self.channel1) for i in range(len(self.channel1))]
 		plt.clf()
-		plt.plot(t,self.channel1,color='blue',label='NS')
-		plt.plot(t,self.channel2,color='red', label='EW')
+		plt.plot(t,np.array(self.channel1),color='blue',label='NS')
+		plt.plot(t,np.array(self.channel2),color='red', label='EW')
 		plt.legend()
-		plt.grid()
+		# plt.grid()
 		plt.ylabel('Amplitude')
+		h = self.header()
 		plt.xlabel('Time, sec')
-		plt.title(self.header())
+		plt.xticks(range(0,301,10))
+		plt.yticks(range(20000,46001,2000))
+		plt.xlim(0,300)
+		plt.title(h[:16]+' '+h[16:])
 		plt.show()
 
 if __name__ == '__main__':

@@ -79,7 +79,7 @@ class Charge_Moment_Class(object):
         # print("Time_Filter: ",time.time()-start_time)
         return res
 
-    def ionosphere_transfer_function_worker(self,input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2):
+    def itf_worker(self,input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2):
         while len(input_array)>0:
             time_fi=0
             if len(input_array)>0:
@@ -107,7 +107,7 @@ class Charge_Moment_Class(object):
 
         worker_array=[]
         for index_worker in range(100):
-            worker_array.append(threading.Thread(target=self.ionosphere_transfer_function_worker,args=(input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2)))
+            worker_array.append(threading.Thread(target=self.itf_worker,args=(input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2)))
             worker_array[-1].start()
         [x.join() for x in worker_array]
         for fi in self.f:

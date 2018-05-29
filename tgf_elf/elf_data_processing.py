@@ -39,7 +39,7 @@ class ELF_Data_Processing_Class(object):
 
 	def read_data(self):
 		read_class = Read_ELF_Class(filename=self.filename,destination_in=self.dest_in)
-		self.channel1,self.channel2 = read_class.read_and_save()
+		self.channel1,self.channel2 = read_class.read()
 
 		return self.channel1,self.channel2,len(self.channel1)
 
@@ -47,7 +47,11 @@ class ELF_Data_Processing_Class(object):
 		data = np.array([sqrt(self.detrended1[i]*self.detrended1[i]+self.detrended2[i]*self.detrended2[i])
 					 for i in range(self.N)])
 		data[data==0] = 1e-9
-		return data
+		std_total = [np.sqrt((self.detrended1[i]/data[i]*self.std1)**2 + \
+							 (self.detrended2[i]/data[i]*self.std2)**2)
+							  for i in range(len(data))]
+		std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
+		return data,std_total
 
 	def filtering(self,data):
 		b, a = signal.butter(N=3,Wn=[(50-0.5)/self.CONST_FN,(50+0.5)/self.CONST_FN],
@@ -188,7 +192,7 @@ class ELF_Data_Processing_Class(object):
 			  str(round(sec%60.,3))
 		return res
 
-	def normal_plot(self):
+	def plot_peak(self):
 		font = {'size'   : 3}
 		mpl.rc('font', **font)
 		mpl.rcParams['axes.linewidth'] = 0.3
@@ -452,6 +456,9 @@ class ELF_Data_Processing_Class(object):
 
 		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
+	def plot():
+		pass
+
 	def data_processing(self):
 		self.channel1,self.channel2,self.N = self.read_data()
 		# self.channel1 = [chi/self.CONST_SCALE for chi in self. channel1]
@@ -483,12 +490,12 @@ class ELF_Data_Processing_Class(object):
 		# 	self.plot_processing()
 
 		# data = sqrt(channel1**2 + channel2**2)
-		self.total_data = self.channels_to_data()
+		self.total_data,self.std_total = self.channels_to_data()
 
-		std_total = [np.sqrt((self.detrended1[i]/self.total_data[i]*self.std1)**2 + \
-							 (self.detrended2[i]/self.total_data[i]*self.std2)**2)
-							  for i in range(len(self.total_data))]
-		self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
+		# std_total = [np.sqrt((self.detrended1[i]/self.total_data[i]*self.std1)**2 + \
+		# 					 (self.detrended2[i]/self.total_data[i]*self.std2)**2)
+		# 					  for i in range(len(self.total_data))]
+		# self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
 
 		# plt.clf()
 		# plt.plot(self.t,self.channel1)
@@ -515,7 +522,7 @@ class ELF_Data_Processing_Class(object):
 
 
 		if self.plot:
-			self.normal_plot()
+			self.plot_peak()
 			self.plot_processing()
 
 		res = {
