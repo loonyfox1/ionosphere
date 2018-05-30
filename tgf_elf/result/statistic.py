@@ -18,17 +18,21 @@ def plot_geog(data):
     plt.show()
 
 if __name__ == '__main__':
-    data = pd.read_table('/home/foxy/Documents/result_Ela7_180523.txt',sep='\t',index_col=False)
+    data = pd.read_table('/home/foxy/Documents/result_Ela7_180529.txt',sep='\t',index_col=False)
 
     res = []
-    for p,pmin in zip(data.p,data.pmin):
+    for p,pmin in zip(data.P,data.PMIN):
         if pmin!=0:
             res.append(p/pmin)
         else: res.append(0)
 
-    plt.scatter(data.ID,res)
+    res.sort()
+    plt.scatter(range(len(res)),res)
     plt.axhline(1)
     plt.axhline(3)
+    plt.show()
+
+    plt.hist(res,100)
     plt.show()
 
     # print(data)

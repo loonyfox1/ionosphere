@@ -82,8 +82,8 @@ class Read_ELF_Class(object):
 
 		t = [i*300./len(self.channel1) for i in range(len(self.channel1))]
 		plt.clf()
-		plt.plot(t,np.array(self.channel1),color='blue',label='NS')
-		plt.plot(t,np.array(self.channel2),color='red', label='EW')
+		plt.plot(t,np.array(self.channel1),color='red',label='NS')
+		plt.plot(t,np.array(self.channel2),color='blue', label='EW')
 		plt.legend()
 		# plt.grid()
 		plt.ylabel('Amplitude')

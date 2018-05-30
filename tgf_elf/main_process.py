@@ -52,7 +52,7 @@ class Main_Class(object):
 		# FN - naquist frequency
 		CONST_FN = CONST_FS/2
 		# SCALE - full scale, pT/scale
-		CONST_SCALE = 2**16/3353e-12
+		CONST_SCALE = (2**16/3353e-12,2**16/3906e-12)
 		# DELTAF - energy bandwidth of the receiver, Hz = 1/sec
 		CONST_DELTAF = 304.9 # NOTE: clarify
 		# HI - correction coefficient of lfilter
@@ -133,8 +133,8 @@ class Main_Class(object):
 			'c(r)': round(self.c*1e17,1),
 			'B pulse': round(self.B*1e12,1),
 			'B noise': round(self.std*1e12,1),
-			'P': round(self.p/1000,1),
-			'P min': round(self.std/self.c/1000,2),
+			'P': round(self.p/1000,2),
+			'P min': round(self.std/self.c/1000,3),
 			'calc dd': int(self.dd*1000),
 			'calc dn': int(self.dn*1000),
 			'real delay': int(self.delta*1000),

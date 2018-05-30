@@ -7,10 +7,9 @@ import time
 import numpy as np
 import matplotlib as mpl
 from read_elf_file import Read_ELF_Class
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
-# font = {'size'   : 8}
-#
-# matplotlib.rc('font', **font)
 
 class ELF_Data_Processing_Class(object):
 	# P = pi/180
@@ -20,6 +19,11 @@ class ELF_Data_Processing_Class(object):
 				 degree,sigma,plot,datetime,idd,dest_img,dest_in):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
+		# print(filename,datetime)
+		if int(filename[5:13])>=20130401 and int(filename[5:13])<=20131130:
+			self.CONST_SCALE = self.CONST_SCALE[1]
+		else:
+			self.CONST_SCALE = self.CONST_SCALE[0]
 		self.filename = filename
 		self.dd = delta_day #+ 1/self.CONST_DELTAF
 		self.dn = delta_night #+ 1/self.CONST_DELTAF
@@ -117,62 +121,64 @@ class ELF_Data_Processing_Class(object):
 		return detrended,mov_avg
 
 	def sigma_clipping(self,detrended):
-		# start_time = time.time()
-		peaked = detrended[:]
-		# check = 10000
-		# while check>10:
-		# 	check = 0
-		# 	std = nanstd(peaked)
-		# 	for i in range(self.N):
-		# 		if abs(peaked[i])>self.SIGMA*std:
-		# 			peaked[i] = nan
-		# 			check += 1
-		# plt.plot(self.t,peaked,label='step 0')
+		peaked = np.array(detrended[:])
+
+		# font = {'size'   : 10}
+		# mpl.rc('font', **font)
+		#
+		# plt.rc('axes', titlesize=15)
+		# plt.rc('legend', fontsize=15)
+		# plt.rc('axes', labelsize=15)
+		# fig, ax = plt.subplots()
+		#
+		# axins = zoomed_inset_axes(ax, 10, loc=7, borderpad=2)
+		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 0',color='skyblue')
+		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 0',color='skyblue')
 
 		std0 = nanstd(peaked)
-		# plt.axhline(std0,c='orange')
-		# plt.axhline(-std0,c='orange')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std0:
 				peaked[i] = nan #self.SIGMA*std0*sign(peaked[i])
-		# plt.plot(self.t,eaked,label='step 1')
+		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 1',color='deepskyblue')
+		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 1',color='deepskyblue')
 
 		std1 = nanstd(peaked)
-		# plt.axhline(std1,c='red')
-		# plt.axhline(-std1,c='red')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std1:
 				peaked[i] = nan #self.SIGMA*std1*sign(peaked[i])
-		# plt.plot(self.t,peaked,label='step 2')
+		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 2',color='dodgerblue')
+		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 2',color='dodgerblue')
 
 		std2 = nanstd(peaked)
-		# plt.axhline(std2,c='green')
-		# plt.axhline(-std2,c='green')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std2:
 				peaked[i] = nan #self.SIGMA*std2*sign(peaked[i])
-		# plt.plot(self.t,peaked,label='step 3')
+		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 3',color='blue')
+		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 3',color='blue')
 
 		std3 = nanstd(peaked)
-		# plt.axhline(std3,c='black')
-		# plt.axhline(-std3,c='black')
 
 		for i in range(self.N):
 			if abs(peaked[i])>self.SIGMA*std3:
 				peaked[i] = nan #self.SIGMA*std3*sign(peaked[i])
-		# plt.plot(self.t,peaked,label='step 4')
+		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 4',color='darkblue')
+		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 4',color='darkblue')
 
-		# plt.legend()
-		# plt.grid()
-		# plt.xlabel('Time, sec')
-		# plt.ylabel('Amplitude')
-		# plt.title('Peaking '+self.filename)
-		# if self.plot:
-		# 	plt.show()
-		# print('Time_Peaking: ',time.time()-start_time)
+		# axins.set_xlim(40,50)
+		# axins.set_ylim(-900/self.CONST_SCALE/1e-12, 900/self.CONST_SCALE/1e-12)
+		# plt.yticks(visible=True)
+		# plt.xticks(visible=False)
+		# mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5",zorder=4)
+		# ax.set_title('Stacja ELF ELA10 20.08.2013 15:25')
+		# ax.set_ylabel('Amplitude, pT')
+		# ax.set_xlabel('Time, sec')
+		# ax.set_xlim(0,300)
+		# ax.set_xticks(range(0,301,10))
+		# ax.set_yticks(range(-450,551,50))
+		# plt.show()
 		return std3
 
 	def azimuth(self):
@@ -457,24 +463,34 @@ class ELF_Data_Processing_Class(object):
 		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 	def plot():
-		pass
+		font = {'size'   : 10}
+		mpl.rc('font', **font)
+
+		plt.rc('axes', titlesize=15)
+		plt.rc('legend', fontsize=15)
+		plt.rc('axes', labelsize=15)
+		plt.clf()
+		plt.plot(self.t,np.array(self.channel1),color='gray',linewidth=1,zorder=1)
+		plt.plot(self.t,self.detrended1+np.array(self.mov_avg1),label='NS',color='red',linewidth=1,zorder=2)
+		plt.plot(self.t,self.mov_avg1,color='black',linewidth=1,zorder=3)
+		plt.plot(self.t,np.array(self.channel2),color='gray',linewidth=1,zorder=1)
+		plt.plot(self.t,self.detrended2+np.array(self.mov_avg2),label='EW',color='blue',linewidth=1,zorder=2)
+		plt.plot(self.t,self.mov_avg2,color='black',linewidth=1,zorder=3)
+		plt.legend()
+		plt.title('Stacja ELF ELA10 20.08.2013 15:25')
+		plt.ylabel('Amplitude')
+		plt.xlabel('Time, sec')
+		plt.xlim(211.689,212.014)
+		plt.ylim(34200,35400)
+		plt.yticks(range(34100,35401,200))
+		plt.xticks(np.arange(211.689,212.016,0.02))
+		plt.show()
 
 	def data_processing(self):
 		self.channel1,self.channel2,self.N = self.read_data()
-		# self.channel1 = [chi/self.CONST_SCALE for chi in self. channel1]
-		# self.channel2 = [chi/self.CONST_SCALE for chi in self. channel2]
 
 		# t - time array
 		self.t = [i*300./self.N for i in range(self.N)]
-
-		# plt.clf()
-		# plt.plot(self.t,self.channel1,color='blue',label='NS')
-		# plt.plot(self.t,self.channel2,color='red',label='EW')
-		# plt.legend()
-		# plt.title('2008-11-13 07:40 ELA 7')
-		# plt.ylabel('Amplitude')
-		# plt.xlabel('Time, sec')
-		# plt.show()
 
 		# processing for channel1
 		self.filtered1 = self.filtering(self.channel1)
@@ -486,44 +502,17 @@ class ELF_Data_Processing_Class(object):
 		self.detrended2,self.mov_avg2 = self.detrending(self.filtered2)
 		self.std2 = self.sigma_clipping(self.detrended2)
 
-		# if self.plot:
-		# 	self.plot_processing()
-
 		# data = sqrt(channel1**2 + channel2**2)
 		self.total_data,self.std_total = self.channels_to_data()
-
-		# std_total = [np.sqrt((self.detrended1[i]/self.total_data[i]*self.std1)**2 + \
-		# 					 (self.detrended2[i]/self.total_data[i]*self.std2)**2)
-		# 					  for i in range(len(self.total_data))]
-		# self.std_total = (np.nanmax(std_total)-np.nanmin(std_total))/2+np.nanmin(std_total)
-
-		# plt.clf()
-		# plt.plot(self.t,self.channel1)
-		# plt.show()
-
-		# plt.clf()
-		# plt.plot(self.t,self.channel1-np.array(self.mov_avg1),label='data')
-		# plt.plot(self.t,self.filtered1-np.array(self.mov_avg1),label='filtered')
-		# plt.plot(self.t,self.detrended1,label='detrended')
-		# plt.axhline(self.std1,color='yellow')
-		# plt.axhline(0,color='black')
-		# plt.axhline(-self.std1,color='yellow')
-		# plt.axvline(self.dd+self.time,color='black')
-		# plt.axvline(self.dn+self.time,color='black')
-		# plt.legend()
-		# plt.show()
-
 
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
 
-		# print(self.time,self.time_peak)
-		# print(self.dd,self.dn)
+		# if self.plot:
+		# 	self.plot_peak()
+		# 	self.plot_processing()
 
 
-		if self.plot:
-			self.plot_peak()
-			self.plot_processing()
 
 		res = {
 			'B': self.B/self.CONST_SCALE,
