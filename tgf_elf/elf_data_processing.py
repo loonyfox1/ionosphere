@@ -19,11 +19,6 @@ class ELF_Data_Processing_Class(object):
 				 degree,sigma,plot,datetime,idd,dest_img,dest_in):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
-		# print(filename,datetime)
-		if int(filename[5:13])>=20130401 and int(filename[5:13])<=20131130:
-			self.CONST_SCALE = self.CONST_SCALE[1]
-		else:
-			self.CONST_SCALE = self.CONST_SCALE[0]
 		self.filename = filename
 		self.dd = delta_day #+ 1/self.CONST_DELTAF
 		self.dn = delta_night #+ 1/self.CONST_DELTAF
@@ -40,6 +35,10 @@ class ELF_Data_Processing_Class(object):
 			self.CONST_INDENT = 1
 		else:
 			self.CONST_INDENT = 3
+			if int(filename[5:13])>=20130401 and int(filename[5:13])<=20131130:
+				self.CONST_SCALE = self.CONST_SCALE[1]
+			else:
+				self.CONST_SCALE = self.CONST_SCALE[0]
 
 	def read_data(self):
 		read_class = Read_ELF_Class(filename=self.filename,destination_in=self.dest_in)
@@ -508,9 +507,9 @@ class ELF_Data_Processing_Class(object):
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
 
-		# if self.plot:
-		# 	self.plot_peak()
-		# 	self.plot_processing()
+		if self.plot:
+			self.plot_peak()
+			self.plot_processing()
 
 
 
