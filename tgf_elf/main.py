@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 	with open(file_res,'w') as f:
 		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+
-				'DIST\tD/N\tDD\tDN'+
+				'DIST\tDC\tDD\tDN'+
 				'\tDELTA\tBP\tBN\tCR\tP\tPMIN\tAP\tAN\tATGF\n')
 	idd_array = [i for i in range(sta,end)]
 	jobs = []

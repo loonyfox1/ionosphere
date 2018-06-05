@@ -171,16 +171,20 @@ class Charge_Moment_Class(object):
 		return res_c
 
 	def ionosphere_transfer_function_fft(self):
-		res = 0
+		d_total = self.total_distance()
+		dc = int(self.d[0][0]/d_total*self.N)
+
+		res = []
 		for check_day in self.d:
 			self.day = check_day[1]
 			self.r = check_day[0]
 			if self.r==0:
-				res += 0
+				res.append([])
 			else:
-				res_itf = self.ionosphere_transfer_function()
-				res += np.fft.ifft(res_itf)
-		return np.fft.fft(res)
+				res_itf = list(np.fft.ifft(self.ionosphere_transfer_function()))
+				res.append(res_itf)
+
+		return np.fft.fft(res[0][:dc]+res[1][dc:])
 
 	def integrand(self):
 		res_rtf = self.receiver_transfer_function()
