@@ -181,10 +181,18 @@ class Charge_Moment_Class(object):
 			if self.r==0:
 				res.append([])
 			else:
-				res_itf = list(np.fft.ifft(self.ionosphere_transfer_function()))
+				itf = self.ionosphere_transfer_function()
+				n = int(len(itf)/2.)
+				res_itf = list(np.fft.ifft(itf[n:]+itf[:n]))
 				res.append(res_itf)
-
-		return np.fft.fft(res[0][:dc]+res[1][dc:])
+		resc = res[0][:dc]+res[1][dc:]
+		# n = int(len(resc)/2.)
+		# res = np.fft.fft(resc[n:]+resc[:n])
+		res = np.fft.fft(resc)
+		plt.clf()
+		plt.plot(res)
+		plt.show()
+		return res
 
 	def integrand(self):
 		res_rtf = self.receiver_transfer_function()
