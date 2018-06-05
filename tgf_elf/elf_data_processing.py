@@ -461,13 +461,13 @@ class ELF_Data_Processing_Class(object):
 
 		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
-	def plot():
-		font = {'size'   : 10}
+	def plotg(self):
+		font = {'size'   : 20}
 		mpl.rc('font', **font)
 
-		plt.rc('axes', titlesize=15)
-		plt.rc('legend', fontsize=15)
-		plt.rc('axes', labelsize=15)
+		plt.rc('axes', titlesize=20)
+		plt.rc('legend', fontsize=20)
+		plt.rc('axes', labelsize=20)
 		plt.clf()
 		plt.plot(self.t,np.array(self.channel1),color='gray',linewidth=1,zorder=1)
 		plt.plot(self.t,self.detrended1+np.array(self.mov_avg1),label='NS',color='red',linewidth=1,zorder=2)
@@ -482,7 +482,7 @@ class ELF_Data_Processing_Class(object):
 		plt.xlim(211.689,212.014)
 		plt.ylim(34200,35400)
 		plt.yticks(range(34100,35401,200))
-		plt.xticks(np.arange(211.689,212.016,0.02))
+		plt.xticks(np.arange(211.689,212.016,0.05))
 		plt.show()
 
 	def data_processing(self):
@@ -507,11 +507,11 @@ class ELF_Data_Processing_Class(object):
 		self.azimuth_positive,self.azimuth_negative = self.azimuth()
 		self.B,self.time_peak,self.index = self.find_peak()
 
+		# self.plotg()
+
 		if self.plot:
 			self.plot_peak()
 			self.plot_processing()
-
-
 
 		res = {
 			'B': self.B/self.CONST_SCALE,

@@ -18,7 +18,7 @@ def plot_geog(data):
     plt.show()
 
 if __name__ == '__main__':
-    data = pd.read_table('/home/foxy/Documents/result_Ela7_180531.txt',sep='\t',index_col=False)
+    data = pd.read_table('/home/foxy/Documents/result_Ela7_180605.txt',sep='\t',index_col=False)
 
     plt.scatter(data.DIST,data.DELTA)
     plt.ylabel('Delta, ms')
@@ -74,24 +74,24 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    plt.hist(data.PMIN[data['D/N']>0.99],100,color='orange',label='day',alpha=0.5)
-    plt.hist(data.PMIN[data['D/N']<0.001],100,color='darkblue',label='night',alpha=0.5)
+    plt.hist(data.PMIN[abs(data['D/N'])>0.99],100,color='orange',label='day',alpha=0.5)
+    plt.hist(data.PMIN[abs(data['D/N'])<0.001],100,color='darkblue',label='night',alpha=0.5)
     plt.ylabel('Quantity')
     plt.xlabel('Pmin')
     plt.legend()
     plt.show()
 
     plt.scatter(data.DIST,data.CR,color='grey')
-    plt.scatter(data.DIST[data['D/N']>0.99],data.CR[data['D/N']>0.99],color='orange',label='day')
-    plt.scatter(data.DIST[data['D/N']<0.001],data.CR[data['D/N']<0.001],color='darkblue',label='night')
+    plt.scatter(data.DIST[abs(data['D/N'])>0.99],data.CR[abs(data['D/N'])>0.99],color='orange',label='day')
+    plt.scatter(data.DIST[abs(data['D/N'])<0.001],data.CR[abs(data['D/N'])<0.001],color='darkblue',label='night')
     plt.ylabel('c(r)')
     plt.xlabel('Dist, km')
     plt.legend()
     plt.show()
 
 
-    plt.scatter(data.COUNTS[data['D/N']>0.99],data.BP[data['D/N']>0.99],color='orange')
-    plt.scatter(data.COUNTS[data['D/N']<0.001],data.BP[data['D/N']<0.001],color='darkblue')
+    plt.scatter(data.COUNTS[abs(data['D/N'])>0.99],data.BP[abs(data['D/N'])>0.99],color='orange')
+    plt.scatter(data.COUNTS[abs(data['D/N'])<0.001],data.BP[abs(data['D/N'])<0.001],color='darkblue')
     plt.show()
     #
     # dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]

@@ -5,7 +5,7 @@ from main_process import Main_Class
 # import main
 from multiprocessing import Process
 import argparse
-
+import os
 
 def process_func(args,counts,geog,dur,file_res):
 	res = Main_Class(args).main()
@@ -50,6 +50,9 @@ if __name__ == '__main__':
 			deg = int(line[6:-1]) if 'deg' in line else deg
 	############################################################################
 	tgf_data = pd.read_table(file_tgf,sep=' ')
+
+	if os.path.exists(dest_img) == False:
+		os.mkdir(dest_img)
 
 	with open(file_res,'w') as f:
 		f.write('ID\tLON\tLAT\tTIMESTAMP\tCOUNTS\tGEOG\tDUR\t'+

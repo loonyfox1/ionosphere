@@ -29,11 +29,11 @@ class Charge_Moment_Class(object):
 		self.CONST_WN1,self.CONST_WN2,self.CONST_WN3 = stantion()
 		# f - array of frequencies
 		self.f = self.frequency_array()
-		print(set([self.f[i+1]-self.f[i] for i in range(len(self.f)-1)]))
+		# print(set([self.f[i+1]-self.f[i] for i in range(len(self.f)-1)]))
 		# self.filter = list(filt)
 
 	def charge_moment(self):
-		c = float(self.c_fun())
+		c = float(self.c_fun_fft()) #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		res = {
 			'p': float(self.B/c),
 			'c': c
@@ -52,12 +52,12 @@ class Charge_Moment_Class(object):
 
 	def receiver_transfer_function(self):
 		# start_time=time.time()
-		font = {'size'   : 10}
+		font = {'size'   : 20}
 		mpl.rc('font', **font)
 
-		plt.rc('axes', titlesize=15)
-		plt.rc('legend', fontsize=15)
-		plt.rc('axes', labelsize=15)
+		plt.rc('axes', titlesize=25)
+		plt.rc('legend', fontsize=25)
+		plt.rc('axes', labelsize=25)
 
 		if self.CONST_DELTAF==51.8:
 			file_name='filter_ela7.dump'
@@ -75,30 +75,30 @@ class Charge_Moment_Class(object):
 			b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
 			z1 = signal.lfilter(b, a, z0)
 
-			res1 = fft.rfft(z1)
+			res1 = absolute(fft.rfft(z1))
 			res1=res1/max(res1)
 
 			b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/self.CONST_FN, analog=False)
 			z2 = signal.lfilter(b, a, z1)
 
-			res2 = fft.rfft(z2)
+			res2 = absolute(fft.rfft(z2))
 			res2=res2/max(res2)
 
 			b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
 			z3 = signal.lfilter(b, a, z2)
 
-			res = fft.rfft(z3)
+			res = absolute(fft.rfft(z3))
 			res=res/max(res)
 
 			with open(file_name, 'wb') as pickle_file:
 				pickle.dump(res, pickle_file)
 
 			plt.clf()
-			plt.plot(self.frequency_array(),res1[1:],label=r'$G_2(f)$',color='slategrey')
-			plt.plot(self.frequency_array(),res2[1:],label=r'$G_2(f)+G_3(f)$',color='steelblue')
-			plt.plot(self.frequency_array(),res[1:],label=r'$G_2(f)+2G_3(f)$',color='blue')
+			plt.plot(self.frequency_array(),res1[1:],label=r'$G_2(f)$',color='slategrey',linewidth=3)
+			plt.plot(self.frequency_array(),res2[1:],label=r'$G_2(f)+G_3(f)$',color='steelblue',linewidth=3)
+			plt.plot(self.frequency_array(),res[1:],label=r'$G_2(f)+2G_3(f)$',color='blue',linewidth=3)
 			plt.xlim(0,450)
-			plt.xticks(range(0,451,20))
+			plt.xticks(range(0,451,50))
 			plt.xlabel('Frequency, Hz')
 			plt.ylabel('Gain')
 			plt.grid()
@@ -164,9 +164,27 @@ class Charge_Moment_Class(object):
 		self.total_r = self.total_distance()
 		return res/k*self.total_r
 
+	def c_fun_fft(self):
+		res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
+						trapz(transpose(array(self.integrand())),
+						x=self.f, axis=1))
+		return res_c
+
+	def ionosphere_transfer_function_fft(self):
+		res = 0
+		for check_day in self.d:
+			self.day = check_day[1]
+			self.r = check_day[0]
+			if self.r==0:
+				res += 0
+			else:
+				res_itf = self.ionosphere_transfer_function()
+				res += np.fft.ifft(res_itf)
+		return np.fft.fft(res)
+
 	def integrand(self):
 		res_rtf = self.receiver_transfer_function()
-		res_itf = self.ionosphere_transfer_function()
+		res_itf = self.ionosphere_transfer_function_fft()
 		return [absolute(res_itf[i]*res_rtf[i])*absolute(res_itf[i]*res_rtf[i])
 				for i in range(int(len(res_itf)))]
 
