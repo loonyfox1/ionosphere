@@ -189,9 +189,9 @@ class Charge_Moment_Class(object):
 		# n = int(len(resc)/2.)
 		# res = np.fft.fft(resc[n:]+resc[:n])
 		res = np.fft.fft(resc)
-		plt.clf()
-		plt.plot(res)
-		plt.show()
+		# plt.clf()
+		# plt.plot(resc)
+		# plt.show()
 		return res
 
 	def integrand(self):
