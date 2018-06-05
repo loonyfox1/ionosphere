@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 
 
-data7 = pd.read_table('/home/foxy/Documents/result_Ela7_180529.txt')
-data1 = pd.read_table('/home/foxy/Documents/result_Ela10_180529.txt')
+data7 = pd.read_table('/home/foxy/Documents/result_Ela7_180531.txt')
+data1 = pd.read_table('/home/foxy/Documents/result_Ela10_180531.txt')
 
 # for id in data1.ID:
 #     try:
@@ -47,14 +47,14 @@ data1 = pd.read_table('/home/foxy/Documents/result_Ela10_180529.txt')
 res = []
 for id in data1.ID:
     try:
-        res.append((data1.CR[data1.ID==id].values[0]/data7.CR[data7.ID==id].values[0])**2)
-        plt.scatter(data7.CR[data7.ID==id].values[0],data1.CR[data1.ID==id].values[0],color='blue')
+        res.append((data1.P[data1.ID==id].values[0]/data7.P[data7.ID==id].values[0])**2)
+        plt.scatter(data7.P[data7.ID==id].values[0],data1.P[data1.ID==id].values[0],color='blue')
     except:
         pass
 plt.plot(range(30000),range(30000),color='black')
 plt.xlabel('ELA 7')
 plt.ylabel('ELA 10')
-plt.title('CR')
+plt.title('P')
 plt.show()
 
 # plt.plot(res)

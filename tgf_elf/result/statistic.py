@@ -18,7 +18,12 @@ def plot_geog(data):
     plt.show()
 
 if __name__ == '__main__':
-    data = pd.read_table('/home/foxy/Documents/result_Ela7_180529.txt',sep='\t',index_col=False)
+    data = pd.read_table('/home/foxy/Documents/result_Ela7_180531.txt',sep='\t',index_col=False)
+
+    plt.scatter(data.DIST,data.DELTA)
+    plt.ylabel('Delta, ms')
+    plt.xlabel('Dist, km')
+    plt.show()
 
     res = []
     for p,pmin in zip(data.P,data.PMIN):
@@ -28,33 +33,79 @@ if __name__ == '__main__':
 
     res.sort()
     plt.scatter(range(len(res)),res)
-    plt.axhline(1)
-    plt.axhline(3)
+    plt.axhline(1,color='red')
+    plt.axhline(3,color='green')
+    plt.ylabel('P/Pmin')
     plt.show()
 
-    plt.hist(res,100)
+    plt.hist(data.BP,100,color='grey',label='total')
+    plt.hist(data.BP[data.GEOG==1],100,color='green',label='coastline')
+    plt.hist(data.BP[data.GEOG==2],100,color='red',label='continent')
+    plt.hist(data.BP[data.GEOG==0],100,color='blue',label='ocean')
+    plt.ylabel('Quantity')
+    plt.xlabel('Bpulse')
+    plt.legend()
     plt.show()
 
-    # print(data)
-    # # plot_geog(data)
-    #
-    # plt.scatter(data.COUNTS[data.GEOG==0],data.p[data.GEOG==0],color='red')
-    # plt.scatter(data.COUNTS[data.GEOG==1],data.p[data.GEOG==1],color='green')
-    # plt.scatter(data.COUNTS[data.GEOG==2],data.p[data.GEOG==2],color='blue')
-    # plt.show()
-    #
-    #
-    # plt.hist(data.p[data.GEOG==1],100,color='green')
-    # plt.hist(data.p[data.GEOG==2],100,color='blue')
-    # plt.hist(data.p[data.GEOG==0],100,color='red')
-    # plt.show()
+    plt.hist(data.BN,100,color='grey',label='total')
+    plt.hist(data.BN[data.GEOG==1],100,color='green',label='coastline')
+    plt.hist(data.BN[data.GEOG==2],100,color='red',label='continent')
+    plt.hist(data.BN[data.GEOG==0],100,color='blue',label='ocean')
+    plt.ylabel('Quantity')
+    plt.xlabel('Bnoise')
+    plt.legend()
+    plt.show()
+
+    plt.hist(data.P,100,color='grey',label='total')
+    plt.hist(data.P[data.GEOG==1],100,color='green',label='coastline')
+    plt.hist(data.P[data.GEOG==2],100,color='red',label='continent')
+    plt.hist(data.P[data.GEOG==0],100,color='blue',label='ocean')
+    plt.ylabel('Quantity')
+    plt.xlabel('P')
+    plt.legend()
+    plt.show()
+
+    plt.hist(data.PMIN,100,color='grey',label='total')
+    plt.hist(data.PMIN[data.GEOG==1],100,color='green',label='coastline')
+    plt.hist(data.PMIN[data.GEOG==2],100,color='red',label='continent')
+    plt.hist(data.PMIN[data.GEOG==0],100,color='blue',label='ocean')
+    plt.ylabel('Quantity')
+    plt.xlabel('Pmin')
+    plt.legend()
+    plt.show()
+
+    plt.hist(data.PMIN[data['D/N']>0.99],100,color='orange',label='day',alpha=0.5)
+    plt.hist(data.PMIN[data['D/N']<0.001],100,color='darkblue',label='night',alpha=0.5)
+    plt.ylabel('Quantity')
+    plt.xlabel('Pmin')
+    plt.legend()
+    plt.show()
+
+    plt.scatter(data.DIST,data.CR,color='grey')
+    plt.scatter(data.DIST[data['D/N']>0.99],data.CR[data['D/N']>0.99],color='orange',label='day')
+    plt.scatter(data.DIST[data['D/N']<0.001],data.CR[data['D/N']<0.001],color='darkblue',label='night')
+    plt.ylabel('c(r)')
+    plt.xlabel('Dist, km')
+    plt.legend()
+    plt.show()
+
+
+    plt.scatter(data.COUNTS[data['D/N']>0.99],data.BP[data['D/N']>0.99],color='orange')
+    plt.scatter(data.COUNTS[data['D/N']<0.001],data.BP[data['D/N']<0.001],color='darkblue')
+    plt.show()
     #
     # dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]
-    # plt.scatter(data.ID[data.GEOG==0],dt(data.TIMESTAMP[data.GEOG==0]),s=1,color='red')
-    # plt.scatter(data.ID[data.GEOG==1],dt(data.TIMESTAMP[data.GEOG==1]),s=1,color='green')
-    # plt.scatter(data.ID[data.GEOG==2],dt(data.TIMESTAMP[data.GEOG==2]),s=1,color='blue')
+    # plt.clf()
+    # plt.hist(dt(data.TIMESTAMP),100)
     # plt.show()
-    #
+
+
+    # dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]
+    # plt.scatter(dt(data.TIMESTAMP[data.GEOG==0]),data.ID[data.GEOG==0],s=1,color='red')
+    # plt.scatter(dt(data.TIMESTAMP[data.GEOG==1]),data.ID[data.GEOG==1],s=1,color='green')
+    # plt.scatter(dt(data.TIMESTAMP[data.GEOG==2]),data.ID[data.GEOG==2],s=1,color='blue')
+    # plt.show()
+
     # plt.scatter(data.Bn,data.Bp)
     # plt.show()
 
