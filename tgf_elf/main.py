@@ -29,14 +29,13 @@ def process_func(args,counts,geog,dur,file_res):
 		# 		'\t\t'+str(res['c(r)'])+'\t\t'+str(res['P'])+'\t\t'+str(res['P min'])+'\n')
 
 if __name__ == '__main__':
-	file_tgf,dest_img,dest_txt,file_res,sta,end,deg = '','','','','','',''
+	file_tgf,dest_img,file_res,sta,end,deg = '','','','','',''
 	# DESTINATIONS #############################################################
 	with open('config.txt','r') as f:
 		for line in f:
 			file_tgf = line[11:-1] if 'file_tgf' in line else file_tgf
 			dest_img = line[11:-1] if 'dest_img' in line else dest_img
 			dest_bin = line[11:-1] if 'dest_bin' in line else dest_bin
-			dest_txt = line[11:-1] if 'dest_txt' in line else dest_txt
 			file_res = line[11:-1] if 'file_res' in line else file_res        # delt = self.N-len(self.filter)
 		# if delt>0:
 		#     for i in range(len(self.filter)-1,len(self.filter)-1+delt):

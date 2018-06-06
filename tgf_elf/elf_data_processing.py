@@ -211,7 +211,10 @@ class ELF_Data_Processing_Class(object):
 		mpl.rcParams['xtick.major.width'] = 0.3
 		mpl.rcParams['ytick.major.width'] = 0.3
 
-		time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+120e-3]
+		if self.CONST_DELTAF==51.8:
+			time_array = [ti for ti in self.t if ti>=self.time-200e-3 and ti<self.time+600e-3]
+		else:
+			time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+120e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
 		timex = [(t-self.time)*1e3 for t in time_array]
@@ -267,7 +270,12 @@ class ELF_Data_Processing_Class(object):
 		axarr = [ax1,ax2,ax3,ax4]
 
 		[a.set_xlabel('Time after '+self.sec_to_str(self.time-1/self.CONST_DELTAF)+' UT [ms]') for a in axarr]
-		[a.set_xticks(np.arange(-40,121,10)) for a in axarr]
+
+		if self.CONST_DELTAF==51.8:
+			[a.set_xticks(np.arange(-200,601,50)) for a in axarr]
+		else:
+			[a.set_xticks(np.arange(-40,121,10)) for a in axarr]
+
 		[a.margins(0,0.1) for a in axarr[:-1]]
 		ax4.margins(0,0.05)
 
@@ -297,6 +305,8 @@ class ELF_Data_Processing_Class(object):
 
 	def plot_antennas(self):
 		fig = plt.figure()
+		# if self.CONST_DELTAF==51.8:
+		# 	time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
 		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
@@ -394,7 +404,10 @@ class ELF_Data_Processing_Class(object):
 		plt.rc('legend', fontsize=5)
 
 		fig = plt.figure()
-		time_array = [ti for ti in self.t if ti>self.time-10e-3 and ti<self.time+210e-3]
+		if self.CONST_DELTAF==51.8:
+			time_array = [ti for ti in self.t if ti>=self.time-200e-3 and ti<self.time+600e-3]
+		else:
+			time_array = [ti for ti in self.t if ti>=self.time-40e-3 and ti<self.time+120e-3]
 		start = self.t.index(time_array[0])
 		end = self.t.index(time_array[-1])+1
 
@@ -449,7 +462,10 @@ class ELF_Data_Processing_Class(object):
 		ax3.set_xlim([time_array[0],time_array[-1]])
 
 		axarr = [ax1,ax2,ax3]
-		[a.set_xticks(np.arange(time_array[0],time_array[-1],0.01)) for a in axarr]
+		if self.CONST_DELTAF==51.8:
+			[a.set_xticks(np.arange(time_array[0],time_array[-1],0.03)) for a in axarr]
+		else:
+			[a.set_xticks(np.arange(time_array[0],time_array[-1],0.01)) for a in axarr]
 
 		if len(str(self.id))<4:
 			sid = ''

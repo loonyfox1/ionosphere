@@ -18,28 +18,53 @@ def plot_geog(data):
     plt.show()
 
 if __name__ == '__main__':
-    data = pd.read_table('/home/foxy/Documents/result_Ela7_180605_2.txt',sep='\t',index_col=False)
-    # plt.style.use('dark_background')
-    for id in data.ID:
-        a = data.DC[data.ID==id].values[0]
-        if a>0:
-            if a>0.5:
-                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='orange',alpha=a)
-            else:
-                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='darkblue',alpha=(1.-a))
-        else:
-            a = -a
-            if a>0.5:
-                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='red',alpha=a)
-            else:
-                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='blue',alpha=(1.-a))
+    data = pd.read_table('/home/foxy/Documents/result_Ela7_180606.txt',sep='\t',index_col=False)
+    data = data.dropna()
 
+    plt.scatter(360-data.ATGF,data.AP,color='violet',label='CG+')
+    plt.scatter(360-data.ATGF,data.AN,color='green',label='CG-')
+    plt.xlabel('360 - A tgf')
+    plt.ylabel('A')
+    plt.legend()
     plt.show()
 
+    plt.subplot(121)
+    plt.scatter(data.ID,data.AP,color='violet',label='CG+')
+    plt.scatter(data.ID,data.ATGF,color='black',label='TGF')
+    plt.xlabel('ID')
+    plt.ylabel('A')
+    plt.legend()
 
-    plt.scatter(data.DIST,data.DELTA)
+    plt.subplot(122)
+    plt.scatter(data.ID,data.AN,color='green',label='CG-')
+    plt.scatter(data.ID,data.ATGF,color='black',label='TGF')
+    plt.xlabel('ID')
+    plt.ylabel('A')
+    plt.legend()
+    plt.show()
+
+    # for id in data.ID:
+    #     a = data.DC[data.ID==id].values[0]
+    #     if a>0:
+    #         if a>0.5:
+    #             plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='orange',alpha=a)
+    #         else:
+    #             plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='darkblue',alpha=(1.-a))
+    #     else:
+    #         a = -a
+    #         if a>0.5:
+    #             plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='red',alpha=a)
+    #         else:
+    #             plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='blue',alpha=(1.-a))
+    #
+    # plt.show()
+
+    plt.scatter(data.DIST,data.DELTA,color='grey',label='total')
+    plt.scatter(data.DIST[abs(data['DC'])>0.99],data.DELTA[abs(data['DC'])>0.99],color='orange',label='day')
+    plt.scatter(data.DIST[abs(data['DC'])<0.001],data.DELTA[abs(data['DC'])<0.01],color='darkblue',label='night')
     plt.ylabel('Delta, ms')
     plt.xlabel('Dist, km')
+    plt.legend()
     plt.show()
 
     res = []
