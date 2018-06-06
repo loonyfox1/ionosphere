@@ -118,7 +118,9 @@ class Main_Class(object):
 		print('Night delay',round(self.dn*1000,3),'ms\n')
 
 		print('B noise',round(self.std*1e12,3),'pT')
-		print('B pulse',round(self.B*1e12,3),'pT')
+		print('B pulse',round(self.B*1e12,3),'pT\n')
+
+		print('c(r)',round(self.c*1e17,4),'e-17')
 		print('Charge moment',round(self.p/1000,3),'C*km\n')
 
 	def write_info(self):
@@ -130,7 +132,7 @@ class Main_Class(object):
 			'id': self.id,
 			'dist': int((self.d[0][0]+self.d[1][0])/1000),
 			'day coef': round(dayd/(float(self.d[0][0])+float(self.d[1][0])),2),
-			'c(r)': round(self.c*1e17,1),
+			'c(r)': round(self.c*1e17,4),
 			'B pulse': round(self.B*1e12,1),
 			'B noise': round(self.std*1e12,1),
 			'P': round(self.p/1000,2),

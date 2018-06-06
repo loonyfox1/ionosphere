@@ -166,8 +166,8 @@ class Charge_Moment_Class(object):
 
 	def c_fun_fft(self):
 		res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
-						trapz(transpose(array(self.integrand())),
-						x=self.f, axis=1))
+						trapz(array(self.integrand()),
+						x=self.f, axis=0))
 		return res_c
 
 	def ionosphere_transfer_function_fft(self):
@@ -181,13 +181,13 @@ class Charge_Moment_Class(object):
 			if self.r==0:
 				res.append([])
 			else:
+				self.r = d_total
 				itf = self.ionosphere_transfer_function()
-				n = int(len(itf)/2.)
-				res_itf = list(np.fft.ifft(itf[n:]+itf[:n]))
+				# n = int(len(itf)/2.)
+				# res_itf = list(np.fft.ifft(itf[n:]+itf[:n]))
+				res_itf = list(np.fft.ifft(itf))
 				res.append(res_itf)
 		resc = res[0][:dc]+res[1][dc:]
-		# n = int(len(resc)/2.)
-		# res = np.fft.fft(resc[n:]+resc[:n])
 		res = np.fft.fft(resc)
 		# plt.clf()
 		# plt.plot(resc)
@@ -197,8 +197,8 @@ class Charge_Moment_Class(object):
 	def integrand(self):
 		res_rtf = self.receiver_transfer_function()
 		res_itf = self.ionosphere_transfer_function_fft()
-		return [absolute(res_itf[i]*res_rtf[i])*absolute(res_itf[i]*res_rtf[i])
-				for i in range(int(len(res_itf)))]
+		return [absolute(itf*rtf*itf*rtf)
+				for itf,rtf in zip(res_itf,res_rtf)]
 
 	def magnetic_altitude(self,fi):
 		return real(self.magnetic_characteristic_altitude(fi))

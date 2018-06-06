@@ -19,6 +19,23 @@ def plot_geog(data):
 
 if __name__ == '__main__':
     data = pd.read_table('/home/foxy/Documents/result_Ela7_180605_2.txt',sep='\t',index_col=False)
+    # plt.style.use('dark_background')
+    for id in data.ID:
+        a = data.DC[data.ID==id].values[0]
+        if a>0:
+            if a>0.5:
+                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='orange',alpha=a)
+            else:
+                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='darkblue',alpha=(1.-a))
+        else:
+            a = -a
+            if a>0.5:
+                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='red',alpha=a)
+            else:
+                plt.scatter(data.DIST[data.ID==id],data.CR[data.ID==id],color='blue',alpha=(1.-a))
+
+    plt.show()
+
 
     plt.scatter(data.DIST,data.DELTA)
     plt.ylabel('Delta, ms')
@@ -93,7 +110,7 @@ if __name__ == '__main__':
     plt.scatter(data.COUNTS[abs(data['DC'])>0.99],data.BP[abs(data['DC'])>0.99],color='orange')
     plt.scatter(data.COUNTS[abs(data['DC'])<0.001],data.BP[abs(data['DC'])<0.001],color='darkblue')
     plt.show()
-    #
+
     # dt = lambda x: [datetime.datetime.strptime(xi,"%Y-%m-%dT%H:%M:%S.%f") for xi in x]
     # plt.clf()
     # plt.hist(dt(data.TIMESTAMP),100)
