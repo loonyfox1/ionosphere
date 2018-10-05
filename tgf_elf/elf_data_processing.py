@@ -117,6 +117,9 @@ class ELF_Data_Processing_Class(object):
 		detrended = detrended+[0]*self.DEGREE
 		mov_avg = mov_avg+filtered[-self.DEGREE:]
 		# print('Time_Detrending: ',time.time()-start_time)
+		plt.plot(detrended,color='gray',zorder=1)
+		plt.axhline(0,zorder=2,color='black')
+		plt.show()
 		return detrended,mov_avg
 
 	def sigma_clipping(self,detrended):
@@ -129,8 +132,8 @@ class ELF_Data_Processing_Class(object):
 		# plt.rc('legend', fontsize=15)
 		# plt.rc('axes', labelsize=15)
 		# fig, ax = plt.subplots()
-		#
-		# axins = zoomed_inset_axes(ax, 10, loc=7, borderpad=2)
+		# #
+		# axins = zoomed_inset_axes(ax, 5, loc=7, borderpad=1)
 		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 0',color='skyblue')
 		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 0',color='skyblue')
 
@@ -165,13 +168,13 @@ class ELF_Data_Processing_Class(object):
 				peaked[i] = nan #self.SIGMA*std3*sign(peaked[i])
 		# ax.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 4',color='darkblue')
 		# axins.plot(self.t,peaked/self.CONST_SCALE/1e-12,label='step 4',color='darkblue')
-
-		# axins.set_xlim(40,50)
-		# axins.set_ylim(-900/self.CONST_SCALE/1e-12, 900/self.CONST_SCALE/1e-12)
+		#
+		# axins.set_xlim(40,60)
+		# axins.set_ylim(-14,24)
 		# plt.yticks(visible=True)
 		# plt.xticks(visible=False)
 		# mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5",zorder=4)
-		# ax.set_title('Stacja ELF ELA10 20.08.2013 15:25')
+		# ax.set_title('Stacja ELF ELA7c 13.11.2008 07:40')
 		# ax.set_ylabel('Amplitude, pT')
 		# ax.set_xlabel('Time, sec')
 		# ax.set_xlim(0,300)
@@ -478,12 +481,12 @@ class ELF_Data_Processing_Class(object):
 		plt.savefig(self.dest_img+'TGF'+sid+'_'+str(self.datetime)+'proc.png',dpi=360,textsize=10)
 
 	def plotg(self):
-		font = {'size'   : 20}
-		mpl.rc('font', **font)
-
-		plt.rc('axes', titlesize=20)
-		plt.rc('legend', fontsize=20)
-		plt.rc('axes', labelsize=20)
+		# font = {'size'   : 20}
+		# mpl.rc('font', **font)
+		#
+		# plt.rc('axes', titlesize=20)
+		# plt.rc('legend', fontsize=20)
+		# plt.rc('axes', labelsize=20)
 		plt.clf()
 		plt.plot(self.t,np.array(self.channel1),color='gray',linewidth=1,zorder=1)
 		plt.plot(self.t,self.detrended1+np.array(self.mov_avg1),label='NS',color='red',linewidth=1,zorder=2)
@@ -492,13 +495,13 @@ class ELF_Data_Processing_Class(object):
 		plt.plot(self.t,self.detrended2+np.array(self.mov_avg2),label='EW',color='blue',linewidth=1,zorder=2)
 		plt.plot(self.t,self.mov_avg2,color='black',linewidth=1,zorder=3)
 		plt.legend()
-		plt.title('Stacja ELF ELA10 20.08.2013 15:25')
+		plt.title('Stacja ELF ELA7c 13.11.2008 07:40')
 		plt.ylabel('Amplitude')
 		plt.xlabel('Time, sec')
-		plt.xlim(211.689,212.014)
-		plt.ylim(34200,35400)
-		plt.yticks(range(34100,35401,200))
-		plt.xticks(np.arange(211.689,212.016,0.05))
+		# plt.xlim(211.689,212.014)
+		# plt.ylim(34200,35400)
+		# plt.yticks(range(34100,35401,200))
+		# plt.xticks(np.arange(211.689,212.016,0.05))
 		plt.show()
 
 	def data_processing(self):
@@ -525,9 +528,9 @@ class ELF_Data_Processing_Class(object):
 
 		# self.plotg()
 
-		if self.plot:
-			self.plot_peak()
-			self.plot_processing()
+		# if self.plot:
+		# 	self.plot_peak()
+		# 	self.plot_processing()
 
 		res = {
 			'B': self.B/self.CONST_SCALE,

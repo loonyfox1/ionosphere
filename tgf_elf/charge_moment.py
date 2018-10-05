@@ -10,6 +10,7 @@ import threading
 import cPickle as pickle
 import numpy as np
 import os.path
+mpl.rcParams.update(mpl.rcParamsDefault)
 
 class Charge_Moment_Class(object):
 	CONST_MU0 = 4e-7*pi
@@ -33,7 +34,7 @@ class Charge_Moment_Class(object):
 		# self.filter = list(filt)
 
 	def charge_moment(self):
-		c = float(self.c_fun_fft()) #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		c = float(self.c_fun()) #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		res = {
 			'p': float(self.B/c),
 			'c': c
@@ -52,12 +53,12 @@ class Charge_Moment_Class(object):
 
 	def receiver_transfer_function(self):
 		# start_time=time.time()
-		font = {'size'   : 20}
-		mpl.rc('font', **font)
-
-		plt.rc('axes', titlesize=25)
-		plt.rc('legend', fontsize=25)
-		plt.rc('axes', labelsize=25)
+		# font = {'size'   : 20}
+		# mpl.rc('font', **font)
+		#
+		# plt.rc('axes', titlesize=25)
+		# plt.rc('legend', fontsize=25)
+		# plt.rc('axes', labelsize=25)
 
 		if self.CONST_DELTAF==51.8:
 			file_name='filter_ela7.dump'
@@ -94,14 +95,14 @@ class Charge_Moment_Class(object):
 				pickle.dump(res, pickle_file)
 
 			plt.clf()
-			plt.plot(self.frequency_array(),res1[1:],label=r'$G_2(f)$',color='slategrey',linewidth=3)
-			plt.plot(self.frequency_array(),res2[1:],label=r'$G_2(f)+G_3(f)$',color='steelblue',linewidth=3)
-			plt.plot(self.frequency_array(),res[1:],label=r'$G_2(f)+2G_3(f)$',color='blue',linewidth=3)
-			plt.xlim(0,450)
-			plt.xticks(range(0,451,50))
+			plt.plot(self.frequency_array(),res1[1:],label=r'$G_2(f)$',color='slategrey')
+			plt.plot(self.frequency_array(),res2[1:],label=r'$G_2(f)+G_3(f)$',color='steelblue')
+			plt.plot(self.frequency_array(),res[1:],label=r'$G_2(f)+2G_3(f)$',color='blue')
+			# plt.xlim(0,450)
+			# plt.xticks(range(0,451,50))
 			plt.xlabel('Frequency, Hz')
 			plt.ylabel('Gain')
-			plt.grid()
+			# plt.grid()
 			plt.legend()
 			plt.show()
 		# print("Time_Filter: ",time.time()-start_time)
@@ -123,7 +124,6 @@ class Charge_Moment_Class(object):
 					output_dictionary[time_fi]=output_res
 
 	def ionosphere_transfer_function(self):
-		# start_time=time.time()
 		res = []
 		itf2 = sqrt(self.r/self.CONST_A/sin(self.r/self.CONST_A))
 
@@ -141,30 +141,12 @@ class Charge_Moment_Class(object):
 		for fi in self.f:
 			res.append(output_dictionary[fi])
 
-		# print("Time_ITF: ",time.time()-start_time)
 		return res
 
 	def total_distance(self):
 		return self.d[0][0]+self.d[1][0]
 
 	def c_fun(self):
-		res = 0
-		k = 2
-		for check_day in self.d:
-			self.day = check_day[1]
-			self.r = check_day[0]
-			if self.r==0:
-				res += 0
-				k -= 1
-			else:
-				res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
-						trapz(transpose(array(self.integrand())),
-						x=self.f, axis=1))
-				res += res_c/self.r
-		self.total_r = self.total_distance()
-		return res/k*self.total_r
-
-	def c_fun_fft(self):
 		res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
 						trapz(array(self.integrand()),
 						x=self.f, axis=0))
@@ -182,17 +164,8 @@ class Charge_Moment_Class(object):
 				res.append([])
 			else:
 				self.r = d_total
-				itf = self.ionosphere_transfer_function()
-				# n = int(len(itf)/2.)
-				# res_itf = list(np.fft.ifft(itf[n:]+itf[:n]))
-				res_itf = list(np.fft.ifft(itf))
-				res.append(res_itf)
-		resc = res[0][:dc]+res[1][dc:]
-		res = np.fft.fft(resc)
-		# plt.clf()
-		# plt.plot(resc)
-		# plt.show()
-		return res
+				res.append(list(np.fft.ifft(self.ionosphere_transfer_function())))
+		return np.fft.fft(res[0][:dc]+res[1][dc:])
 
 	def integrand(self):
 		res_rtf = self.receiver_transfer_function()

@@ -6,4 +6,4 @@ file_res = /home/foxy/ELF_data/results/result.csv
 sta = 0
 end = 1143
 
-deg = 60
+deg = 15

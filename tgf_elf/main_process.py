@@ -248,7 +248,7 @@ class Main_Class(object):
 		self.info()
 		print('Time: ',time.time()-start_time)
 		# if self.plot:
-		# 	self.plot_terminator()
+		# self.plot_terminator()
 
 		res = self.write_info()
 		if not self.verbose:
