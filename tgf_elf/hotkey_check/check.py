@@ -84,9 +84,14 @@ class CheckClass(object):
 		hotkeysdetector.cancel()
 		cv2.destroyAllWindows()
 
-		with open('hand_check_result.csv', 'w') as f:
-			w = csv.writer(f)
-			w.writerows(self.result.items())
+		if os.path.exists('hand_check_result.csv'):
+			with open('hand_check_result.csv', 'a') as f:
+				w = csv.writer(f)
+				w.writerows(self.result.items())
+		else:
+			with open('hand_check_result.csv', 'w') as f:
+				w = csv.writer(f)
+				w.writerows(self.result.items())
 
 if __name__ == '__main__':
 	args = argument_parser()
