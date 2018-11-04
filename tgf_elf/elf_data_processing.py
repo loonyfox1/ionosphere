@@ -22,7 +22,8 @@ class ELF_Data_Processing_Class(object):
 		self.filename = filename
 		self.dd = delta_day #+ 1/self.CONST_DELTAF
 		self.dn = delta_night #+ 1/self.CONST_DELTAF
-		self.DEGREE = degree
+		self.DEGREE_x = degree_x
+		self.DEGREE_y = degree_y
 		self.plot = plot
 		self.SIGMA = sigma
 		self.time = time + 1/self.CONST_DELTAF #-1.6e-3 # NOTE: WTFFFFF??????

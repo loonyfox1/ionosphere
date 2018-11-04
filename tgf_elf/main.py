@@ -29,7 +29,7 @@ def process_func(args,counts,geog,dur,file_res):
 		# 		'\t\t'+str(res['c(r)'])+'\t\t'+str(res['P'])+'\t\t'+str(res['P min'])+'\n')
 
 if __name__ == '__main__':
-	file_tgf,dest_img,file_res,sta,end,deg = '','','','','',''
+	file_tgf,dest_img,file_res,sta,end,deg_x,deg_y = '','','','','',''
 	# DESTINATIONS #############################################################
 	with open('config.txt','r') as f:
 		for line in f:
@@ -46,9 +46,11 @@ if __name__ == '__main__':
 
 			sta = int(line[6:-1]) if 'sta' in line else sta
 			end = int(line[6:-1]) if 'end' in line else end
-			deg = int(line[6:-1]) if 'deg' in line else deg
+			deg_x = int(line[8:-1]) if 'deg_x' in line else deg_x
+			deg_y = int(line[8:-1]) if 'deg_y' in line else deg_y
 	############################################################################
 	tgf_data = pd.read_table(file_tgf,sep=' ')
+	# print(tgf_data)
 
 	if os.path.exists(dest_img) == False:
 		os.mkdir(dest_img)
@@ -72,7 +74,8 @@ if __name__ == '__main__':
 			args.plot = True
 			args.dest_bin = dest_bin
 			args.dest_img = dest_img
-			args.degree = deg
+			args.degree_x = deg_x
+			args.degree_y = deg_y
 			args.sigma = 3
 
 			# args.filt = filt

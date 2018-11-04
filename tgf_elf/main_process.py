@@ -27,7 +27,8 @@ class Main_Class(object):
 		self.verbose = args.verbose
 		self.plot = args.plot
 		self.destination = args.dest_bin
-		self.degree = args.degree
+		self.degree_x = args.degree_x
+		self.degree_y = args.degree_y
 		self.sigma = args.sigma
 		self.dest_img = args.dest_img
 		# self.filt = args.filt
@@ -225,7 +226,7 @@ class Main_Class(object):
 		elf_data_processing_class = ELF_Data_Processing_Class(
 				filename=self.filename,delta_day=dd,delta_night=dn,
 				time=self.time_to_sec(),A=self.A,stantion=self.stantion,
-				degree=self.degree,sigma=self.sigma,plot=self.plot,
+				degree_x=self.degree_x,degree_y=self.degree_y,sigma=self.sigma,plot=self.plot,
 				idd=self.id,datetime=self.datetime,dest_img=self.dest_img,dest_in=self.destination)
 		res = elf_data_processing_class.data_processing()
 
