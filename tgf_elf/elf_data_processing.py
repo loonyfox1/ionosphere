@@ -22,8 +22,8 @@ class ELF_Data_Processing_Class(object):
 		self.filename = filename
 		self.dd = delta_day #+ 1/self.CONST_DELTAF
 		self.dn = delta_night #+ 1/self.CONST_DELTAF
-		self.DEGREE_x = degree_x
-		self.DEGREE_y = degree_y
+		self.DEGREE1 = degree_x
+		self.DEGREE2 = degree_y
 		self.plot = plot
 		self.SIGMA = sigma
 		self.time = time + 1/self.CONST_DELTAF #-1.6e-3 # NOTE: WTFFFFF??????
@@ -106,17 +106,17 @@ class ELF_Data_Processing_Class(object):
 		plt.subplots_adjust(hspace=0.4)
 		plt.show()
 
-	def detrending(self,filtered):
+	def detrending(self,filtered,degree):
 		# start_time = time.time()
-		mov_avg = filtered[:self.DEGREE]
-		detrended=[0]*self.DEGREE
-		for i in range(self.DEGREE,self.N-self.DEGREE):
-			chunk = filtered[i-self.DEGREE:i+self.DEGREE+1]
+		mov_avg = filtered[:degree]
+		detrended=[0]*degree
+		for i in range(degree,self.N-degree):
+			chunk = filtered[i-degree:i+degree+1]
 			chunk = sum(chunk)/len(chunk)
 			mov_avg.append(chunk)
 			detrended.append(filtered[i]-chunk)
-		detrended = detrended+[0]*self.DEGREE
-		mov_avg = mov_avg+filtered[-self.DEGREE:]
+		detrended = detrended+[0]*degree
+		mov_avg = mov_avg+filtered[-degree:]
 		# print('Time_Detrending: ',time.time()-start_time)
 		plt.plot(detrended,color='gray',zorder=1)
 		plt.axhline(0,zorder=2,color='black')
@@ -513,12 +513,12 @@ class ELF_Data_Processing_Class(object):
 
 		# processing for channel1
 		self.filtered1 = self.filtering(self.channel1)
-		self.detrended1,self.mov_avg1 = self.detrending(self.filtered1)
+		self.detrended1,self.mov_avg1 = self.detrending(self.filtered1,self.DEGREE1)
 		self.std1 = self.sigma_clipping(self.detrended1)
 
 		# processing for channel2
 		self.filtered2 = self.filtering(self.channel2)
-		self.detrended2,self.mov_avg2 = self.detrending(self.filtered2)
+		self.detrended2,self.mov_avg2 = self.detrending(self.filtered2,self.DEGREE2)
 		self.std2 = self.sigma_clipping(self.detrended2)
 
 		# data = sqrt(channel1**2 + channel2**2)
