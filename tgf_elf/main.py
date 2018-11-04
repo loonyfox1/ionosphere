@@ -29,7 +29,7 @@ def process_func(args,counts,geog,dur,file_res):
 		# 		'\t\t'+str(res['c(r)'])+'\t\t'+str(res['P'])+'\t\t'+str(res['P min'])+'\n')
 
 if __name__ == '__main__':
-	file_tgf,dest_img,file_res,sta,end,deg_x,deg_y = '','','','','',''
+	file_tgf,dest_img,file_res,sta,end,deg_x,deg_y = '','','','','','',''
 	# DESTINATIONS #############################################################
 	with open('config.txt','r') as f:
 		for line in f:
