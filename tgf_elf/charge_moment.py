@@ -35,11 +35,7 @@ class Charge_Moment_Class(object):
 
 	def charge_moment(self):
 		c = float(self.c_fun()) #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		res = {
-			'p': float(self.B/c),
-			'c': c
-		}
-		return res
+		return float(self.B/c),c
 
 	def number_of_point(self):
 		return int(round(self.CONST_FS*self.CONST_T))
@@ -125,6 +121,7 @@ class Charge_Moment_Class(object):
 
 	def ionosphere_transfer_function(self):
 		res = []
+
 		itf2 = sqrt(self.r/self.CONST_A/sin(self.r/self.CONST_A))
 
 		input_array=list(self.f)
@@ -164,6 +161,8 @@ class Charge_Moment_Class(object):
 				res.append([])
 			else:
 				self.r = d_total
+				if self.r/self.CONST_A>np.pi:
+					self.r = self.r - np.pi*self.CONST_A
 				res.append(list(np.fft.ifft(self.ionosphere_transfer_function())))
 		return np.fft.fft(res[0][:dc]+res[1][dc:])
 

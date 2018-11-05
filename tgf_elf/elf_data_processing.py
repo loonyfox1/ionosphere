@@ -16,7 +16,7 @@ class ELF_Data_Processing_Class(object):
 	CONST_P = pi/180
 
 	def __init__(self,filename,delta_day,delta_night,time,A,stantion,
-				 degree,sigma,plot,datetime,idd,dest_img,dest_in):
+				 degree_x,degree_y,sigma,plot,datetime,idd,dest_img,dest_in):
 		self.CONST_FS, self.CONST_FN, self.CONST_SCALE, self.CONST_DELTAF, \
 		 _, _, _, _ = stantion()
 		self.filename = filename
@@ -118,9 +118,9 @@ class ELF_Data_Processing_Class(object):
 		detrended = detrended+[0]*degree
 		mov_avg = mov_avg+filtered[-degree:]
 		# print('Time_Detrending: ',time.time()-start_time)
-		plt.plot(detrended,color='gray',zorder=1)
-		plt.axhline(0,zorder=2,color='black')
-		plt.show()
+		# plt.plot(detrended,color='gray',zorder=1)
+		# plt.axhline(0,zorder=2,color='black')
+		# plt.show()
 		return detrended,mov_avg
 
 	def sigma_clipping(self,detrended):

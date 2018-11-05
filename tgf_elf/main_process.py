@@ -92,7 +92,7 @@ class Main_Class(object):
 		self.utime = round(float(self.datetime[11:13])+float(self.datetime[14:16])/60+float(self.datetime[17:])/3600,2)
 		return self.year,self.month,self.day,self.hour,self.minute,self.second,self.utime
 
-	def info(self):
+	def print_info(self):
 		print('-----------------------------')
 		print('\nTGF ID',self.id)
 		print('ELF file',self.filename)
@@ -111,9 +111,6 @@ class Main_Class(object):
 
 		print('Distance day  ',int(self.d[0][0]/1000) if self.d[0][1]==True  else int(self.d[1][0]/1000),'km')
 		print('Distance night',int(self.d[0][0]/1000) if self.d[0][1]==False else int(self.d[1][0]/1000),'km\n')
-
-		# print('Sun lat',str(round(self.p0,1))+' N' if self.p0>0 else str(-round(self.p0,1))+' S')
-		# print('Sun lon',str(round(self.l0,1))+' E\n' if self.l0>0 else str(-round(self.l0,1))+' W\n')
 
 		print('Day   delay',round(self.dd*1000,3),'ms')
 		print('Night delay',round(self.dn*1000,3),'ms\n')
@@ -243,10 +240,10 @@ class Main_Class(object):
 										stantion=self.stantion)
 		res = charge_moment_class.charge_moment()
 
-		self.p = res['p']
-		self.c = res['c']
+		self.p = res[0]
+		self.c = res[1]
 
-		self.info()
+		self.print_info()
 		print('Time: ',time.time()-start_time)
 		# if self.plot:
 		# self.plot_terminator()

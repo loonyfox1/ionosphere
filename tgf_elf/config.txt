@@ -1,10 +1,10 @@
 dest_bin = /home/foxy/ELF_data/bin_files/
 dest_img = /home/foxy/ELF_data/img/
-file_tgf = /home/foxy/Downloads/eventlist_modified_Ela7.dat
+file_tgf = /home/foxy/ELF_data/eventlist_modified_Ela7.dat
 file_res = /home/foxy/ELF_data/results/result.csv
 
-sta = 0
-end = 1143
+sta = 1060
+end = 1062
 
 deg_x = 15
 deg_y = 20
