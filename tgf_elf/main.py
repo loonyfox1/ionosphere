@@ -78,11 +78,12 @@ if __name__ == '__main__':
 			args.degree_y = deg_y
 			args.sigma = 3
 
-			# args.filt = filt
+			process_func(args,tgf_data.COUNTS[tgf_data.ID==idd].values[0],
+						tgf_data.GEOG[tgf_data.ID==idd].values[0],tgf_data.DUR[tgf_data.ID==idd].values[0],file_res)
 
-			p = Process(target=process_func,args=(args,tgf_data.COUNTS[tgf_data.ID==idd].values[0],
-						tgf_data.GEOG[tgf_data.ID==idd].values[0],tgf_data.DUR[tgf_data.ID==idd].values[0],file_res))
-			jobs.append(p)
-			p.start()
+			# p = Process(target=process_func,args=(args,tgf_data.COUNTS[tgf_data.ID==idd].values[0],
+			# 			tgf_data.GEOG[tgf_data.ID==idd].values[0],tgf_data.DUR[tgf_data.ID==idd].values[0],file_res))
+			# jobs.append(p)
+			# p.start()
 
-	[x.join() for x in jobs]
+	# [x.join() for x in jobs]
