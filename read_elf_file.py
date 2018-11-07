@@ -1,13 +1,15 @@
 from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+from pathlib import Path
 import matplotlib as mpl
 
 class Read_ELF_Class(object):
-	def __init__(self,filename,destination_in):
+	def __init__(self,filename,destination_in,destination_out):
 		self.filename = filename
 		self.dest_in = destination_in
-		# self.dest_out = destination_out
+		self.dest_out = destination_out
 
 	def header(self):
 		with open(self.dest_in+self.filename, "rb") as f:
@@ -66,14 +68,16 @@ class Read_ELF_Class(object):
 		if len(self.channel1)<len(self.channel2):
 			self.channel2 = self.channel2[:len(self.channel1)]
 		# self.plot()
-		return self.channel1,self.channel2
 
-		# with open(self.dest_out+self.filename, "w") as f:
-		# 	f.write(self.fileheader+'\n')
-		# 	for i in range(len(self.channel1)-1):
-		# 		f.write(str(self.channel1[i])+'\t'+str(self.channel2[i])+'\n')
-		# 	f.write(str(self.channel1[-1])+'\t'+str(self.channel2[-1]))
-		# return self.filename
+		path = Path(self.dest_out+self.filename[:-16])
+		path.mkdir(parents=True)
+		with open(self.dest_out+self.filename, "w") as f:
+			f.write(self.fileheader+'\n')
+			for i in range(len(self.channel1)-1):
+				f.write(str(self.channel1[i])+'\t'+str(self.channel2[i])+'\n')
+			f.write(str(self.channel1[-1])+'\t'+str(self.channel2[-1]))
+
+		return np.array(self.channel1),np.array(self.channel2)
 
 	def plot(self):
 		# plt.rc('axes', titlesize=15)

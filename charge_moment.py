@@ -21,46 +21,29 @@ class Charge_Moment_Class(object):
 	# FS - sampling rate, Hz = 1/sec
 	CONST_T = 300
 
-	def __init__(self,B,d,stantion):
-		# B - B_pulse
+	def __init__(self,B,d,args):
 		self.B = B
 		# d - array/tuple of distance like ((r_day,day=True),(r_night,day=False))
 		self.d = d
-		self.CONST_FS,self.CONST_FN,_,self.CONST_DELTAF,self.CONST_HI, \
-		self.CONST_WN1,self.CONST_WN2,self.CONST_WN3 = stantion()
-		# f - array of frequencies
+		self.args = args
 		self.f = self.frequency_array()
-		# print(set([self.f[i+1]-self.f[i] for i in range(len(self.f)-1)]))
-		# self.filter = list(filt)
 
 	def charge_moment(self):
-		c = float(self.c_fun()) #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		res = {
-			'p': float(self.B/c),
-			'c': c
-		}
-		return res
+		c = float(self.c_fun())
+		return float(self.B/c),c
 
 	def number_of_point(self):
-		return int(round(self.CONST_FS*self.CONST_T))
+		return int(round(self.args['CONST_FS']*self.CONST_T))
 
 	def omega(self,fi):
 		return 2*pi*fi
 
 	def frequency_array(self):
 		self.N = self.number_of_point()
-		return fft.rfftfreq(n=self.N,d=1/self.CONST_FS)[1:]
+		return fft.rfftfreq(n=self.N,d=1/self.args['CONST_FS'])[1:]
 
 	def receiver_transfer_function(self):
-		# start_time=time.time()
-		# font = {'size'   : 20}
-		# mpl.rc('font', **font)
-		#
-		# plt.rc('axes', titlesize=25)
-		# plt.rc('legend', fontsize=25)
-		# plt.rc('axes', labelsize=25)
-
-		if self.CONST_DELTAF==51.8:
+		if self.args['ela']==7:
 			file_name='filter_ela7.dump'
 		else:
 			file_name='filter_ela10.dump'
@@ -73,19 +56,19 @@ class Charge_Moment_Class(object):
 			z0 = zeros(self.N)
 			z0[0] = 1
 
-			b, a = signal.cheby1(N=2, rp=3, Wn=self.CONST_WN1/self.CONST_FN, analog=False)
+			b, a = signal.cheby1(N=2, rp=3, Wn=self.args['CONST_WN'][0]/self.args['CONST_FN'], analog=False)
 			z1 = signal.lfilter(b, a, z0)
 
 			res1 = absolute(fft.rfft(z1))
 			res1=res1/max(res1)
 
-			b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN2/self.CONST_FN, analog=False)
+			b, a = signal.cheby1(N=3, rp=3, Wn=self.args['CONST_WN'][1]/self.args['CONST_FN'], analog=False)
 			z2 = signal.lfilter(b, a, z1)
 
 			res2 = absolute(fft.rfft(z2))
 			res2=res2/max(res2)
 
-			b, a = signal.cheby1(N=3, rp=3, Wn=self.CONST_WN3/self.CONST_FN, analog=False)
+			b, a = signal.cheby1(N=3, rp=3, Wn=self.args['CONST_WN'][2]/self.args['CONST_FN'], analog=False)
 			z3 = signal.lfilter(b, a, z2)
 
 			res = absolute(fft.rfft(z3))
@@ -94,18 +77,6 @@ class Charge_Moment_Class(object):
 			with open(file_name, 'wb') as pickle_file:
 				pickle.dump(res, pickle_file)
 
-			plt.clf()
-			plt.plot(self.frequency_array(),res1[1:],label=r'$G_2(f)$',color='slategrey')
-			plt.plot(self.frequency_array(),res2[1:],label=r'$G_2(f)+G_3(f)$',color='steelblue')
-			plt.plot(self.frequency_array(),res[1:],label=r'$G_2(f)+2G_3(f)$',color='blue')
-			# plt.xlim(0,450)
-			# plt.xticks(range(0,451,50))
-			plt.xlabel('Frequency, Hz')
-			plt.ylabel('Gain')
-			# plt.grid()
-			plt.legend()
-			plt.show()
-		# print("Time_Filter: ",time.time()-start_time)
 		return res
 
 	def itf_worker(self,input_array,lock_input_array,output_dictionary,lock_output_dictionary,itf2):
@@ -125,6 +96,7 @@ class Charge_Moment_Class(object):
 
 	def ionosphere_transfer_function(self):
 		res = []
+
 		itf2 = sqrt(self.r/self.CONST_A/sin(self.r/self.CONST_A))
 
 		input_array=list(self.f)
@@ -140,14 +112,14 @@ class Charge_Moment_Class(object):
 		[x.join() for x in worker_array]
 		for fi in self.f:
 			res.append(output_dictionary[fi])
-
+			
 		return res
 
 	def total_distance(self):
 		return self.d[0][0]+self.d[1][0]
 
 	def c_fun(self):
-		res_c = sqrt(pi*self.CONST_DELTAF/self.CONST_HI* \
+		res_c = sqrt(pi*self.args['CONST_DELTAF']/self.args['CONST_HI']* \
 						trapz(array(self.integrand()),
 						x=self.f, axis=0))
 		return res_c
@@ -164,6 +136,8 @@ class Charge_Moment_Class(object):
 				res.append([])
 			else:
 				self.r = d_total
+				if self.r/self.CONST_A>np.pi:
+					self.r = self.r - np.pi*self.CONST_A
 				res.append(list(np.fft.ifft(self.ionosphere_transfer_function())))
 		return np.fft.fft(res[0][:dc]+res[1][dc:])
 

@@ -46,13 +46,21 @@ class Day_Night_Distance_Class(object):
 			sin(self.flat1*self.CONST_P)*cos(self.slat1*self.CONST_P)* \
 			cos((self.slon1-self.flon1)*self.CONST_P)
 		A = arctan2(x,y)/self.CONST_P
+		# NOTE: CHECK!!! 
 		return (A+360)%360
 
 	def intersection_point(self):
+		# NOTE: costul'
+		if self.flon1==self.slon1: self.slon1 += 0.01
+		if self.flat1==self.slat1: self.slat1 += 0.01
+		if self.flon2==self.slon2: self.slon2 += 0.01
+		if self.flat2==self.slat2: self.slat2 += 0.01
+
 		t2 = -((self.flat1 - self.slat1) * (self.slon1 - self.slon2) - \
 			  (self.slat2 - self.slat1) * (self.flon1 - self.slon1))/ \
 			 ((self.flat1 - self.slat1) * (self.flon2 - self.slon2) - \
 			  (self.flon1 - self.slon1) * (self.flat2 - self.slat2))
+
 		if t2>=0 and t2<=1:
 			t1 = (self.slat2 - self.slat1) / (self.flat1 - self.slat1) + \
 			  t2*(self.flat2 - self.slat2) / (self.flat1 - self.slat1)
